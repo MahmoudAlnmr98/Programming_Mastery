@@ -1887,6 +1887,620 @@ Array.from({ length: 5 }, (_, i) => i * 2); // [0, 2, 4, 6, 8]
 - `fill()`: Same value for all elements
 - `Array.from()`: Different values based on index
 
+### 61. What is the output of `3 + 2 + "7"` in JavaScript?
+
+**Answer:**
+```javascript
+3 + 2 + "7"  // "57"
+```
+
+**Explanation:**
+- `3 + 2` evaluates to `5` (number)
+- `5 + "7"` performs string concatenation, resulting in `"57"`
+
+**More Examples:**
+```javascript
+"3" + 2 + 7;     // "327" (left to right, string concatenation)
+3 + 2 + 7;       // 12 (all numbers, addition)
+"3" + (2 + 7);   // "39" (parentheses evaluated first)
+```
+
+### 62. Explain the difference between `null` and `undefined` in detail.
+
+**Answer:**
+**undefined:**
+- Variable declared but not assigned
+- Missing function parameters
+- Missing object properties
+- Function with no return statement
+
+**null:**
+- Explicitly assigned value
+- Represents intentional absence of value
+- Must be assigned
+
+```javascript
+let x;
+console.log(x);        // undefined
+
+let y = null;
+console.log(y);        // null
+
+// typeof
+typeof undefined;      // "undefined"
+typeof null;           // "object" (historical bug)
+
+// Equality
+null == undefined;     // true (loose equality)
+null === undefined;    // false (strict equality)
+```
+
+### 63. Explain JavaScript's type coercion with examples.
+
+**Answer:**
+Type coercion converts one type to another automatically.
+
+**String Coercion:**
+```javascript
+"5" + 3;        // "53" (number to string)
+"5" - 3;        // 2 (string to number)
+"5" * "2";      // 10 (both to numbers)
+```
+
+**Boolean Coercion:**
+```javascript
+if ("hello") { }    // true (non-empty string)
+if (0) { }          // false (zero)
+if ([]) { }         // true (array is truthy)
+if ({}) { }         // true (object is truthy)
+```
+
+**Number Coercion:**
+```javascript
++"5";            // 5
+Number("5");     // 5
+parseInt("5");   // 5
+```
+
+**Falsy Values:**
+- `false`, `0`, `""`, `null`, `undefined`, `NaN`
+
+### 64. Explain JavaScript's `this` binding in different scenarios.
+
+**Answer:**
+**Global Context:**
+```javascript
+console.log(this); // Window (browser) or global (Node)
+```
+
+**Function Call:**
+```javascript
+function regular() {
+    console.log(this); // Window/global (non-strict) or undefined (strict)
+}
+```
+
+**Method Call:**
+```javascript
+const obj = {
+    name: "John",
+    greet: function() {
+        console.log(this.name); // "John"
+    }
+};
+obj.greet();
+```
+
+**Arrow Function:**
+```javascript
+const obj = {
+    name: "John",
+    greet: () => {
+        console.log(this.name); // undefined (lexical this)
+    }
+};
+```
+
+**Constructor:**
+```javascript
+function Person(name) {
+    this.name = name; // this = new object
+}
+const person = new Person("John");
+```
+
+### 65. Explain JavaScript's `arguments` object.
+
+**Answer:**
+`arguments` is array-like object containing function arguments.
+
+```javascript
+function sum() {
+    let total = 0;
+    for (let i = 0; i < arguments.length; i++) {
+        total += arguments[i];
+    }
+    return total;
+}
+
+sum(1, 2, 3); // 6
+```
+
+**Convert to Array:**
+```javascript
+function example() {
+    const args = Array.from(arguments);
+    // Or
+    const args2 = [...arguments];
+}
+```
+
+**Note:** Arrow functions don't have `arguments` object.
+
+### 66. Explain JavaScript's `eval()` and why it's dangerous.
+
+**Answer:**
+`eval()` executes string as JavaScript code.
+
+```javascript
+eval("2 + 2"); // 4
+eval("console.log('Hello')"); // Executes code
+```
+
+**Dangers:**
+- Security risk (code injection)
+- Performance issues (no optimization)
+- Debugging difficulties
+
+**Alternatives:**
+```javascript
+// Use Function constructor (safer)
+const add = new Function('a', 'b', 'return a + b');
+add(2, 3); // 5
+
+// Use JSON.parse for data
+const data = JSON.parse('{"name": "John"}');
+```
+
+### 67. Explain JavaScript's `with` statement and why it's deprecated.
+
+**Answer:**
+`with` adds object properties to scope chain.
+
+```javascript
+const obj = { a: 1, b: 2 };
+with (obj) {
+    console.log(a + b); // 3
+}
+```
+
+**Problems:**
+- Performance issues
+- Ambiguity
+- Deprecated in strict mode
+
+**Alternative:**
+```javascript
+// Use destructuring
+const { a, b } = obj;
+console.log(a + b);
+```
+
+### 68. Explain JavaScript's `delete` operator.
+
+**Answer:**
+`delete` removes property from object.
+
+```javascript
+const obj = { a: 1, b: 2, c: 3 };
+delete obj.b;
+console.log(obj); // { a: 1, c: 3 }
+
+// Array elements
+const arr = [1, 2, 3];
+delete arr[1];
+console.log(arr); // [1, empty, 3] (length unchanged)
+```
+
+**Limitations:**
+- Cannot delete variables
+- Cannot delete function parameters
+- Cannot delete non-configurable properties
+
+### 69. Explain JavaScript's `void` operator.
+
+**Answer:**
+`void` evaluates expression and returns `undefined`.
+
+```javascript
+void 0;              // undefined
+void (1 + 2);        // undefined
+void console.log('Hello'); // undefined (but logs 'Hello')
+```
+
+**Use Cases:**
+- Ensure expression returns undefined
+- Prevent navigation in links: `<a href="javascript:void(0)">`
+- IIFE: `void function() { }()`
+
+### 70. Explain JavaScript's `in` operator.
+
+**Answer:**
+`in` checks if property exists in object.
+
+```javascript
+const obj = { a: 1, b: 2 };
+'a' in obj;          // true
+'c' in obj;          // false
+
+// Arrays
+const arr = [1, 2, 3];
+0 in arr;            // true (index exists)
+5 in arr;            // false (index doesn't exist)
+'length' in arr;     // true (property exists)
+```
+
+**vs `hasOwnProperty()`:**
+```javascript
+const obj = Object.create({ inherited: true });
+obj.own = true;
+
+'inherited' in obj;           // true (checks prototype chain)
+obj.hasOwnProperty('inherited'); // false (only own properties)
+```
+
+### 71. Explain JavaScript's `instanceof` operator.
+
+**Answer:**
+`instanceof` checks if object is instance of constructor.
+
+```javascript
+[] instanceof Array;          // true
+[] instanceof Object;        // true (Array extends Object)
+{} instanceof Object;        // true
+
+function Person() {}
+const person = new Person();
+person instanceof Person;    // true
+person instanceof Object;   // true
+```
+
+**Custom instanceof:**
+```javascript
+function myInstanceof(obj, constructor) {
+    let proto = Object.getPrototypeOf(obj);
+    while (proto) {
+        if (proto === constructor.prototype) return true;
+        proto = Object.getPrototypeOf(proto);
+    }
+    return false;
+}
+```
+
+### 72. Explain JavaScript's `typeof` operator quirks.
+
+**Answer:**
+**Normal Cases:**
+```javascript
+typeof "hello";      // "string"
+typeof 42;           // "number"
+typeof true;         // "boolean"
+typeof undefined;    // "undefined"
+typeof Symbol();     // "symbol"
+typeof function(){}; // "function"
+```
+
+**Quirks:**
+```javascript
+typeof null;         // "object" (historical bug)
+typeof [];           // "object"
+typeof {};           // "object"
+typeof NaN;          // "number"
+typeof Infinity;     // "number"
+```
+
+**Better Type Checking:**
+```javascript
+Object.prototype.toString.call(null);      // "[object Null]"
+Object.prototype.toString.call([]);        // "[object Array]"
+Object.prototype.toString.call({});       // "[object Object]"
+```
+
+### 73. Explain JavaScript's `new` operator.
+
+**Answer:**
+`new` creates instance of constructor function.
+
+**What `new` does:**
+1. Creates new object
+2. Sets prototype to constructor's prototype
+3. Binds `this` to new object
+4. Returns object (unless constructor returns object)
+
+```javascript
+function Person(name) {
+    this.name = name;
+}
+
+const person = new Person("John");
+// Equivalent to:
+// 1. const obj = {};
+// 2. obj.__proto__ = Person.prototype;
+// 3. Person.call(obj, "John");
+// 4. return obj;
+```
+
+**Manual Implementation:**
+```javascript
+function myNew(constructor, ...args) {
+    const obj = Object.create(constructor.prototype);
+    const result = constructor.apply(obj, args);
+    return result instanceof Object ? result : obj;
+}
+```
+
+### 74. Explain JavaScript's `super` keyword.
+
+**Answer:**
+`super` calls parent class methods/constructor.
+
+**In Constructor:**
+```javascript
+class Parent {
+    constructor(name) {
+        this.name = name;
+    }
+}
+
+class Child extends Parent {
+    constructor(name, age) {
+        super(name); // Call parent constructor
+        this.age = age;
+    }
+}
+```
+
+**In Methods:**
+```javascript
+class Parent {
+    greet() {
+        return "Hello from parent";
+    }
+}
+
+class Child extends Parent {
+    greet() {
+        return super.greet() + " and child";
+    }
+}
+```
+
+**In Static Methods:**
+```javascript
+class Parent {
+    static getType() {
+        return "Parent";
+    }
+}
+
+class Child extends Parent {
+    static getType() {
+        return super.getType() + " -> Child";
+    }
+}
+```
+
+### 75. Explain JavaScript's `yield` keyword and generator functions.
+
+**Answer:**
+`yield` pauses generator function execution.
+
+**Basic Generator:**
+```javascript
+function* generator() {
+    yield 1;
+    yield 2;
+    yield 3;
+}
+
+const gen = generator();
+gen.next(); // { value: 1, done: false }
+gen.next(); // { value: 2, done: false }
+gen.next(); // { value: 3, done: false }
+gen.next(); // { value: undefined, done: true }
+```
+
+**Yield with Value:**
+```javascript
+function* generator() {
+    const x = yield "First";
+    const y = yield x + " Second";
+    return y + " Third";
+}
+
+const gen = generator();
+gen.next();        // { value: "First", done: false }
+gen.next("Hello"); // { value: "Hello Second", done: false }
+gen.next("World"); // { value: "World Third", done: true }
+```
+
+**Use Cases:**
+- Lazy evaluation
+- Infinite sequences
+- Async iteration
+
+### 76. Explain JavaScript's `async` and `await` error handling.
+
+**Answer:**
+**Try-Catch:**
+```javascript
+async function fetchData() {
+    try {
+        const response = await fetch('https://api.example.com/data');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error:', error);
+        throw error; // Re-throw if needed
+    }
+}
+```
+
+**Promise Catch:**
+```javascript
+async function fetchData() {
+    const response = await fetch('https://api.example.com/data')
+        .catch(error => {
+            console.error('Fetch error:', error);
+            return null;
+        });
+    
+    if (!response) return null;
+    return response.json();
+}
+```
+
+**Multiple Awaits:**
+```javascript
+async function fetchMultiple() {
+    try {
+        const [data1, data2] = await Promise.all([
+            fetchData1(),
+            fetchData2()
+        ]);
+        return { data1, data2 };
+    } catch (error) {
+        // Handles any error from either promise
+        console.error('Error:', error);
+    }
+}
+```
+
+### 77. Explain JavaScript's `Promise.all()` vs `Promise.allSettled()`.
+
+**Answer:**
+**Promise.all():**
+```javascript
+Promise.all([promise1, promise2, promise3])
+    .then(results => {
+        // All resolved
+    })
+    .catch(error => {
+        // First rejection stops all
+    });
+```
+
+**Promise.allSettled():**
+```javascript
+Promise.allSettled([promise1, promise2, promise3])
+    .then(results => {
+        results.forEach(result => {
+            if (result.status === 'fulfilled') {
+                console.log('Success:', result.value);
+            } else {
+                console.log('Failed:', result.reason);
+            }
+        });
+    });
+```
+
+**Differences:**
+- `all()`: Fails fast (first rejection)
+- `allSettled()`: Waits for all (never rejects)
+
+### 78. Explain JavaScript's `JSON.parse()` and `JSON.stringify()`.
+
+**Answer:**
+**JSON.stringify():**
+```javascript
+const obj = { name: "John", age: 30 };
+JSON.stringify(obj); // '{"name":"John","age":30}'
+
+// With replacer
+JSON.stringify(obj, ['name']); // '{"name":"John"}'
+
+// With space (pretty print)
+JSON.stringify(obj, null, 2);
+```
+
+**JSON.parse():**
+```javascript
+const json = '{"name":"John","age":30}';
+JSON.parse(json); // { name: "John", age: 30 }
+
+// With reviver
+JSON.parse(json, (key, value) => {
+    if (key === 'age') return value * 2;
+    return value;
+});
+```
+
+**Limitations:**
+- Functions not stringified
+- `undefined` not stringified
+- `Date` becomes string
+- Circular references cause error
+
+### 79. Explain JavaScript's `Object.keys()`, `Object.values()`, `Object.entries()`.
+
+**Answer:**
+**Object.keys():**
+```javascript
+const obj = { a: 1, b: 2, c: 3 };
+Object.keys(obj); // ['a', 'b', 'c']
+```
+
+**Object.values():**
+```javascript
+Object.values(obj); // [1, 2, 3]
+```
+
+**Object.entries():**
+```javascript
+Object.entries(obj); // [['a', 1], ['b', 2], ['c', 3]]
+
+// Convert to Map
+const map = new Map(Object.entries(obj));
+
+// Iterate
+for (const [key, value] of Object.entries(obj)) {
+    console.log(key, value);
+}
+```
+
+**Object.fromEntries():**
+```javascript
+const entries = [['a', 1], ['b', 2]];
+Object.fromEntries(entries); // { a: 1, b: 2 }
+```
+
+### 80. Explain JavaScript's `Array.from()` vs spread operator.
+
+**Answer:**
+**Array.from():**
+```javascript
+Array.from('hello'); // ['h', 'e', 'l', 'l', 'o']
+Array.from({ length: 5 }, (_, i) => i); // [0, 1, 2, 3, 4]
+
+// From array-like
+const arrayLike = { 0: 'a', 1: 'b', length: 2 };
+Array.from(arrayLike); // ['a', 'b']
+```
+
+**Spread Operator:**
+```javascript
+[...'hello']; // ['h', 'e', 'l', 'l', 'o']
+[...arrayLike]; // Error (not iterable)
+
+// Works with iterables
+const set = new Set([1, 2, 3]);
+[...set]; // [1, 2, 3]
+```
+
+**Differences:**
+- `Array.from()`: Works with array-like objects
+- Spread: Only works with iterables
+
 ---
 
 This covers JavaScript interview questions from beginner to advanced level with detailed explanations and code examples.

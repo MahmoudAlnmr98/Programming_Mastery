@@ -1171,6 +1171,399 @@ query {
 - HTTP: REST APIs, web pages
 - WebSocket: Chat, gaming, real-time updates
 
+### 51. Explain RESTful API Design Best Practices.
+
+**Answer:**
+**Resource Naming:**
+```
+GET    /api/users           # List users
+GET    /api/users/123       # Get user
+POST   /api/users           # Create user
+PUT    /api/users/123       # Update user (full)
+PATCH  /api/users/123       # Update user (partial)
+DELETE /api/users/123       # Delete user
+```
+
+**Status Codes:**
+- 200: OK
+- 201: Created
+- 204: No Content
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 500: Internal Server Error
+
+**Versioning:**
+```
+/api/v1/users
+/api/v2/users
+```
+
+### 52. Explain API Pagination Strategies.
+
+**Answer:**
+**Offset-Based:**
+```
+GET /api/users?page=1&limit=10
+```
+
+**Cursor-Based:**
+```
+GET /api/users?cursor=abc123&limit=10
+```
+
+**Keyset Pagination:**
+```
+GET /api/users?last_id=123&limit=10
+```
+
+**Benefits:**
+- Cursor-based: Better for large datasets
+- Offset-based: Simple, allows jumping to page
+
+### 53. Explain API Filtering, Sorting, and Searching.
+
+**Answer:**
+**Filtering:**
+```
+GET /api/users?status=active&role=admin
+```
+
+**Sorting:**
+```
+GET /api/users?sort=name&order=asc
+```
+
+**Searching:**
+```
+GET /api/users?search=john
+```
+
+**Implementation:**
+```javascript
+app.get('/api/users', (req, res) => {
+    let query = User.find();
+    
+    if (req.query.status) {
+        query = query.where('status').equals(req.query.status);
+    }
+    
+    if (req.query.sort) {
+        const order = req.query.order === 'desc' ? -1 : 1;
+        query = query.sort({ [req.query.sort]: order });
+    }
+    
+    query.exec((err, users) => {
+        res.json(users);
+    });
+});
+```
+
+### 54. Explain API Authentication Methods.
+
+**Answer:**
+**1. Basic Auth:**
+```javascript
+// Client sends: Authorization: Basic base64(username:password)
+const auth = Buffer.from(`${username}:${password}`).toString('base64');
+```
+
+**2. Bearer Token (JWT):**
+```javascript
+// Client sends: Authorization: Bearer <token>
+const token = jwt.sign({ userId: 123 }, secret);
+```
+
+**3. API Keys:**
+```javascript
+// Client sends: X-API-Key: <key>
+app.use((req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+    if (!isValidKey(apiKey)) {
+        return res.status(401).json({ error: 'Invalid API key' });
+    }
+    next();
+});
+```
+
+**4. OAuth 2.0:**
+- Authorization code flow
+- Client credentials flow
+- Implicit flow
+
+### 55. Explain API Response Formatting.
+
+**Answer:**
+**Consistent Format:**
+```javascript
+// Success
+{
+    "status": "success",
+    "data": { ... },
+    "message": "User created successfully"
+}
+
+// Error
+{
+    "status": "error",
+    "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Invalid email format",
+        "details": { ... }
+    }
+}
+```
+
+**Pagination:**
+```javascript
+{
+    "data": [...],
+    "pagination": {
+        "page": 1,
+        "limit": 10,
+        "total": 100,
+        "totalPages": 10
+    }
+}
+```
+
+### 56. Explain Database Connection Pooling.
+
+**Answer:**
+Connection pool reuses database connections.
+
+**Benefits:**
+- Reduces connection overhead
+- Limits concurrent connections
+- Better resource management
+
+**Configuration:**
+```javascript
+const pool = new Pool({
+    host: 'localhost',
+    database: 'mydb',
+    user: 'user',
+    password: 'password',
+    max: 20, // Maximum connections
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000
+});
+```
+
+### 57. Explain Backend Logging Best Practices.
+
+**Answer:**
+**Structured Logging:**
+```javascript
+logger.info('User created', {
+    userId: 123,
+    email: 'user@example.com',
+    timestamp: new Date()
+});
+```
+
+**Log Levels:**
+- ERROR: Errors that need attention
+- WARN: Warning messages
+- INFO: Informational messages
+- DEBUG: Debug information
+
+**Best Practices:**
+- Use structured logging (JSON)
+- Include context (user ID, request ID)
+- Don't log sensitive data
+- Centralized logging
+
+### 58. Explain Backend Error Handling Patterns.
+
+**Answer:**
+**Custom Error Classes:**
+```javascript
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+    }
+}
+
+class ValidationError extends AppError {
+    constructor(message) {
+        super(message, 400);
+    }
+}
+```
+
+**Error Handler:**
+```javascript
+app.use((err, req, res, next) => {
+    if (err.isOperational) {
+        return res.status(err.statusCode).json({
+            status: 'error',
+            message: err.message
+        });
+    }
+    
+    // Log unexpected errors
+    logger.error(err);
+    
+    res.status(500).json({
+        status: 'error',
+        message: 'Internal server error'
+    });
+});
+```
+
+### 59. Explain Backend Testing Strategies.
+
+**Answer:**
+**Unit Tests:**
+```javascript
+test('should create user', async () => {
+    const user = await userService.createUser({
+        name: 'John',
+        email: 'john@example.com'
+    });
+    
+    expect(user.name).toBe('John');
+});
+```
+
+**Integration Tests:**
+```javascript
+test('POST /api/users', async () => {
+    const response = await request(app)
+        .post('/api/users')
+        .send({ name: 'John', email: 'john@example.com' })
+        .expect(201);
+    
+    expect(response.body).toHaveProperty('id');
+});
+```
+
+**Test Types:**
+- Unit: Test individual functions
+- Integration: Test API endpoints
+- E2E: Test complete flows
+
+### 60. Explain Backend Deployment Strategies.
+
+**Answer:**
+**Blue-Green Deployment:**
+- Two identical environments
+- Switch traffic between them
+- Zero downtime
+
+**Canary Deployment:**
+- Deploy to subset of servers
+- Gradually increase traffic
+- Rollback if issues
+
+**Rolling Deployment:**
+- Deploy to servers one by one
+- No downtime
+- Slower process
+
+### 61. Explain Backend Monitoring and Alerting.
+
+**Answer:**
+**Key Metrics:**
+- Response time (p50, p95, p99)
+- Error rate
+- Throughput (requests/second)
+- Resource usage (CPU, memory)
+
+**Alerting:**
+- Set thresholds
+- Notify on anomalies
+- Use tools: Prometheus, Grafana, Datadog
+
+### 62. Explain Backend Scalability Patterns.
+
+**Answer:**
+**Vertical Scaling:**
+- Increase server resources
+- Limited by hardware
+
+**Horizontal Scaling:**
+- Add more servers
+- Requires load balancing
+- Stateless services
+
+**Database Scaling:**
+- Read replicas
+- Sharding
+- Caching
+
+### 63. Explain Backend Data Validation.
+
+**Answer:**
+**Input Validation:**
+```javascript
+const schema = {
+    email: {
+        type: 'string',
+        required: true,
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    },
+    age: {
+        type: 'number',
+        min: 18,
+        max: 100
+    }
+};
+
+function validate(data, schema) {
+    // Validation logic
+}
+```
+
+**Libraries:**
+- Joi (Node.js)
+- Validator.js
+- express-validator
+
+### 64. Explain Backend File Upload Handling.
+
+**Answer:**
+**Multipart Form Data:**
+```javascript
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    res.json({ file: req.file });
+});
+```
+
+**Best Practices:**
+- Validate file type
+- Limit file size
+- Scan for viruses
+- Store in object storage (S3)
+
+### 65. Explain Backend Background Jobs.
+
+**Answer:**
+**Job Queue:**
+```javascript
+const Bull = require('bull');
+const queue = new Bull('email-queue');
+
+queue.process(async (job) => {
+    await sendEmail(job.data);
+});
+
+queue.add({ to: 'user@example.com', subject: 'Hello' });
+```
+
+**Use Cases:**
+- Email sending
+- Image processing
+- Report generation
+- Data synchronization
+
 ---
 
 This covers backend interview questions from beginner to advanced level with comprehensive coverage of essential topics.

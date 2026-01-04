@@ -1846,6 +1846,579 @@ test('increments counter', () => {
 - Test accessibility
 - Mock external dependencies
 
+### 56. Explain React's Fragment and when to use it.
+
+**Answer:**
+Fragment allows grouping elements without adding extra DOM node.
+
+```jsx
+// Without Fragment
+function Component() {
+    return (
+        <div>
+            <h1>Title</h1>
+            <p>Content</p>
+        </div>
+    );
+}
+
+// With Fragment
+function Component() {
+    return (
+        <>
+            <h1>Title</h1>
+            <p>Content</p>
+        </>
+    );
+}
+
+// Or
+function Component() {
+    return (
+        <React.Fragment>
+            <h1>Title</h1>
+            <p>Content</p>
+        </React.Fragment>
+    );
+}
+```
+
+**When to use:**
+- Group elements without wrapper
+- Return multiple elements
+- Avoid unnecessary DOM nodes
+
+### 57. Explain React's defaultProps and propTypes.
+
+**Answer:**
+**defaultProps:**
+```jsx
+function Component({ name, age }) {
+    return <div>{name} is {age} years old</div>;
+}
+
+Component.defaultProps = {
+    name: 'Anonymous',
+    age: 0
+};
+```
+
+**propTypes:**
+```jsx
+import PropTypes from 'prop-types';
+
+function Component({ name, age, email }) {
+    return <div>{name}</div>;
+}
+
+Component.propTypes = {
+    name: PropTypes.string.isRequired,
+    age: PropTypes.number,
+    email: PropTypes.string
+};
+```
+
+**Note:** In modern React, use default parameters and TypeScript instead.
+
+### 58. Explain React's children prop.
+
+**Answer:**
+`children` prop allows passing components as data.
+
+```jsx
+function Container({ children }) {
+    return <div className="container">{children}</div>;
+}
+
+// Usage
+<Container>
+    <h1>Title</h1>
+    <p>Content</p>
+</Container>
+```
+
+**Multiple Children:**
+```jsx
+function Layout({ header, sidebar, content }) {
+    return (
+        <div>
+            {header}
+            <div>
+                {sidebar}
+                {content}
+            </div>
+        </div>
+    );
+}
+
+// Usage
+<Layout
+    header={<Header />}
+    sidebar={<Sidebar />}
+    content={<Content />}
+/>
+```
+
+### 59. Explain React's useReducer for complex state.
+
+**Answer:**
+useReducer manages complex state logic.
+
+```jsx
+function reducer(state, action) {
+    switch (action.type) {
+        case 'increment':
+            return { count: state.count + 1 };
+        case 'decrement':
+            return { count: state.count - 1 };
+        case 'reset':
+            return { count: 0 };
+        default:
+            return state;
+    }
+}
+
+function Counter() {
+    const [state, dispatch] = useReducer(reducer, { count: 0 });
+    
+    return (
+        <div>
+            <p>Count: {state.count}</p>
+            <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+            <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+            <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>
+        </div>
+    );
+}
+```
+
+**When to use:**
+- Complex state logic
+- Multiple sub-values
+- State updates depend on previous state
+
+### 60. Explain React's useLayoutEffect vs useEffect.
+
+**Answer:**
+**useEffect:**
+- Runs after render and paint
+- Asynchronous
+- Good for: API calls, subscriptions, side effects
+
+**useLayoutEffect:**
+- Runs after render but before paint
+- Synchronous
+- Good for: DOM measurements, preventing flicker
+
+```jsx
+function Component() {
+    const [width, setWidth] = useState(0);
+    const ref = useRef();
+    
+    useLayoutEffect(() => {
+        // Measure before paint
+        setWidth(ref.current.offsetWidth);
+    }, []);
+    
+    return <div ref={ref}>Content</div>;
+}
+```
+
+### 61. Explain React's custom hooks best practices.
+
+**Answer:**
+**Naming:**
+- Always start with `use`
+- Descriptive names
+
+**Single Responsibility:**
+```jsx
+// Good - focused hook
+function useCounter(initialValue = 0) {
+    const [count, setCount] = useState(initialValue);
+    const increment = () => setCount(count + 1);
+    const decrement = () => setCount(count - 1);
+    return { count, increment, decrement };
+}
+
+// Bad - does too much
+function useCounterAndTimer(initialValue) {
+    // Counter logic
+    // Timer logic
+    // Too many responsibilities
+}
+```
+
+**Return Consistent Structure:**
+```jsx
+function useFetch(url) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
+    useEffect(() => {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                setData(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                setError(err);
+                setLoading(false);
+            });
+    }, [url]);
+    
+    return { data, loading, error };
+}
+```
+
+### 62. Explain React's prop drilling and solutions.
+
+**Answer:**
+**Problem:**
+```jsx
+function App() {
+    const user = { name: 'John' };
+    return <ComponentA user={user} />;
+}
+
+function ComponentA({ user }) {
+    return <ComponentB user={user} />;
+}
+
+function ComponentB({ user }) {
+    return <ComponentC user={user} />;
+}
+```
+
+**Solutions:**
+1. **Context API:**
+```jsx
+const UserContext = createContext();
+
+function App() {
+    return (
+        <UserContext.Provider value={{ name: 'John' }}>
+            <ComponentA />
+        </UserContext.Provider>
+    );
+}
+
+function ComponentC() {
+    const user = useContext(UserContext);
+    return <div>{user.name}</div>;
+}
+```
+
+2. **Composition:**
+```jsx
+function App() {
+    return <ComponentA><ComponentC /></ComponentA>;
+}
+```
+
+### 63. Explain React's state lifting.
+
+**Answer:**
+Lifting state moves state to common ancestor.
+
+```jsx
+// Before - state in child
+function TemperatureInput() {
+    const [temperature, setTemperature] = useState('');
+    return <input value={temperature} onChange={e => setTemperature(e.target.value)} />;
+}
+
+// After - state lifted to parent
+function Calculator() {
+    const [temperature, setTemperature] = useState('');
+    
+    return (
+        <div>
+            <TemperatureInput value={temperature} onChange={setTemperature} />
+            <TemperatureDisplay temperature={temperature} />
+        </div>
+    );
+}
+```
+
+### 64. Explain React's controlled components pattern.
+
+**Answer:**
+Controlled components have React control their value.
+
+```jsx
+function Form() {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: ''
+    });
+    
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+    
+    return (
+        <form>
+            <input
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+            />
+            <input
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+            />
+        </form>
+    );
+}
+```
+
+### 65. Explain React's form handling.
+
+**Answer:**
+**Controlled Form:**
+```jsx
+function Form() {
+    const [name, setName] = useState('');
+    
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log(name);
+    };
+    
+    return (
+        <form onSubmit={handleSubmit}>
+            <input value={name} onChange={e => setName(e.target.value)} />
+            <button type="submit">Submit</button>
+        </form>
+    );
+}
+```
+
+**Uncontrolled Form:**
+```jsx
+function Form() {
+    const formRef = useRef();
+    
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(formRef.current);
+        console.log(formData.get('name'));
+    };
+    
+    return (
+        <form ref={formRef} onSubmit={handleSubmit}>
+            <input name="name" />
+            <button type="submit">Submit</button>
+        </form>
+    );
+}
+```
+
+### 66. Explain React's event handling.
+
+**Answer:**
+**Synthetic Events:**
+```jsx
+function Button() {
+    const handleClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Clicked');
+    };
+    
+    return <button onClick={handleClick}>Click me</button>;
+}
+```
+
+**Event Pooling (React < 17):**
+```jsx
+// Event object reused, need to persist
+function handleClick(e) {
+    e.persist(); // React < 17
+    setTimeout(() => {
+        console.log(e.type);
+    }, 100);
+}
+```
+
+**Passing Arguments:**
+```jsx
+function List({ items }) {
+    const handleClick = (id) => {
+        console.log('Clicked:', id);
+    };
+    
+    return (
+        <ul>
+            {items.map(item => (
+                <li key={item.id} onClick={() => handleClick(item.id)}>
+                    {item.name}
+                </li>
+            ))}
+        </ul>
+    );
+}
+```
+
+### 67. Explain React's conditional rendering.
+
+**Answer:**
+**If Statement:**
+```jsx
+function Component({ isLoggedIn }) {
+    if (isLoggedIn) {
+        return <Dashboard />;
+    }
+    return <Login />;
+}
+```
+
+**Ternary Operator:**
+```jsx
+function Component({ isLoggedIn }) {
+    return (
+        <div>
+            {isLoggedIn ? <Dashboard /> : <Login />}
+        </div>
+    );
+}
+```
+
+**Logical AND:**
+```jsx
+function Component({ items }) {
+    return (
+        <div>
+            {items.length > 0 && <ItemList items={items} />}
+        </div>
+    );
+}
+```
+
+**Immediately Invoked Function:**
+```jsx
+function Component({ user }) {
+    return (
+        <div>
+            {(() => {
+                if (user.role === 'admin') return <AdminPanel />;
+                if (user.role === 'user') return <UserPanel />;
+                return <GuestPanel />;
+            })()}
+        </div>
+    );
+}
+```
+
+### 68. Explain React's list rendering and keys.
+
+**Answer:**
+**Basic List:**
+```jsx
+function List({ items }) {
+    return (
+        <ul>
+            {items.map(item => (
+                <li key={item.id}>{item.name}</li>
+            ))}
+        </ul>
+    );
+}
+```
+
+**Keys Must Be:**
+- Unique among siblings
+- Stable across renders
+- Predictable
+
+**Common Mistakes:**
+```jsx
+// Bad - index as key (if list can reorder)
+{items.map((item, index) => <Item key={index} data={item} />)}
+
+// Bad - random key
+{items.map(item => <Item key={Math.random()} data={item} />)}
+
+// Good - stable unique key
+{items.map(item => <Item key={item.id} data={item} />)}
+```
+
+### 69. Explain React's component composition.
+
+**Answer:**
+Composition builds complex UIs from simple components.
+
+**Containment:**
+```jsx
+function Container({ children }) {
+    return <div className="container">{children}</div>;
+}
+
+function App() {
+    return (
+        <Container>
+            <Header />
+            <Content />
+        </Container>
+    );
+}
+```
+
+**Specialization:**
+```jsx
+function Dialog({ title, children }) {
+    return (
+        <div className="dialog">
+            <h1>{title}</h1>
+            {children}
+        </div>
+    );
+}
+
+function WelcomeDialog() {
+    return (
+        <Dialog title="Welcome">
+            <p>Thank you for visiting!</p>
+        </Dialog>
+    );
+}
+```
+
+### 70. Explain React's higher-order components (HOCs).
+
+**Answer:**
+HOC is function that takes component and returns new component.
+
+```jsx
+function withLoading(Component) {
+    return function WithLoadingComponent({ isLoading, ...props }) {
+        if (isLoading) {
+            return <div>Loading...</div>;
+        }
+        return <Component {...props} />;
+    };
+}
+
+// Usage
+const UserProfileWithLoading = withLoading(UserProfile);
+
+<UserProfileWithLoading isLoading={true} user={user} />
+```
+
+**Common HOCs:**
+- `withRouter` (React Router)
+- `connect` (Redux)
+- `withAuth` (Authentication)
+
+**Modern Alternative:** Use hooks instead of HOCs.
+
 ---
 
 This covers React interview questions from beginner to advanced level with detailed explanations and code examples.

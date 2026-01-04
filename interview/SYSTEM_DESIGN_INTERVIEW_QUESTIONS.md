@@ -1376,6 +1376,425 @@ Producer → Queue Partitions → Consumer Groups
 - Consumer groups for parallelism
 - Dead letter queue
 
+### 46. Design a Web Crawler.
+
+**Requirements:**
+- Crawl web pages
+- Respect robots.txt
+- Handle billions of pages
+- Avoid duplicates
+
+**Answer:**
+**Components:**
+1. **URL Frontier**: Queue of URLs to crawl
+2. **DNS Resolver**: Resolve domain names
+3. **Fetcher**: Download pages
+4. **Parser**: Extract links and content
+5. **Deduplicator**: Check for duplicates
+6. **Storage**: Store crawled content
+
+**Architecture:**
+```
+Seed URLs → URL Frontier → Fetcher → Parser → Storage
+                              ↓
+                          Deduplicator
+```
+
+**Key Design:**
+- Politeness (rate limiting per domain)
+- Robots.txt compliance
+- URL normalization
+- Bloom filter for duplicate detection
+
+### 47. Design a Distributed File System (GFS-like).
+
+**Requirements:**
+- Store large files
+- Handle failures
+- High throughput
+- Replication
+
+**Answer:**
+**Components:**
+1. **Master Node**: Metadata management
+2. **Chunk Servers**: Store file chunks
+3. **Client Library**: Interface for clients
+4. **Replication**: Multiple copies of chunks
+
+**Architecture:**
+```
+Client → Master (metadata) → Chunk Servers (data)
+```
+
+**Key Design:**
+- Chunk-based storage (64MB chunks)
+- Master keeps metadata only
+- Replication (3 copies)
+- Heartbeat for health checks
+
+### 48. Design a News Feed System.
+
+**Requirements:**
+- Display personalized feed
+- Real-time updates
+- Handle 100M users
+- Multiple content types
+
+**Answer:**
+**Components:**
+1. **Content Service**: Store posts/articles
+2. **Social Graph**: User relationships
+3. **Ranking Service**: Personalize feed
+4. **Feed Generator**: Build feed
+5. **Cache**: Store pre-computed feeds
+
+**Architecture:**
+```
+User → Feed API → Ranking → Feed Generator → Cache
+```
+
+**Key Design:**
+- Pre-compute feeds (pull model)
+- Real-time updates (push model)
+- Ranking algorithm (relevance, recency)
+- Caching strategy
+
+### 49. Design a Distributed ID Generator.
+
+**Requirements:**
+- Generate unique IDs
+- High throughput
+- No collisions
+- Distributed system
+
+**Answer:**
+**Approaches:**
+1. **UUID**: 128-bit unique identifier
+2. **Snowflake**: Twitter's ID generator (timestamp + machine + sequence)
+3. **Database Sequence**: Auto-increment with sharding
+4. **Redis INCR**: Atomic counter
+
+**Snowflake Algorithm:**
+```
+64-bit ID = 41 bits (timestamp) + 10 bits (machine) + 12 bits (sequence)
+```
+
+**Key Design:**
+- Monotonic IDs
+- No coordination needed
+- Time-based ordering
+- High throughput
+
+### 50. Design a Leaderboard System.
+
+**Requirements:**
+- Real-time rankings
+- Handle millions of users
+- Multiple leaderboards
+- Historical data
+
+**Answer:**
+**Components:**
+1. **Score Service**: Update scores
+2. **Ranking Service**: Calculate ranks
+3. **Storage**: Redis Sorted Sets
+4. **Cache**: Top N players
+
+**Architecture:**
+```
+Score Update → Ranking Service → Redis Sorted Set → Cache
+```
+
+**Key Design:**
+- Redis Sorted Sets (ZADD, ZRANK)
+- Periodic snapshots for history
+- Sharding by leaderboard type
+- Caching top players
+
+### 51. Design a URL Shortener (Detailed).
+
+**Requirements:**
+- Shorten long URLs
+- Redirect to original
+- Analytics
+- Handle 100M URLs/day
+
+**Answer:**
+**Components:**
+1. **Short URL Generator**: Base62 encoding
+2. **Mapping Service**: Store short → long mapping
+3. **Redirect Service**: Handle redirects
+4. **Analytics Service**: Track clicks
+5. **Cache**: Redis for hot URLs
+
+**Algorithm:**
+- Counter-based: Auto-increment ID → Base62
+- Hash-based: MD5/SHA → Base62 (first 6 chars)
+- Random: Generate random string
+
+**Database:**
+```sql
+CREATE TABLE urls (
+    id BIGINT PRIMARY KEY,
+    short_url VARCHAR(10) UNIQUE,
+    original_url TEXT,
+    created_at TIMESTAMP,
+    expires_at TIMESTAMP,
+    click_count INT
+);
+```
+
+### 52. Design a Pastebin Service.
+
+**Requirements:**
+- Store text snippets
+- Expiration support
+- Syntax highlighting
+- Handle 10M pastes/day
+
+**Answer:**
+**Components:**
+1. **Paste Service**: Create/read pastes
+2. **Storage**: Database + Object storage
+3. **Expiration Service**: Clean up expired
+4. **Syntax Highlighter**: Client-side or server-side
+
+**Architecture:**
+```
+Client → API → Paste Service → Storage
+                        ↓
+                  Expiration Job
+```
+
+**Key Design:**
+- Short unique IDs
+- TTL for expiration
+- Compression for large pastes
+- CDN for static assets
+
+### 53. Design a Distributed Cache (Memcached-like).
+
+**Requirements:**
+- Key-value storage
+- High throughput
+- Low latency
+- Distributed
+
+**Answer:**
+**Components:**
+1. **Cache Nodes**: Store key-value pairs
+2. **Consistent Hashing**: Distribute keys
+3. **Replication**: For availability
+4. **Eviction Policy**: LRU, LFU
+
+**Architecture:**
+```
+Client → Hash Function → Cache Node → Memory Storage
+```
+
+**Key Design:**
+- Consistent hashing
+- Replication (master-slave)
+- Eviction policies
+- TTL support
+
+### 54. Design a Rate Limiter (Detailed).
+
+**Requirements:**
+- Limit requests per user/IP
+- Multiple algorithms
+- Distributed system
+- Handle 1M requests/second
+
+**Answer:**
+**Algorithms:**
+1. **Token Bucket**: Tokens added at rate, request consumes token
+2. **Leaky Bucket**: Requests added, processed at fixed rate
+3. **Fixed Window**: Count in time window
+4. **Sliding Window**: Count in sliding window
+
+**Implementation:**
+```javascript
+class RateLimiter {
+    constructor(maxRequests, windowMs) {
+        this.maxRequests = maxRequests;
+        this.windowMs = windowMs;
+        this.requests = new Map();
+    }
+    
+    isAllowed(identifier) {
+        const now = Date.now();
+        const windowStart = now - this.windowMs;
+        
+        if (!this.requests.has(identifier)) {
+            this.requests.set(identifier, []);
+        }
+        
+        const userRequests = this.requests.get(identifier);
+        const recentRequests = userRequests.filter(time => time > windowStart);
+        
+        if (recentRequests.length >= this.maxRequests) {
+            return false;
+        }
+        
+        recentRequests.push(now);
+        this.requests.set(identifier, recentRequests);
+        return true;
+    }
+}
+```
+
+### 55. Design a Distributed Lock (Detailed).
+
+**Requirements:**
+- Acquire/release locks
+- Handle failures
+- Prevent deadlocks
+- High availability
+
+**Answer:**
+**Implementation with Redis:**
+```javascript
+async function acquireLock(key, ttl) {
+    const lockKey = `lock:${key}`;
+    const result = await redis.set(lockKey, 'locked', 'EX', ttl, 'NX');
+    return result === 'OK';
+}
+
+async function releaseLock(key) {
+    await redis.del(`lock:${key}`);
+}
+```
+
+**Redlock Algorithm:**
+- Acquire lock on majority of nodes
+- Prevents single point of failure
+- Handles clock skew
+
+### 56. Design a Distributed Counter.
+
+**Requirements:**
+- Increment/decrement
+- High throughput
+- Eventually consistent
+- Handle 10M ops/second
+
+**Answer:**
+**Approaches:**
+1. **Sharded Counters**: Distribute by key
+2. **CRDTs**: Conflict-free replicated data types
+3. **Redis INCR**: Atomic operations
+4. **Cassandra Counters**: Distributed counters
+
+**Sharded Approach:**
+```
+Counter ID → Hash → Shard → Local Counter → Periodic Aggregation
+```
+
+### 57. Design a Distributed Session Store.
+
+**Requirements:**
+- Store user sessions
+- High availability
+- Low latency
+- Handle 100M sessions
+
+**Answer:**
+**Components:**
+1. **Session Service**: Manage sessions
+2. **Storage**: Redis cluster
+3. **Replication**: For availability
+4. **TTL**: Auto-expire sessions
+
+**Architecture:**
+```
+Client → Session Service → Redis Cluster → Replication
+```
+
+**Key Design:**
+- Session ID generation
+- TTL management
+- Replication strategy
+- Sticky sessions vs stateless
+
+### 58. Design a Distributed Tracing System.
+
+**Requirements:**
+- Track requests across services
+- Low overhead
+- Query traces
+- Handle 1M traces/second
+
+**Answer:**
+**Components:**
+1. **Tracer**: Instrument services
+2. **Collector**: Gather traces
+3. **Storage**: Time-series database
+4. **Query Service**: Search traces
+
+**Architecture:**
+```
+Service → Tracer → Collector → Storage → Query Service
+```
+
+**Key Design:**
+- Trace ID propagation
+- Sampling (reduce overhead)
+- Span correlation
+- Storage optimization
+
+### 59. Design a Content Delivery Network (CDN).
+
+**Requirements:**
+- Serve static content globally
+- Low latency
+- High availability
+- Handle 1B requests/day
+
+**Answer:**
+**Components:**
+1. **Edge Servers**: Serve content
+2. **Origin Server**: Source of truth
+3. **DNS**: Route to nearest edge
+4. **Cache**: Store popular content
+
+**Architecture:**
+```
+User → DNS → Edge Server → Cache → Origin (if miss)
+```
+
+**Key Design:**
+- Geographic distribution
+- Cache invalidation
+- Load balancing
+- Health checks
+
+### 60. Design a Distributed Search System.
+
+**Requirements:**
+- Full-text search
+- Handle billions of documents
+- Low latency
+- High availability
+
+**Answer:**
+**Components:**
+1. **Indexer**: Build inverted index
+2. **Search Service**: Execute queries
+3. **Sharding**: Distribute index
+4. **Replication**: For availability
+
+**Architecture:**
+```
+Documents → Indexer → Sharded Index → Search Service → Results
+```
+
+**Key Design:**
+- Inverted index structure
+- Sharding strategy
+- Query routing
+- Result merging
+
 ---
 
 This covers system design interview questions from beginner to advanced level with detailed explanations and architectures.

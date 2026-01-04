@@ -1154,6 +1154,324 @@ const token = generateCSRFToken();
 - Sanitize inputs
 - Use parameterized queries
 
+### 41. Explain CSS Selectors and their specificity.
+
+**Answer:**
+**Selector Types:**
+```css
+/* Element */
+div { }
+
+/* Class */
+.container { }
+
+/* ID */
+#header { }
+
+/* Attribute */
+[type="text"] { }
+
+/* Pseudo-class */
+:hover { }
+
+/* Pseudo-element */
+::before { }
+
+/* Descendant */
+div p { }
+
+/* Child */
+div > p { }
+
+/* Adjacent sibling */
+div + p { }
+
+/* General sibling */
+div ~ p { }
+```
+
+**Specificity Order:**
+1. Inline styles (1000)
+2. IDs (100)
+3. Classes, attributes, pseudo-classes (10)
+4. Elements, pseudo-elements (1)
+
+### 42. Explain CSS Position Property.
+
+**Answer:**
+**Static (Default):**
+```css
+.element {
+    position: static; /* Normal flow */
+}
+```
+
+**Relative:**
+```css
+.element {
+    position: relative;
+    top: 10px; /* Offset from normal position */
+    left: 20px;
+}
+```
+
+**Absolute:**
+```css
+.element {
+    position: absolute;
+    top: 0;
+    right: 0; /* Relative to nearest positioned ancestor */
+}
+```
+
+**Fixed:**
+```css
+.element {
+    position: fixed;
+    top: 0; /* Relative to viewport */
+}
+```
+
+**Sticky:**
+```css
+.element {
+    position: sticky;
+    top: 0; /* Sticks when scrolling */
+}
+```
+
+### 43. Explain CSS Display Property.
+
+**Answer:**
+**Block:**
+```css
+.element {
+    display: block; /* Full width, new line */
+}
+```
+
+**Inline:**
+```css
+.element {
+    display: inline; /* Width of content, no new line */
+}
+```
+
+**Inline-Block:**
+```css
+.element {
+    display: inline-block; /* Inline but can set width/height */
+}
+```
+
+**None:**
+```css
+.element {
+    display: none; /* Removed from layout */
+}
+```
+
+**Flex:**
+```css
+.element {
+    display: flex; /* Flexbox layout */
+}
+```
+
+**Grid:**
+```css
+.element {
+    display: grid; /* Grid layout */
+}
+```
+
+### 44. Explain CSS Z-Index and Stacking Context.
+
+**Answer:**
+**Z-Index:**
+```css
+.element1 {
+    z-index: 1; /* Higher value = on top */
+}
+
+.element2 {
+    z-index: 2; /* Above element1 */
+}
+```
+
+**Stacking Context:**
+- Created by: positioned elements with z-index, opacity < 1, transform, etc.
+- Each context has its own stacking order
+
+```css
+.parent {
+    position: relative;
+    z-index: 1; /* Creates stacking context */
+}
+
+.child {
+    z-index: 999; /* Only within parent's context */
+}
+```
+
+### 45. Explain CSS Media Queries.
+
+**Answer:**
+**Basic:**
+```css
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+    }
+}
+```
+
+**Multiple Conditions:**
+```css
+@media (min-width: 768px) and (max-width: 1024px) {
+    .container {
+        width: 750px;
+    }
+}
+```
+
+**Orientation:**
+```css
+@media (orientation: landscape) {
+    .container {
+        flex-direction: row;
+    }
+}
+```
+
+**Print:**
+```css
+@media print {
+    .no-print {
+        display: none;
+    }
+}
+```
+
+### 46. Explain HTML5 Semantic Elements.
+
+**Answer:**
+**Semantic Elements:**
+```html
+<header>Header content</header>
+<nav>Navigation</nav>
+<main>Main content</main>
+<article>Independent content</article>
+<section>Section of content</section>
+<aside>Sidebar content</aside>
+<footer>Footer content</footer>
+```
+
+**Benefits:**
+- Better SEO
+- Accessibility
+- Code readability
+- Screen readers
+
+### 47. Explain HTML Forms and Input Types.
+
+**Answer:**
+**Input Types:**
+```html
+<input type="text" />
+<input type="email" />
+<input type="password" />
+<input type="number" />
+<input type="date" />
+<input type="checkbox" />
+<input type="radio" />
+<input type="file" />
+<input type="range" />
+<input type="color" />
+```
+
+**Form Validation:**
+```html
+<form>
+    <input type="email" required />
+    <input type="number" min="0" max="100" />
+    <input type="text" pattern="[A-Za-z]{3}" />
+    <button type="submit">Submit</button>
+</form>
+```
+
+### 48. Explain CSS Preprocessors (SASS/SCSS).
+
+**Answer:**
+**Variables:**
+```scss
+$primary-color: #007bff;
+$font-size: 16px;
+
+.button {
+    color: $primary-color;
+    font-size: $font-size;
+}
+```
+
+**Nesting:**
+```scss
+.nav {
+    ul {
+        list-style: none;
+        li {
+            display: inline-block;
+        }
+    }
+}
+```
+
+**Mixins:**
+```scss
+@mixin flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    @include flex-center;
+}
+```
+
+### 49. Explain CSS Architecture (OOCSS, SMACSS, BEM).
+
+**Answer:**
+**OOCSS (Object-Oriented CSS):**
+- Separate structure from skin
+- Separate container from content
+
+**SMACSS (Scalable and Modular Architecture):**
+- Base, Layout, Module, State, Theme
+
+**BEM (Block Element Modifier):**
+```css
+.block { }
+.block__element { }
+.block--modifier { }
+```
+
+### 50. Explain Browser Rendering Process.
+
+**Answer:**
+**Steps:**
+1. **Parse HTML**: Build DOM tree
+2. **Parse CSS**: Build CSSOM tree
+3. **Render Tree**: Combine DOM + CSSOM
+4. **Layout**: Calculate positions (reflow)
+5. **Paint**: Fill pixels
+6. **Composite**: Layer composition
+
+**Optimization:**
+- Minimize reflows/repaints
+- Use transform/opacity for animations
+- Avoid layout thrashing
+
 ---
 
 This covers frontend interview questions from beginner to advanced level with comprehensive coverage.

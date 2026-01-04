@@ -1431,6 +1431,399 @@ CREATE (jane:Person {name: "Jane"})
 CREATE (john)-[:FRIENDS]->(jane)
 ```
 
+### 51. Find Second Highest Salary (Common Interview Problem).
+
+**Answer:**
+```sql
+-- Method 1: Subquery
+SELECT MAX(salary) as second_highest
+FROM employees
+WHERE salary < (SELECT MAX(salary) FROM employees);
+
+-- Method 2: LIMIT/OFFSET
+SELECT salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 1 OFFSET 1;
+
+-- Method 3: DENSE_RANK
+SELECT salary
+FROM (
+    SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) as rnk
+    FROM employees
+) ranked
+WHERE rnk = 2;
+```
+
+### 52. Find Nth Highest Salary.
+
+**Answer:**
+```sql
+-- Method 1: LIMIT/OFFSET
+SELECT salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 1 OFFSET (N - 1);
+
+-- Method 2: DENSE_RANK
+SELECT salary
+FROM (
+    SELECT salary, DENSE_RANK() OVER (ORDER BY salary DESC) as rnk
+    FROM employees
+) ranked
+WHERE rnk = N;
+```
+
+### 53. Find Employees with Same Salary.
+
+**Answer:**
+```sql
+-- Using GROUP BY
+SELECT salary, COUNT(*) as count
+FROM employees
+GROUP BY salary
+HAVING COUNT(*) > 1;
+
+-- Using Self Join
+SELECT DISTINCT e1.name, e1.salary
+FROM employees e1
+JOIN employees e2 ON e1.salary = e2.salary AND e1.id != e2.id;
+```
+
+### 54. Find Duplicate Emails.
+
+**Answer:**
+```sql
+-- Method 1: GROUP BY
+SELECT email, COUNT(*) as count
+FROM users
+GROUP BY email
+HAVING COUNT(*) > 1;
+
+-- Method 2: Window Function
+SELECT email
+FROM (
+    SELECT email, COUNT(*) OVER (PARTITION BY email) as cnt
+    FROM users
+) ranked
+WHERE cnt > 1;
+```
+
+### 55. Delete Duplicate Rows (Keep One).
+
+**Answer:**
+```sql
+-- PostgreSQL
+DELETE FROM users
+WHERE id NOT IN (
+    SELECT MIN(id)
+    FROM users
+    GROUP BY email
+);
+
+-- MySQL
+DELETE u1 FROM users u1
+INNER JOIN users u2
+WHERE u1.id > u2.id AND u1.email = u2.email;
+```
+
+### 56. Find Employees Earning More Than Their Managers.
+
+**Answer:**
+```sql
+SELECT e.name as employee, e.salary, m.name as manager, m.salary as manager_salary
+FROM employees e
+JOIN employees m ON e.manager_id = m.id
+WHERE e.salary > m.salary;
+```
+
+### 57. Find Department with Highest Average Salary.
+
+**Answer:**
+```sql
+SELECT department, AVG(salary) as avg_salary
+FROM employees
+GROUP BY department
+ORDER BY avg_salary DESC
+LIMIT 1;
+
+-- Or using window function
+SELECT department, avg_salary
+FROM (
+    SELECT department, AVG(salary) as avg_salary,
+           RANK() OVER (ORDER BY AVG(salary) DESC) as rnk
+    FROM employees
+    GROUP BY department
+) ranked
+WHERE rnk = 1;
+```
+
+### 58. Find Employees Who Never Have Projects.
+
+**Answer:**
+```sql
+-- Method 1: LEFT JOIN
+SELECT e.name
+FROM employees e
+LEFT JOIN projects p ON e.id = p.employee_id
+WHERE p.id IS NULL;
+
+-- Method 2: NOT EXISTS
+SELECT name
+FROM employees e
+WHERE NOT EXISTS (
+    SELECT 1 FROM projects p WHERE p.employee_id = e.id
+);
+
+-- Method 3: NOT IN
+SELECT name
+FROM employees
+WHERE id NOT IN (SELECT employee_id FROM projects WHERE employee_id IS NOT NULL);
+```
+
+### 59. Find Consecutive Numbers.
+
+**Answer:**
+```sql
+-- Find numbers that appear at least 3 times consecutively
+SELECT DISTINCT num as ConsecutiveNums
+FROM (
+    SELECT num,
+           LAG(num, 1) OVER (ORDER BY id) as prev,
+           LEAD(num, 1) OVER (ORDER BY id) as next
+    FROM logs
+) ranked
+WHERE num = prev AND num = next;
+```
+
+### 60. Rank Employees by Salary in Each Department.
+
+**Answer:**
+```sql
+SELECT 
+    department,
+    name,
+    salary,
+    RANK() OVER (PARTITION BY department ORDER BY salary DESC) as dept_rank,
+    DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) as dept_dense_rank
+FROM employees;
+```
+
+### 61. Find Customers Who Bought All Products.
+
+**Answer:**
+```sql
+SELECT customer_id
+FROM orders
+GROUP BY customer_id
+HAVING COUNT(DISTINCT product_id) = (
+    SELECT COUNT(DISTINCT product_id) FROM products
+);
+```
+
+### 62. Find Top 3 Salaries in Each Department.
+
+**Answer:**
+```sql
+SELECT department, name, salary
+FROM (
+    SELECT 
+        department,
+        name,
+        salary,
+        DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) as rnk
+    FROM employees
+) ranked
+WHERE rnk <= 3;
+```
+
+### 63. Swap Salary Values (Male/Female).
+
+**Answer:**
+```sql
+-- Swap male and female salary values
+UPDATE employees
+SET salary = CASE
+    WHEN sex = 'm' THEN (
+        SELECT salary FROM employees e2 
+        WHERE e2.sex = 'f' AND e2.id = employees.id
+    )
+    WHEN sex = 'f' THEN (
+        SELECT salary FROM employees e2 
+        WHERE e2.sex = 'm' AND e2.id = employees.id
+    )
+END;
+
+-- Or using temporary table
+UPDATE employees e1
+JOIN employees e2 ON e1.id = e2.id
+SET e1.salary = e2.salary, e2.salary = e1.salary
+WHERE e1.sex != e2.sex;
+```
+
+### 64. Find Employees with Top N Salaries in Each Department.
+
+**Answer:**
+```sql
+SELECT department, name, salary
+FROM (
+    SELECT 
+        department,
+        name,
+        salary,
+        ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) as rn
+    FROM employees
+) ranked
+WHERE rn <= N;
+```
+
+### 65. Calculate Running Total.
+
+**Answer:**
+```sql
+SELECT 
+    date,
+    sales,
+    SUM(sales) OVER (ORDER BY date) as running_total
+FROM sales;
+
+-- By category
+SELECT 
+    category,
+    date,
+    sales,
+    SUM(sales) OVER (PARTITION BY category ORDER BY date) as running_total
+FROM sales;
+```
+
+### 66. Find Employees with Salary Between Range.
+
+**Answer:**
+```sql
+SELECT name, salary
+FROM employees
+WHERE salary BETWEEN 50000 AND 100000;
+
+-- Or
+SELECT name, salary
+FROM employees
+WHERE salary >= 50000 AND salary <= 100000;
+```
+
+### 67. Find Employees Hired in Last N Months.
+
+**Answer:**
+```sql
+SELECT name, hire_date
+FROM employees
+WHERE hire_date >= DATE_SUB(CURRENT_DATE, INTERVAL 6 MONTH);
+
+-- PostgreSQL
+SELECT name, hire_date
+FROM employees
+WHERE hire_date >= CURRENT_DATE - INTERVAL '6 months';
+```
+
+### 68. Find Employees with No Manager (Top Level).
+
+**Answer:**
+```sql
+SELECT name
+FROM employees
+WHERE manager_id IS NULL;
+```
+
+### 69. Find Employees and Their Department Count.
+
+**Answer:**
+```sql
+SELECT 
+    e.name,
+    COUNT(DISTINCT d.id) as dept_count
+FROM employees e
+LEFT JOIN departments d ON e.department_id = d.id
+GROUP BY e.id, e.name;
+```
+
+### 70. Find Products Never Ordered.
+
+**Answer:**
+```sql
+SELECT p.name
+FROM products p
+LEFT JOIN order_items oi ON p.id = oi.product_id
+WHERE oi.product_id IS NULL;
+```
+
+### 71. Find Customers with Most Orders.
+
+**Answer:**
+```sql
+SELECT customer_id, COUNT(*) as order_count
+FROM orders
+GROUP BY customer_id
+ORDER BY order_count DESC
+LIMIT 1;
+```
+
+### 72. Find Employees with Same Name.
+
+**Answer:**
+```sql
+SELECT name, COUNT(*) as count
+FROM employees
+GROUP BY name
+HAVING COUNT(*) > 1;
+```
+
+### 73. Find Latest Record for Each Group.
+
+**Answer:**
+```sql
+-- Method 1: Window Function
+SELECT id, name, date
+FROM (
+    SELECT 
+        id, name, date,
+        ROW_NUMBER() OVER (PARTITION BY name ORDER BY date DESC) as rn
+    FROM records
+) ranked
+WHERE rn = 1;
+
+-- Method 2: Self Join
+SELECT r1.*
+FROM records r1
+LEFT JOIN records r2 ON r1.name = r2.name AND r1.date < r2.date
+WHERE r2.id IS NULL;
+```
+
+### 74. Find Employees with Maximum Salary in Each Department.
+
+**Answer:**
+```sql
+SELECT e.department, e.name, e.salary
+FROM employees e
+JOIN (
+    SELECT department, MAX(salary) as max_salary
+    FROM employees
+    GROUP BY department
+) max_sal ON e.department = max_sal.department 
+         AND e.salary = max_sal.max_salary;
+```
+
+### 75. Find Employees Who Joined in Same Month.
+
+**Answer:**
+```sql
+SELECT 
+    EXTRACT(YEAR FROM hire_date) as year,
+    EXTRACT(MONTH FROM hire_date) as month,
+    COUNT(*) as count
+FROM employees
+GROUP BY EXTRACT(YEAR FROM hire_date), EXTRACT(MONTH FROM hire_date)
+HAVING COUNT(*) > 1;
+```
+
 ---
 
 This covers database interview questions from beginner to advanced level with detailed explanations.
