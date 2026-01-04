@@ -892,6 +892,322 @@ app.use(express.static('public'));
 - Use middleware for cross-cutting concerns
 - Keep middleware focused and reusable
 
+### 31. Explain Node.js Worker Threads.
+
+**Answer:**
+Worker Threads enable CPU-intensive tasks without blocking the event loop.
+
+```javascript
+const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
+
+if (isMainThread) {
+    // Main thread
+    const worker = new Worker(__filename, {
+        workerData: { start: 0, end: 1000000 }
+    });
+    
+    worker.on('message', (result) => {
+        console.log('Result:', result);
+    });
+    
+    worker.on('error', (err) => {
+        console.error('Worker error:', err);
+    });
+} else {
+    // Worker thread
+    let sum = 0;
+    for (let i = workerData.start; i < workerData.end; i++) {
+        sum += i;
+    }
+    parentPort.postMessage(sum);
+}
+```
+
+**Use Cases:**
+- CPU-intensive computations
+- Image/video processing
+- Data parsing/transformation
+- Cryptographic operations
+
+**Differences from Child Process:**
+- Worker Threads share memory (SharedArrayBuffer)
+- Child Processes are separate processes with separate memory
+
+### 32. Explain the role of libuv in Node.js.
+
+**Answer:**
+libuv is a C library that provides asynchronous I/O operations for Node.js.
+
+**Functions:**
+- **Event Loop**: Manages async operations
+- **Thread Pool**: Handles file I/O, DNS, crypto operations
+- **Network I/O**: TCP/UDP sockets
+- **File System**: Async file operations
+- **Timers**: setTimeout, setInterval
+
+**Architecture:**
+```
+Node.js Application
+    ↓
+V8 Engine (JavaScript execution)
+    ↓
+libuv (Event Loop + Thread Pool)
+    ↓
+Operating System
+```
+
+**Thread Pool:**
+- Default: 4 threads
+- Configurable: `UV_THREADPOOL_SIZE=8`
+- Used for: fs operations, DNS lookups, crypto
+
+### 33. Explain backpressure in Node.js streams.
+
+**Answer:**
+Backpressure occurs when data production rate exceeds consumption rate.
+
+**Problem:**
+```javascript
+// Fast producer, slow consumer
+const readable = fs.createReadStream('large-file.txt');
+const writable = fs.createWriteStream('output.txt');
+
+readable.pipe(writable); // May cause memory issues
+```
+
+**Solution:**
+```javascript
+readable.on('data', (chunk) => {
+    const canContinue = writable.write(chunk);
+    if (!canContinue) {
+        readable.pause(); // Pause reading
+    }
+});
+
+writable.on('drain', () => {
+    readable.resume(); // Resume reading
+});
+```
+
+**Using pipe() (handles automatically):**
+```javascript
+readable.pipe(writable); // Automatically handles backpressure
+```
+
+### 34. Explain the DNS module in Node.js.
+
+**Answer:**
+DNS module provides domain name resolution.
+
+```javascript
+const dns = require('dns');
+
+// Lookup (uses OS DNS)
+dns.lookup('example.com', (err, address, family) => {
+    console.log('Address:', address);
+    console.log('Family:', family); // 4 (IPv4) or 6 (IPv6)
+});
+
+// Resolve (uses DNS protocol)
+dns.resolve4('example.com', (err, addresses) => {
+    console.log('IPv4 addresses:', addresses);
+});
+
+dns.resolve('example.com', 'MX', (err, records) => {
+    console.log('MX records:', records);
+});
+
+// Reverse lookup
+dns.reverse('8.8.8.8', (err, hostnames) => {
+    console.log('Hostnames:', hostnames);
+});
+
+// Promises API
+const { promises: dnsPromises } = require('dns');
+const address = await dnsPromises.lookup('example.com');
+```
+
+### 35. Explain the util module in Node.js.
+
+**Answer:**
+util module provides utility functions.
+
+```javascript
+const util = require('util');
+
+// promisify - convert callback to promise
+const fs = require('fs');
+const readFile = util.promisify(fs.readFile);
+
+async function example() {
+    const data = await readFile('file.txt', 'utf8');
+    console.log(data);
+}
+
+// callbackify - convert promise to callback
+const callbackFn = util.callbackify(asyncFn);
+callbackFn((err, result) => {
+    // Handle result
+});
+
+// inspect - string representation
+console.log(util.inspect(obj, { depth: null, colors: true }));
+
+// format - printf-style formatting
+util.format('%s:%s', 'foo', 'bar'); // 'foo:bar'
+
+// inherits - prototype inheritance
+util.inherits(Child, Parent);
+
+// isDeepStrictEqual - deep equality
+util.isDeepStrictEqual(obj1, obj2);
+```
+
+### 36. Explain the purpose of package.json in Node.js.
+
+**Answer:**
+package.json is the manifest file for Node.js projects.
+
+**Key Fields:**
+```json
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "description": "App description",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": ["node", "express"],
+  "author": "Your Name",
+  "license": "MIT"
+}
+```
+
+**Scripts:**
+- `npm start`: Runs "start" script
+- `npm test`: Runs "test" script
+- `npm run <script>`: Runs custom script
+
+**Dependencies:**
+- `dependencies`: Production dependencies
+- `devDependencies`: Development-only dependencies
+- `peerDependencies`: Required by host package
+- `optionalDependencies`: Optional dependencies
+
+### 37. Explain the difference between process.nextTick(), setImmediate(), and setTimeout().
+
+**Answer:**
+**Execution Order:**
+1. `process.nextTick()` - Highest priority (microtask queue)
+2. `setImmediate()` - Check phase of event loop
+3. `setTimeout()` - Timers phase of event loop
+
+```javascript
+console.log('1');
+
+setTimeout(() => console.log('2'), 0);
+setImmediate(() => console.log('3'));
+process.nextTick(() => console.log('4'));
+
+console.log('5');
+
+// Output: 1, 5, 4, 2, 3
+```
+
+**process.nextTick():**
+- Executes before event loop continues
+- Can starve event loop if used excessively
+- Use for: cleanup, error handling
+
+**setImmediate():**
+- Executes in Check phase
+- After I/O callbacks
+- Use for: non-blocking operations
+
+**setTimeout():**
+- Executes in Timers phase
+- Minimum delay: 1ms (even if 0)
+- Use for: delayed execution
+
+### 38. Explain how to handle large file uploads in Node.js.
+
+**Answer:**
+Use streams and multipart form handling.
+
+```javascript
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+// Configure storage
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
+
+// File size limit
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Invalid file type'));
+    }
+});
+
+// Single file
+app.post('/upload', upload.single('file'), (req, res) => {
+    res.json({ file: req.file });
+});
+
+// Multiple files
+app.post('/upload', upload.array('files', 10), (req, res) => {
+    res.json({ files: req.files });
+});
+```
+
+**Streaming Large Files:**
+```javascript
+const busboy = require('busboy');
+
+app.post('/upload', (req, res) => {
+    const bb = busboy({ headers: req.headers });
+    
+    bb.on('file', (name, file, info) => {
+        const saveTo = path.join(__dirname, 'uploads', info.filename);
+        file.pipe(fs.createWriteStream(saveTo));
+    });
+    
+    bb.on('finish', () => {
+        res.json({ success: true });
+    });
+    
+    req.pipe(bb);
+});
+```
+
 ---
 
 This covers Node.js and Express.js interview questions from beginner to advanced level with detailed explanations and code examples.

@@ -673,6 +673,242 @@ export default function Error({ error, reset }) {
 }
 ```
 
+### 26. Explain Next.js API routes best practices.
+
+**Answer:**
+API routes provide backend functionality.
+
+**Basic Route:**
+```javascript
+// pages/api/users.js
+export default function handler(req, res) {
+    if (req.method === 'GET') {
+        res.status(200).json({ users: [] });
+    } else {
+        res.setHeader('Allow', ['GET']);
+        res.status(405).end(`Method ${req.method} Not Allowed`);
+    }
+}
+```
+
+**Dynamic Routes:**
+```javascript
+// pages/api/users/[id].js
+export default function handler(req, res) {
+    const { id } = req.query;
+    
+    if (req.method === 'GET') {
+        res.status(200).json({ id, name: 'User' });
+    }
+}
+```
+
+**Best Practices:**
+- Validate input
+- Handle errors properly
+- Use proper HTTP methods
+- Set appropriate headers
+- Implement authentication
+- Rate limiting
+
+**Example:**
+```javascript
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100
+});
+
+export default async function handler(req, res) {
+    await limiter(req, res);
+    
+    try {
+        const data = await fetchData();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+```
+
+### 27. Explain Next.js middleware and edge functions.
+
+**Answer:**
+Middleware runs before request completes.
+
+**Middleware:**
+```javascript
+// middleware.js
+export function middleware(request) {
+    // Redirect
+    if (request.nextUrl.pathname === '/old') {
+        return NextResponse.redirect(new URL('/new', request.url));
+    }
+    
+    // Add headers
+    const response = NextResponse.next();
+    response.headers.set('x-custom-header', 'value');
+    return response;
+}
+
+// Matcher
+export const config = {
+    matcher: '/about/:path*',
+};
+```
+
+**Edge Functions:**
+```javascript
+// pages/api/edge.js
+export const config = {
+    runtime: 'edge',
+};
+
+export default function handler(req) {
+    return new Response('Hello from Edge!', {
+        headers: { 'content-type': 'text/plain' },
+    });
+}
+```
+
+**Use Cases:**
+- Authentication
+- Redirects
+- A/B testing
+- Geolocation
+- Request modification
+
+### 28. Explain Next.js optimization techniques.
+
+**Answer:**
+**Image Optimization:**
+```jsx
+import Image from 'next/image';
+
+<Image
+    src="/image.jpg"
+    width={500}
+    height={300}
+    alt="Description"
+    priority // Load immediately
+    placeholder="blur"
+    blurDataURL="..."
+/>
+```
+
+**Font Optimization:**
+```javascript
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
+
+export default function Layout({ children }) {
+    return (
+        <div className={inter.className}>
+            {children}
+        </div>
+    );
+}
+```
+
+**Script Optimization:**
+```jsx
+import Script from 'next/script';
+
+<Script
+    src="https://example.com/script.js"
+    strategy="lazyOnload"
+    onLoad={() => console.log('Loaded')}
+/>
+```
+
+**Bundle Analysis:**
+```bash
+npm install @next/bundle-analyzer
+```
+
+### 29. Explain Next.js deployment strategies.
+
+**Answer:**
+**Vercel (Recommended):**
+```bash
+vercel
+```
+
+**Docker:**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+**Static Export:**
+```javascript
+// next.config.js
+module.exports = {
+    output: 'export',
+    images: {
+        unoptimized: true
+    }
+};
+```
+
+**Environment Variables:**
+```javascript
+// .env.local
+DATABASE_URL=...
+NEXT_PUBLIC_API_URL=...
+
+// Usage
+const dbUrl = process.env.DATABASE_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+```
+
+### 30. Explain Next.js testing strategies.
+
+**Answer:**
+**Unit Testing:**
+```javascript
+import { render, screen } from '@testing-library/react';
+import Home from '../pages/index';
+
+test('renders homepage', () => {
+    render(<Home />);
+    expect(screen.getByText('Welcome')).toBeInTheDocument();
+});
+```
+
+**API Route Testing:**
+```javascript
+import { createMocks } from 'node-mocks-http';
+import handler from '../pages/api/users';
+
+test('GET /api/users', async () => {
+    const { req, res } = createMocks({
+        method: 'GET'
+    });
+    
+    await handler(req, res);
+    expect(res._getStatusCode()).toBe(200);
+});
+```
+
+**E2E Testing:**
+```javascript
+import { test, expect } from '@playwright/test';
+
+test('homepage loads', async ({ page }) => {
+    await page.goto('http://localhost:3000');
+    await expect(page).toHaveTitle(/Next.js/);
+});
+```
+
 ---
 
 This covers Next.js interview questions from beginner to advanced level with detailed explanations and code examples.

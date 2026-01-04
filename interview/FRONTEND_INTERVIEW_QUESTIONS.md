@@ -593,6 +593,241 @@ pc.ontrack = (event) => {
 };
 ```
 
+### 26. Explain browser rendering pipeline and optimization.
+
+**Answer:**
+**Rendering Pipeline:**
+1. **Parse HTML** → DOM tree
+2. **Parse CSS** → CSSOM tree
+3. **Combine** → Render tree
+4. **Layout** → Calculate positions
+5. **Paint** → Fill pixels
+6. **Composite** → Layer composition
+
+**Optimization:**
+```javascript
+// Use requestAnimationFrame for animations
+function animate() {
+    // Animation code
+    requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+
+// Use transform/opacity (compositor-only properties)
+// Bad: Changes layout
+element.style.left = '100px';
+
+// Good: Only composite
+element.style.transform = 'translateX(100px)';
+
+// Debounce scroll/resize handlers
+const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+};
+
+window.addEventListener('scroll', debounce(handleScroll, 100));
+```
+
+**Critical Rendering Path:**
+- Minimize render-blocking resources
+- Inline critical CSS
+- Defer non-critical JavaScript
+- Optimize images
+
+### 27. Explain Service Workers and offline functionality.
+
+**Answer:**
+Service Workers enable offline functionality and background processing.
+
+**Registration:**
+```javascript
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+            console.log('SW registered:', registration);
+        })
+        .catch(error => {
+            console.log('SW registration failed:', error);
+        });
+}
+```
+
+**Service Worker:**
+```javascript
+// sw.js
+const CACHE_NAME = 'v1';
+const urlsToCache = [
+    '/',
+    '/styles.css',
+    '/script.js'
+];
+
+// Install
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+    );
+});
+
+// Fetch
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                // Return cached version or fetch
+                return response || fetch(event.request);
+            })
+    );
+});
+```
+
+**Cache Strategies:**
+- **Cache First**: Check cache, then network
+- **Network First**: Try network, fallback to cache
+- **Stale While Revalidate**: Return cache, update in background
+
+### 28. Explain Web Vitals and performance metrics.
+
+**Answer:**
+Web Vitals are key user experience metrics.
+
+**Core Web Vitals:**
+1. **LCP (Largest Contentful Paint)**: < 2.5s
+   - Time to render largest content
+2. **FID (First Input Delay)**: < 100ms
+   - Time from first interaction to response
+3. **CLS (Cumulative Layout Shift)**: < 0.1
+   - Visual stability measure
+
+**Measuring:**
+```javascript
+import { getCLS, getFID, getLCP } from 'web-vitals';
+
+getCLS(console.log);
+getFID(console.log);
+getLCP(console.log);
+
+// Or with analytics
+function sendToAnalytics(metric) {
+    // Send to analytics service
+    analytics.track('web-vital', {
+        name: metric.name,
+        value: metric.value,
+        id: metric.id
+    });
+}
+
+getCLS(sendToAnalytics);
+getFID(sendToAnalytics);
+getLCP(sendToAnalytics);
+```
+
+**Other Metrics:**
+- **TTFB (Time to First Byte)**: < 800ms
+- **FCP (First Contentful Paint)**: < 1.8s
+- **TBT (Total Blocking Time)**: < 200ms
+
+### 29. Explain frontend build tools comparison (Webpack vs Vite vs Parcel).
+
+**Answer:**
+**Webpack:**
+- Mature, extensive ecosystem
+- Complex configuration
+- Slower dev server
+- Bundle-based
+
+**Vite:**
+- Fast HMR (Hot Module Replacement)
+- Native ES modules
+- Simple configuration
+- Faster builds
+
+**Parcel:**
+- Zero configuration
+- Fast builds
+- Built-in optimizations
+- Less flexible
+
+**Comparison:**
+```javascript
+// Webpack config
+module.exports = {
+    entry: './src/index.js',
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: 'bundle.js'
+    },
+    module: {
+        rules: [
+            { test: /\.js$/, use: 'babel-loader' }
+        ]
+    }
+};
+
+// Vite config (simpler)
+export default {
+    build: {
+        outDir: 'dist'
+    }
+};
+```
+
+### 30. Explain frontend state management patterns.
+
+**Answer:**
+**Local State:**
+```javascript
+const [count, setCount] = useState(0);
+```
+
+**Context API:**
+```javascript
+const ThemeContext = createContext();
+
+function ThemeProvider({ children }) {
+    const [theme, setTheme] = useState('light');
+    return (
+        <ThemeContext.Provider value={{ theme, setTheme }}>
+            {children}
+        </ThemeContext.Provider>
+    );
+}
+```
+
+**Redux Pattern:**
+```javascript
+// Actions
+const increment = () => ({ type: 'INCREMENT' });
+
+// Reducer
+const counter = (state = 0, action) => {
+    switch (action.type) {
+        case 'INCREMENT':
+            return state + 1;
+        default:
+            return state;
+    }
+};
+
+// Store
+const store = createStore(counter);
+```
+
+**Zustand (Lightweight):**
+```javascript
+import create from 'zustand';
+
+const useStore = create(set => ({
+    count: 0,
+    increment: () => set(state => ({ count: state.count + 1 }))
+}));
+```
+
 ---
 
 This covers frontend interview questions from beginner to advanced level with comprehensive coverage.

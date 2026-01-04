@@ -1105,6 +1105,225 @@ Promise.race([promise1, promise2])
     .then(result => console.log('First:', result));
 ```
 
+### 34. Explain JavaScript memory management and garbage collection.
+
+**Answer:**
+JavaScript uses automatic garbage collection.
+
+**Memory Lifecycle:**
+1. **Allocation**: Memory allocated when creating objects
+2. **Use**: Memory used by program
+3. **Release**: Garbage collector frees unused memory
+
+**Garbage Collection Algorithms:**
+
+**Mark-and-Sweep:**
+- Marks reachable objects
+- Sweeps unmarked objects
+- Most common algorithm
+
+**Reference Counting:**
+- Counts references to objects
+- Frees when count reaches zero
+- Problem: Circular references
+
+**Memory Leaks:**
+```javascript
+// Global variables
+window.data = largeArray; // Never garbage collected
+
+// Closures holding references
+function outer() {
+    const largeData = new Array(1000000).fill(0);
+    return function inner() {
+        // largeData kept in memory
+        console.log('inner');
+    };
+}
+
+// Event listeners
+element.addEventListener('click', handler);
+// Remove: element.removeEventListener('click', handler);
+
+// Timers
+const timer = setInterval(() => {}, 1000);
+// Clear: clearInterval(timer);
+```
+
+**Best Practices:**
+- Avoid global variables
+- Remove event listeners
+- Clear timers
+- Use WeakMap/WeakSet for weak references
+
+### 35. Explain JavaScript module systems (CommonJS, ES6, AMD).
+
+**Answer:**
+**CommonJS (Node.js):**
+```javascript
+// Export
+module.exports = {
+    add: (a, b) => a + b,
+    subtract: (a, b) => a - b
+};
+
+// Or
+exports.add = (a, b) => a + b;
+
+// Import
+const { add, subtract } = require('./math');
+const math = require('./math');
+```
+
+**ES6 Modules:**
+```javascript
+// Export
+export const add = (a, b) => a + b;
+export default function subtract(a, b) { return a - b; }
+
+// Import
+import { add } from './math.js';
+import subtract from './math.js';
+import * as math from './math.js';
+```
+
+**AMD (Asynchronous Module Definition):**
+```javascript
+// Define
+define(['dependency1', 'dependency2'], function(dep1, dep2) {
+    return {
+        method: function() {}
+    };
+});
+
+// Require
+require(['module'], function(module) {
+    module.method();
+});
+```
+
+**Differences:**
+- **CommonJS**: Synchronous, runtime, Node.js
+- **ES6**: Static, compile-time, browser/Node.js
+- **AMD**: Asynchronous, browser (RequireJS)
+
+### 36. Explain JavaScript proxy and reflect APIs.
+
+**Answer:**
+**Proxy:**
+Proxy wraps object to intercept operations.
+
+```javascript
+const target = { name: 'John', age: 30 };
+
+const handler = {
+    get(target, prop) {
+        console.log(`Getting ${prop}`);
+        return target[prop];
+    },
+    set(target, prop, value) {
+        console.log(`Setting ${prop} to ${value}`);
+        target[prop] = value;
+        return true;
+    },
+    has(target, prop) {
+        return prop in target;
+    },
+    deleteProperty(target, prop) {
+        delete target[prop];
+        return true;
+    }
+};
+
+const proxy = new Proxy(target, handler);
+proxy.name; // Logs: Getting name
+proxy.age = 31; // Logs: Setting age to 31
+```
+
+**Use Cases:**
+- Validation
+- Logging
+- Default values
+- Virtual properties
+
+**Reflect:**
+Reflect provides methods for proxy operations.
+
+```javascript
+const obj = { name: 'John' };
+
+// Reflect methods mirror proxy traps
+Reflect.get(obj, 'name'); // 'John'
+Reflect.set(obj, 'age', 30); // true
+Reflect.has(obj, 'name'); // true
+Reflect.deleteProperty(obj, 'name'); // true
+Reflect.ownKeys(obj); // ['age']
+```
+
+### 37. Explain JavaScript iterators and generators.
+
+**Answer:**
+**Iterators:**
+Objects that implement iterator protocol.
+
+```javascript
+const iterable = {
+    [Symbol.iterator]() {
+        let count = 0;
+        return {
+            next() {
+                if (count < 3) {
+                    return { value: count++, done: false };
+                }
+                return { done: true };
+            }
+        };
+    }
+};
+
+for (const value of iterable) {
+    console.log(value); // 0, 1, 2
+}
+```
+
+**Generators:**
+Functions that return generator objects.
+
+```javascript
+function* numberGenerator() {
+    yield 1;
+    yield 2;
+    yield 3;
+}
+
+const gen = numberGenerator();
+console.log(gen.next()); // { value: 1, done: false }
+console.log(gen.next()); // { value: 2, done: false }
+console.log(gen.next()); // { value: 3, done: false }
+console.log(gen.next()); // { done: true }
+```
+
+**Generator Use Cases:**
+```javascript
+// Infinite sequence
+function* fibonacci() {
+    let [prev, curr] = [0, 1];
+    while (true) {
+        yield curr;
+        [prev, curr] = [curr, prev + curr];
+    }
+}
+
+// Lazy evaluation
+function* filter(iterable, predicate) {
+    for (const item of iterable) {
+        if (predicate(item)) {
+            yield item;
+        }
+    }
+}
+```
+
 ---
 
 This covers JavaScript interview questions from beginner to advanced level with detailed explanations and code examples.

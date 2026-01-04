@@ -799,6 +799,215 @@ function handle(result: Result) {
 }
 ```
 
+### 31. Explain TypeScript utility types in detail.
+
+**Answer:**
+Utility types transform existing types.
+
+**Partial:**
+```typescript
+interface User {
+    name: string;
+    age: number;
+    email: string;
+}
+
+type PartialUser = Partial<User>;
+// { name?: string; age?: number; email?: string; }
+```
+
+**Required:**
+```typescript
+type RequiredUser = Required<PartialUser>;
+// All properties required
+```
+
+**Readonly:**
+```typescript
+type ReadonlyUser = Readonly<User>;
+// All properties readonly
+```
+
+**Pick:**
+```typescript
+type UserName = Pick<User, 'name' | 'email'>;
+// { name: string; email: string; }
+```
+
+**Omit:**
+```typescript
+type UserWithoutEmail = Omit<User, 'email'>;
+// { name: string; age: number; }
+```
+
+**Record:**
+```typescript
+type UserMap = Record<string, User>;
+// { [key: string]: User; }
+```
+
+**Exclude/Extract:**
+```typescript
+type T1 = Exclude<'a' | 'b' | 'c', 'a'>; // 'b' | 'c'
+type T2 = Extract<'a' | 'b' | 'c', 'a' | 'd'>; // 'a'
+```
+
+**NonNullable:**
+```typescript
+type T = NonNullable<string | null | undefined>; // string
+```
+
+### 32. Explain TypeScript conditional types.
+
+**Answer:**
+Conditional types select types based on conditions.
+
+```typescript
+type IsArray<T> = T extends Array<any> ? true : false;
+
+type T1 = IsArray<string[]>; // true
+type T2 = IsArray<string>; // false
+```
+
+**Infer Keyword:**
+```typescript
+type ArrayElementType<T> = T extends Array<infer U> ? U : never;
+
+type T1 = ArrayElementType<string[]>; // string
+type T2 = ArrayElementType<number[]>; // number
+```
+
+**Flatten Array:**
+```typescript
+type Flatten<T> = T extends Array<infer U> ? Flatten<U> : T;
+
+type T1 = Flatten<string[][]>; // string
+type T2 = Flatten<number[][][]>; // number
+```
+
+**Return Type:**
+```typescript
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never;
+
+type T = ReturnType<() => string>; // string
+```
+
+### 33. Explain TypeScript template literal types.
+
+**Answer:**
+Template literal types create string literal types.
+
+```typescript
+type EventName<T extends string> = `on${Capitalize<T>}`;
+
+type ClickEvent = EventName<'click'>; // 'onClick'
+type ChangeEvent = EventName<'change'>; // 'onChange'
+```
+
+**String Manipulation:**
+```typescript
+type Uppercase<S extends string> = // Built-in
+type Lowercase<S extends string> = // Built-in
+type Capitalize<S extends string> = // Built-in
+type Uncapitalize<S extends string> = // Built-in
+```
+
+**Path Types:**
+```typescript
+type Path<T> = T extends object
+    ? {
+        [K in keyof T]: K extends string
+            ? `${K}` | `${K}.${Path<T[K]>}`
+            : never;
+    }[keyof T]
+    : never;
+
+type UserPaths = Path<{ name: string; address: { city: string } }>;
+// 'name' | 'address' | 'address.city'
+```
+
+### 34. Explain TypeScript declaration merging.
+
+**Answer:**
+Declaration merging combines multiple declarations.
+
+**Interface Merging:**
+```typescript
+interface User {
+    name: string;
+}
+
+interface User {
+    age: number;
+}
+
+// Merged: { name: string; age: number; }
+```
+
+**Namespace Merging:**
+```typescript
+namespace MyLib {
+    export function func1() {}
+}
+
+namespace MyLib {
+    export function func2() {}
+}
+
+// Both func1 and func2 available
+```
+
+**Module Augmentation:**
+```typescript
+// Original module
+declare module 'express' {
+    interface Request {
+        user?: User;
+    }
+}
+
+// Usage
+app.use((req, res) => {
+    req.user; // TypeScript knows about this
+});
+```
+
+### 35. Explain TypeScript performance and compilation options.
+
+**Answer:**
+**Compiler Options:**
+```json
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "ESNext",
+        "lib": ["ES2020", "DOM"],
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "incremental": true,
+        "tsBuildInfoFile": ".tsbuildinfo"
+    }
+}
+```
+
+**Performance Tips:**
+- Use `incremental` for faster rebuilds
+- Use `skipLibCheck` to skip type checking libraries
+- Use project references for large codebases
+- Use `isolatedModules` for faster compilation
+
+**Project References:**
+```json
+{
+    "references": [
+        { "path": "./shared" },
+        { "path": "./utils" }
+    ]
+}
+```
+
 ---
 
 This covers TypeScript interview questions from beginner to advanced level with detailed explanations and code examples.

@@ -713,6 +713,257 @@ Producer → Task Queue → Workers → Result Store
 - Manual invalidation
 - Version-based
 
+### 26. Design a distributed task scheduler.
+
+**Answer:**
+System to schedule and execute tasks across distributed workers.
+
+**Requirements:**
+- Schedule tasks with delay/cron
+- Execute tasks reliably
+- Scale horizontally
+- Handle failures
+
+**Architecture:**
+```
+Client → API Gateway → Task Scheduler
+                          ↓
+                    Message Queue (RabbitMQ/Kafka)
+                          ↓
+                    Worker Pool
+                          ↓
+                    Database (PostgreSQL)
+```
+
+**Components:**
+1. **Scheduler Service**: Accepts tasks, schedules execution
+2. **Message Queue**: Stores pending tasks
+3. **Worker Pool**: Executes tasks
+4. **Database**: Stores task metadata, history
+5. **Monitoring**: Track task status, failures
+
+**Task Storage:**
+```sql
+CREATE TABLE tasks (
+    id UUID PRIMARY KEY,
+    type VARCHAR(50),
+    payload JSONB,
+    scheduled_at TIMESTAMP,
+    status VARCHAR(20),
+    retry_count INT,
+    created_at TIMESTAMP
+);
+```
+
+**Scheduling:**
+- **Delayed Tasks**: Store with scheduled_at timestamp
+- **Cron Tasks**: Parse cron expression, calculate next run
+- **Periodic Polling**: Workers poll for due tasks
+
+**Reliability:**
+- Idempotent tasks
+- Retry mechanism
+- Dead letter queue
+- Task deduplication
+
+### 27. Design a real-time analytics system.
+
+**Answer:**
+System to process and analyze events in real-time.
+
+**Requirements:**
+- Low latency (< 100ms)
+- High throughput (millions events/sec)
+- Real-time dashboards
+- Historical analysis
+
+**Architecture:**
+```
+Events → Kafka → Stream Processor (Flink/Storm)
+                    ↓
+            Time-Series DB (InfluxDB)
+                    ↓
+            Dashboard (Grafana)
+```
+
+**Components:**
+1. **Event Ingestion**: Kafka for event streaming
+2. **Stream Processing**: Flink/Storm for real-time processing
+3. **Storage**: 
+   - Time-series DB for metrics
+   - Data warehouse for historical
+4. **Visualization**: Grafana/Kibana dashboards
+
+**Processing:**
+- **Windowing**: Sliding/tumbling windows
+- **Aggregation**: Count, sum, average
+- **Filtering**: Filter relevant events
+- **Enrichment**: Add context to events
+
+**Scaling:**
+- Partition events by key
+- Parallel processing
+- Horizontal scaling
+
+### 28. Design a configuration management service.
+
+**Answer:**
+Centralized service for application configuration.
+
+**Requirements:**
+- Centralized config storage
+- Dynamic updates
+- Versioning
+- Environment-specific configs
+- Access control
+
+**Architecture:**
+```
+Apps → Config Service API
+          ↓
+    Database (PostgreSQL)
+          ↓
+    Cache (Redis)
+          ↓
+    Notification (WebSocket/Pub-Sub)
+```
+
+**Features:**
+- **Hierarchical Config**: App → Environment → Feature
+- **Versioning**: Track config changes
+- **Rollback**: Revert to previous version
+- **Validation**: Validate config before applying
+- **Notifications**: Notify apps of changes
+
+**Implementation:**
+```javascript
+// Config structure
+{
+    "app": "user-service",
+    "environment": "production",
+    "config": {
+        "database": {
+            "host": "db.example.com",
+            "port": 5432
+        },
+        "features": {
+            "newFeature": true
+        }
+    },
+    "version": 1,
+    "updatedAt": "2024-01-01T00:00:00Z"
+}
+```
+
+**Caching:**
+- Cache configs in Redis
+- TTL-based expiration
+- Invalidate on updates
+
+### 29. Design a distributed lock service.
+
+**Answer:**
+Service to coordinate access to shared resources.
+
+**Requirements:**
+- Mutual exclusion
+- Deadlock prevention
+- Fault tolerance
+- Low latency
+
+**Implementation Options:**
+
+**1. Redis:**
+```javascript
+// Acquire lock
+const lock = await redis.set(
+    'lock:resource',
+    'owner-id',
+    'EX', 10,  // Expire in 10 seconds
+    'NX'      // Only if not exists
+);
+
+// Release lock
+if (await redis.get('lock:resource') === 'owner-id') {
+    await redis.del('lock:resource');
+}
+```
+
+**2. ZooKeeper:**
+- Ephemeral nodes
+- Sequential nodes
+- Watch mechanism
+
+**3. Database:**
+```sql
+-- Acquire lock
+INSERT INTO locks (resource, owner, expires_at)
+VALUES ('resource-id', 'owner-id', NOW() + INTERVAL '10 seconds')
+ON CONFLICT (resource) DO NOTHING;
+
+-- Release lock
+DELETE FROM locks WHERE resource = 'resource-id' AND owner = 'owner-id';
+```
+
+**Best Practices:**
+- Set expiration time
+- Use unique owner ID
+- Implement renewal mechanism
+- Handle failures gracefully
+
+### 30. Design a multi-tenant SaaS system.
+
+**Answer:**
+System serving multiple customers (tenants) from single codebase.
+
+**Tenancy Models:**
+
+**1. Database per Tenant:**
+- Isolation: Complete
+- Scalability: High
+- Cost: High
+
+**2. Shared Database, Separate Schemas:**
+- Isolation: Good
+- Scalability: Medium
+- Cost: Medium
+
+**3. Shared Database, Shared Schema:**
+- Isolation: Application-level
+- Scalability: High
+- Cost: Low
+
+**Architecture:**
+```
+Request → Tenant Resolver → Tenant Context
+                              ↓
+                        Application Logic
+                              ↓
+                        Tenant-Aware DB
+```
+
+**Tenant Identification:**
+- Subdomain: `tenant1.app.com`
+- Path: `app.com/tenant1/...`
+- Header: `X-Tenant-ID`
+
+**Data Isolation:**
+```sql
+-- Row-level security
+CREATE POLICY tenant_isolation ON users
+    USING (tenant_id = current_setting('app.tenant_id')::uuid);
+
+-- Query
+SET app.tenant_id = 'tenant-uuid';
+SELECT * FROM users;  -- Only returns tenant's users
+```
+
+**Features:**
+- Tenant-specific configuration
+- Custom branding
+- Usage quotas
+- Billing per tenant
+
 ---
 
 This covers system design interview questions from beginner to advanced level with detailed explanations and architectures.

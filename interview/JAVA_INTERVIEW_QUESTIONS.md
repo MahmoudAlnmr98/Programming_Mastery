@@ -946,6 +946,259 @@ String formatted = dateTime.format(formatter);
 LocalDateTime parsed = LocalDateTime.parse("2024-01-15 10:30:00", formatter);
 ```
 
+### 31. Explain Spring MVC architecture.
+
+**Answer:**
+Spring MVC is a web framework implementing Model-View-Controller pattern.
+
+**Components:**
+1. **DispatcherServlet**: Front controller, routes requests
+2. **HandlerMapping**: Maps URLs to controllers
+3. **Controller**: Handles requests, returns model/view
+4. **ViewResolver**: Resolves view names to actual views
+5. **Model**: Data passed to view
+
+**Flow:**
+```
+Request → DispatcherServlet → HandlerMapping → Controller
+                                                      ↓
+Response ← ViewResolver ← View ← Model ← Controller
+```
+
+**Example:**
+```java
+@Controller
+@RequestMapping("/users")
+public class UserController {
+    
+    @Autowired
+    private UserService userService;
+    
+    @GetMapping("/{id}")
+    public String getUser(@PathVariable Long id, Model model) {
+        User user = userService.findById(id);
+        model.addAttribute("user", user);
+        return "user-detail"; // View name
+    }
+    
+    @PostMapping
+    @ResponseBody
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        User created = userService.save(user);
+        return ResponseEntity.ok(created);
+    }
+}
+```
+
+**Configuration:**
+```java
+@Configuration
+@EnableWebMvc
+public class WebConfig implements WebMvcConfigurer {
+    @Override
+    public void configureViewResolvers(ViewResolverRegistry registry) {
+        registry.jsp("/WEB-INF/views/", ".jsp");
+    }
+}
+```
+
+### 32. Explain Spring Bean lifecycle and scopes.
+
+**Answer:**
+**Bean Lifecycle:**
+1. Instantiation
+2. Populate properties
+3. BeanNameAware.setBeanName()
+4. BeanFactoryAware.setBeanFactory()
+5. ApplicationContextAware.setApplicationContext()
+6. @PostConstruct
+7. InitializingBean.afterPropertiesSet()
+8. Custom init method
+9. Bean ready
+10. @PreDestroy
+11. DisposableBean.destroy()
+12. Custom destroy method
+
+**Bean Scopes:**
+- **singleton**: One instance per container (default)
+- **prototype**: New instance each time
+- **request**: One per HTTP request (web)
+- **session**: One per HTTP session (web)
+- **application**: One per ServletContext (web)
+
+```java
+@Component
+@Scope("prototype")
+public class PrototypeBean {
+    // New instance each time
+}
+
+@Component
+@Scope("request")
+public class RequestBean {
+    // One per HTTP request
+}
+```
+
+### 33. Explain Inner Beans in Spring.
+
+**Answer:**
+Inner beans are beans defined within another bean's definition.
+
+**XML Configuration:**
+```xml
+<bean id="outerBean" class="com.example.OuterBean">
+    <property name="innerBean">
+        <bean class="com.example.InnerBean">
+            <property name="name" value="Inner"/>
+        </bean>
+    </property>
+</bean>
+```
+
+**Java Configuration:**
+```java
+@Configuration
+public class AppConfig {
+    
+    @Bean
+    public OuterBean outerBean() {
+        OuterBean outer = new OuterBean();
+        outer.setInnerBean(innerBean()); // Inner bean
+        return outer;
+    }
+    
+    @Bean
+    public InnerBean innerBean() {
+        return new InnerBean("Inner");
+    }
+}
+```
+
+**Characteristics:**
+- No ID/name (anonymous)
+- Cannot be accessed outside parent bean
+- Cannot be injected elsewhere
+- Useful for one-time use
+
+### 34. Explain the volatile keyword in detail.
+
+**Answer:**
+`volatile` ensures visibility of variable changes across threads.
+
+**Without volatile:**
+```java
+class Shared {
+    private boolean flag = false; // May be cached
+    
+    public void setFlag() {
+        flag = true; // May not be visible to other threads
+    }
+    
+    public boolean getFlag() {
+        return flag; // May read stale value
+    }
+}
+```
+
+**With volatile:**
+```java
+class Shared {
+    private volatile boolean flag = false; // Always reads from main memory
+    
+    public void setFlag() {
+        flag = true; // Immediately visible to all threads
+    }
+    
+    public boolean getFlag() {
+        return flag; // Always reads from main memory
+    }
+}
+```
+
+**Properties:**
+- **Visibility**: Changes visible to all threads
+- **No Atomicity**: Not atomic for compound operations
+- **No Ordering**: Doesn't provide ordering guarantees
+
+**Use Cases:**
+- Status flags
+- Shutdown signals
+- Single-writer scenarios
+
+**Limitations:**
+```java
+// NOT atomic - needs synchronization
+private volatile int count = 0;
+
+public void increment() {
+    count++; // Read-modify-write (not atomic)
+}
+
+// Solution: Use AtomicInteger
+private AtomicInteger count = new AtomicInteger(0);
+
+public void increment() {
+    count.incrementAndGet(); // Atomic
+}
+```
+
+### 35. Explain the difference between abstract class and interface in Java.
+
+**Answer:**
+**Abstract Class:**
+- Can have instance variables
+- Can have constructors
+- Can have concrete methods
+- Can have abstract methods
+- Single inheritance
+- Can have any access modifier
+
+**Interface:**
+- Only constants (public static final)
+- No constructors
+- Can have default methods (Java 8+)
+- Can have static methods (Java 8+)
+- Can have private methods (Java 9+)
+- Multiple inheritance
+- All methods public (unless private)
+
+```java
+// Abstract class
+abstract class Animal {
+    protected String name; // Instance variable
+    
+    public Animal(String name) { // Constructor
+        this.name = name;
+    }
+    
+    public void eat() { // Concrete method
+        System.out.println(name + " is eating");
+    }
+    
+    abstract void makeSound(); // Abstract method
+}
+
+// Interface
+interface Flyable {
+    int MAX_HEIGHT = 1000; // Constant
+    
+    void fly(); // Abstract method
+    
+    default void land() { // Default method (Java 8+)
+        System.out.println("Landing");
+    }
+    
+    static void info() { // Static method (Java 8+)
+        System.out.println("Flying interface");
+    }
+}
+```
+
+**When to use:**
+- **Abstract Class**: Share code, common state
+- **Interface**: Define contract, multiple inheritance
+
 ---
 
 This covers Java interview questions from beginner to advanced level. Each answer includes code examples and explanations.

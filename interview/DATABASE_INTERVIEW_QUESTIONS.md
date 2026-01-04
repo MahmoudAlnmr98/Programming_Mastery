@@ -625,6 +625,181 @@ jdbc:mysql://host:port/database?user=user&password=pass
 - **In Transit**: SSL/TLS for connections
 - **Application**: Encrypt sensitive data
 
+### 29. Explain database connection string best practices.
+
+**Answer:**
+Connection strings contain database connection information.
+
+**Format:**
+```
+postgresql://username:password@host:port/database?params
+mysql://user:pass@localhost:3306/dbname
+mongodb://user:pass@host:27017/dbname
+```
+
+**Best Practices:**
+- Store in environment variables
+- Use connection pooling
+- Encrypt sensitive data
+- Use read replicas for reads
+- Set timeouts
+- Use SSL/TLS
+
+**Example:**
+```javascript
+// Environment variable
+const connectionString = process.env.DATABASE_URL;
+
+// With connection pooling
+const pool = new Pool({
+    connectionString,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+```
+
+### 30. Explain database query execution plans.
+
+**Answer:**
+Execution plan shows how database executes query.
+
+**Analyzing Plans:**
+```sql
+-- PostgreSQL
+EXPLAIN ANALYZE SELECT * FROM users WHERE email = 'user@example.com';
+
+-- MySQL
+EXPLAIN SELECT * FROM users WHERE email = 'user@example.com';
+
+-- SQL Server
+SET SHOWPLAN_ALL ON;
+SELECT * FROM users WHERE email = 'user@example.com';
+```
+
+**Plan Components:**
+- **Seq Scan**: Full table scan (slow)
+- **Index Scan**: Uses index (fast)
+- **Index Only Scan**: Uses index only (fastest)
+- **Nested Loop**: Join algorithm
+- **Hash Join**: Hash-based join
+- **Sort**: Sorting operation
+
+**Optimization:**
+- Look for sequential scans on large tables
+- Ensure indexes are used
+- Check join algorithms
+- Monitor sort operations
+
+### 31. Explain database materialized views.
+
+**Answer:**
+Materialized views store query results physically.
+
+**Creating:**
+```sql
+CREATE MATERIALIZED VIEW user_stats AS
+SELECT 
+    user_id,
+    COUNT(*) as order_count,
+    SUM(total) as total_spent
+FROM orders
+GROUP BY user_id;
+
+-- Refresh
+REFRESH MATERIALIZED VIEW user_stats;
+```
+
+**Use Cases:**
+- Expensive aggregations
+- Complex joins
+- Reporting queries
+- Data warehousing
+
+**Trade-offs:**
+- Faster reads
+- Stale data (needs refresh)
+- Storage overhead
+- Maintenance required
+
+### 32. Explain database stored procedures and functions.
+
+**Answer:**
+**Stored Procedures:**
+```sql
+CREATE PROCEDURE GetUserOrders(IN user_id INT)
+BEGIN
+    SELECT * FROM orders WHERE user_id = user_id;
+END;
+
+-- Call
+CALL GetUserOrders(123);
+```
+
+**Functions:**
+```sql
+CREATE FUNCTION CalculateTotal(price DECIMAL, quantity INT)
+RETURNS DECIMAL
+BEGIN
+    RETURN price * quantity;
+END;
+
+-- Use
+SELECT CalculateTotal(10.00, 5) AS total;
+```
+
+**Benefits:**
+- Performance (precompiled)
+- Security (controlled access)
+- Reusability
+- Business logic in database
+
+**Drawbacks:**
+- Database-specific
+- Harder to test
+- Version control challenges
+- Less flexible
+
+### 33. Explain database triggers.
+
+**Answer:**
+Triggers execute automatically on events.
+
+**Creating Trigger:**
+```sql
+CREATE TRIGGER update_timestamp
+BEFORE UPDATE ON users
+FOR EACH ROW
+BEGIN
+    SET NEW.updated_at = NOW();
+END;
+```
+
+**Trigger Types:**
+- **BEFORE**: Executes before operation
+- **AFTER**: Executes after operation
+- **INSTEAD OF**: Replaces operation (views)
+
+**Use Cases:**
+- Audit logging
+- Data validation
+- Automatic calculations
+- Maintaining denormalized data
+
+**Example:**
+```sql
+CREATE TRIGGER log_user_changes
+AFTER UPDATE ON users
+FOR EACH ROW
+BEGIN
+    INSERT INTO user_audit_log (user_id, old_value, new_value, changed_at)
+    VALUES (NEW.id, OLD.email, NEW.email, NOW());
+END;
+```
+
 ---
 
 This covers database interview questions from beginner to advanced level with detailed explanations.

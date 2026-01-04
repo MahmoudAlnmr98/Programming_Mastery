@@ -967,6 +967,197 @@ function Component() {
 }
 ```
 
+### 34. Explain React performance optimization techniques.
+
+**Answer:**
+**Techniques:**
+
+**1. React.memo:**
+```jsx
+const ExpensiveComponent = React.memo(({ data }) => {
+    return <div>{data}</div>;
+}, (prevProps, nextProps) => {
+    return prevProps.data === nextProps.data; // Custom comparison
+});
+```
+
+**2. useMemo:**
+```jsx
+const expensiveValue = useMemo(() => {
+    return computeExpensiveValue(a, b);
+}, [a, b]); // Only recompute when a or b changes
+```
+
+**3. useCallback:**
+```jsx
+const handleClick = useCallback(() => {
+    doSomething(id);
+}, [id]); // Stable reference
+```
+
+**4. Code Splitting:**
+```jsx
+const LazyComponent = React.lazy(() => import('./LazyComponent'));
+
+function App() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LazyComponent />
+        </Suspense>
+    );
+}
+```
+
+**5. Virtualization:**
+```jsx
+import { FixedSizeList } from 'react-window';
+
+function List({ items }) {
+    return (
+        <FixedSizeList
+            height={600}
+            itemCount={items.length}
+            itemSize={50}
+        >
+            {({ index, style }) => (
+                <div style={style}>{items[index]}</div>
+            )}
+        </FixedSizeList>
+    );
+}
+```
+
+### 35. Explain React error boundaries in detail.
+
+**Answer:**
+Error boundaries catch errors in component tree.
+
+```jsx
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+    
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+    
+    componentDidCatch(error, errorInfo) {
+        // Log to error reporting service
+        console.error('Error caught:', error, errorInfo);
+    }
+    
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div>
+                    <h2>Something went wrong</h2>
+                    <button onClick={() => this.setState({ hasError: false })}>
+                        Try again
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+// Usage
+<ErrorBoundary>
+    <App />
+</ErrorBoundary>
+```
+
+**Limitations:**
+- Doesn't catch errors in event handlers
+- Doesn't catch errors in async code
+- Doesn't catch errors during server-side rendering
+
+### 36. Explain React Server Components (RSC).
+
+**Answer:**
+Server Components render on server, reducing client bundle.
+
+**Server Component:**
+```jsx
+// app/users/page.js (Server Component)
+async function UsersPage() {
+    const users = await fetchUsers(); // Runs on server
+    
+    return (
+        <div>
+            {users.map(user => (
+                <UserCard key={user.id} user={user} />
+            ))}
+        </div>
+    );
+}
+```
+
+**Client Component:**
+```jsx
+'use client'; // Directive for Client Component
+
+import { useState } from 'react';
+
+function Counter() {
+    const [count, setCount] = useState(0);
+    return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+```
+
+**Benefits:**
+- Smaller client bundle
+- Direct database access
+- Better security (API keys on server)
+- Improved performance
+
+### 37. Explain React testing strategies.
+
+**Answer:**
+**Unit Testing with Jest and React Testing Library:**
+```jsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import Button from './Button';
+
+test('renders button and handles click', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    const button = screen.getByRole('button', { name: /click me/i });
+    expect(button).toBeInTheDocument();
+    
+    fireEvent.click(button);
+    expect(handleClick).toHaveBeenCalledTimes(1);
+});
+```
+
+**Testing Hooks:**
+```jsx
+import { renderHook, act } from '@testing-library/react';
+import { useCounter } from './useCounter';
+
+test('increments counter', () => {
+    const { result } = renderHook(() => useCounter());
+    
+    act(() => {
+        result.current.increment();
+    });
+    
+    expect(result.current.count).toBe(1);
+});
+```
+
+**Snapshot Testing:**
+```jsx
+test('matches snapshot', () => {
+    const { container } = render(<Component />);
+    expect(container).toMatchSnapshot();
+});
+```
+
 ---
 
 This covers React interview questions from beginner to advanced level with detailed explanations and code examples.

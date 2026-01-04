@@ -510,6 +510,286 @@ if (idempotencyKeyExists(key)) {
 - Prevents duplicate operations
 - Better error handling
 
+### 28. Explain CI/CD pipelines and best practices.
+
+**Answer:**
+CI/CD automates building, testing, and deployment.
+
+**CI (Continuous Integration):**
+- Automatically build on code changes
+- Run tests
+- Check code quality
+- Generate artifacts
+
+**CD (Continuous Deployment/Delivery):**
+- Automatically deploy to environments
+- Run integration tests
+- Monitor deployment
+
+**Pipeline Stages:**
+```yaml
+# Example: GitHub Actions
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Deploy
+        run: npm run deploy
+```
+
+**Best Practices:**
+- Fast feedback loops
+- Automated testing
+- Environment parity
+- Version control everything
+- Rollback capability
+- Monitoring and alerts
+
+### 29. Explain monitoring and logging strategies.
+
+**Answer:**
+**Monitoring:**
+- **Metrics**: CPU, memory, response time, error rate
+- **Logging**: Application logs, error logs, access logs
+- **Tracing**: Distributed tracing for microservices
+- **Alerting**: Notify on thresholds
+
+**Logging Best Practices:**
+```javascript
+// Structured logging
+const winston = require('winston');
+
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'combined.log' })
+    ]
+});
+
+// Log levels
+logger.error('Error occurred', { error, userId, requestId });
+logger.warn('Warning message', { context });
+logger.info('Info message', { data });
+logger.debug('Debug message', { details });
+```
+
+**Metrics:**
+- **Counters**: Total requests, errors
+- **Gauges**: Current connections, queue size
+- **Histograms**: Response time distribution
+- **Timers**: Operation duration
+
+**Tools:**
+- **Logging**: ELK Stack, Splunk, CloudWatch
+- **Metrics**: Prometheus, Grafana, Datadog
+- **Tracing**: Jaeger, Zipkin, AWS X-Ray
+
+### 30. Explain deployment strategies.
+
+**Answer:**
+**Blue-Green Deployment:**
+- Two identical environments
+- Switch traffic from blue to green
+- Instant rollback
+
+**Canary Deployment:**
+- Deploy to small subset
+- Monitor metrics
+- Gradually increase traffic
+- Rollback if issues
+
+**Rolling Deployment:**
+- Update instances gradually
+- No downtime
+- Slower deployment
+
+**A/B Testing:**
+- Deploy different versions
+- Route traffic based on criteria
+- Compare metrics
+
+**Example:**
+```bash
+# Blue-Green with Docker
+docker-compose -f docker-compose.blue.yml up -d
+# Test blue
+# Switch load balancer to blue
+docker-compose -f docker-compose.green.yml up -d
+# Test green
+# Switch load balancer to green
+docker-compose -f docker-compose.blue.yml down
+```
+
+### 31. Explain API security vulnerabilities and prevention.
+
+**Answer:**
+**Common Vulnerabilities:**
+
+**1. SQL Injection:**
+```javascript
+// Vulnerable
+const query = `SELECT * FROM users WHERE id = ${userId}`;
+
+// Safe
+const query = 'SELECT * FROM users WHERE id = $1';
+await db.query(query, [userId]);
+```
+
+**2. XSS (Cross-Site Scripting):**
+```javascript
+// Sanitize inputs
+const sanitize = require('sanitize-html');
+const clean = sanitize(userInput);
+```
+
+**3. CSRF (Cross-Site Request Forgery):**
+```javascript
+// Use CSRF tokens
+const csrf = require('csurf');
+app.use(csrf({ cookie: true }));
+
+app.get('/form', (req, res) => {
+    res.render('form', { csrfToken: req.csrfToken() });
+});
+```
+
+**4. Authentication Bypass:**
+- Use strong authentication
+- Implement rate limiting
+- Validate tokens properly
+- Use HTTPS
+
+**5. Insecure Direct Object References:**
+```javascript
+// Check authorization
+app.get('/users/:id', authenticate, async (req, res) => {
+    if (req.user.id !== req.params.id && !req.user.isAdmin) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+    // Return user data
+});
+```
+
+### 32. Explain database migration strategies.
+
+**Answer:**
+**Migration Types:**
+- **Schema Changes**: Add/remove columns, tables
+- **Data Migrations**: Transform data
+- **Rollback**: Revert changes
+
+**Best Practices:**
+```javascript
+// Example: Using Knex.js
+exports.up = function(knex) {
+    return knex.schema.createTable('users', function(table) {
+        table.increments('id');
+        table.string('email').unique();
+        table.string('password');
+        table.timestamps();
+    });
+};
+
+exports.down = function(knex) {
+    return knex.schema.dropTable('users');
+};
+```
+
+**Migration Strategy:**
+1. **Backward Compatible**: Add columns as nullable first
+2. **Gradual Rollout**: Migrate data in batches
+3. **Feature Flags**: Enable new schema gradually
+4. **Rollback Plan**: Always have rollback ready
+
+**Zero-Downtime Migrations:**
+- Add new column (nullable)
+- Deploy code that writes to both
+- Migrate existing data
+- Deploy code that reads from new column
+- Remove old column
+
+### 33. Explain API documentation with OpenAPI/Swagger.
+
+**Answer:**
+OpenAPI/Swagger provides API documentation and testing.
+
+**Example:**
+```yaml
+openapi: 3.0.0
+info:
+  title: User API
+  version: 1.0.0
+paths:
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+```
+
+**Integration:**
+```javascript
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API',
+            version: '1.0.0',
+        },
+    },
+    apis: ['./routes/*.js'],
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+```
+
 ---
 
 This covers backend interview questions from beginner to advanced level with comprehensive coverage of essential topics.

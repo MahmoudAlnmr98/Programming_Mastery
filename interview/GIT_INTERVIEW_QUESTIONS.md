@@ -542,6 +542,214 @@ git add .gitattributes
 - Review PRs carefully
 - Use branch protection
 
+### 26. Explain Git hooks and their usage.
+
+**Answer:**
+Git hooks are scripts that run automatically at certain points.
+
+**Client-Side Hooks:**
+```bash
+# pre-commit - Before commit
+#!/bin/sh
+npm test
+if [ $? -ne 0 ]; then
+    echo "Tests failed"
+    exit 1
+fi
+
+# commit-msg - Validate commit message
+#!/bin/sh
+commit_msg=$(cat "$1")
+if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore):"; then
+    echo "Invalid commit message format"
+    exit 1
+fi
+
+# pre-push - Before push
+#!/bin/sh
+npm run build
+```
+
+**Server-Side Hooks:**
+```bash
+# pre-receive - Before accepting pushes
+#!/bin/sh
+while read oldrev newrev refname; do
+    # Validate refs
+done
+
+# update - Before updating ref
+#!/bin/sh
+refname=$1
+oldrev=$2
+newrev=$3
+# Validate specific ref
+```
+
+**Installing Hooks:**
+```bash
+# Manual
+chmod +x .git/hooks/pre-commit
+cp pre-commit .git/hooks/
+
+# Using husky (Node.js)
+npm install --save-dev husky
+npx husky install
+npx husky add .husky/pre-commit "npm test"
+```
+
+### 27. Explain Git workflows (GitFlow, GitHub Flow, GitLab Flow).
+
+**Answer:**
+**GitFlow:**
+```
+main (production)
+  └── develop (development)
+       ├── feature/user-auth
+       ├── feature/payment
+       └── release/v1.0.0
+            └── hotfix/critical-bug
+```
+
+**GitHub Flow:**
+```
+main (always deployable)
+  └── feature-branch
+       (create PR → merge → deploy)
+```
+
+**GitLab Flow:**
+```
+main
+  └── staging
+       └── production
+            └── feature-branch
+```
+
+**Comparison:**
+- **GitFlow**: Complex, good for releases
+- **GitHub Flow**: Simple, continuous deployment
+- **GitLab Flow**: Environment-based
+
+### 28. Explain Git submodules and subtrees.
+
+**Answer:**
+**Submodules:**
+```bash
+# Add submodule
+git submodule add https://github.com/user/repo.git path/to/submodule
+
+# Clone with submodules
+git clone --recursive https://github.com/user/main-repo.git
+
+# Update submodules
+git submodule update --remote
+
+# Remove submodule
+git submodule deinit path/to/submodule
+git rm path/to/submodule
+```
+
+**Subtrees:**
+```bash
+# Add subtree
+git subtree add --prefix=lib/repo https://github.com/user/repo.git main --squash
+
+# Pull changes
+git subtree pull --prefix=lib/repo https://github.com/user/repo.git main --squash
+
+# Push changes
+git subtree push --prefix=lib/repo https://github.com/user/repo.git main
+```
+
+**When to use:**
+- **Submodules**: External dependencies, separate versioning
+- **Subtrees**: Simpler, single repository
+
+### 29. Explain Git bisect for debugging.
+
+**Answer:**
+Git bisect helps find the commit that introduced a bug.
+
+**Usage:**
+```bash
+# Start bisect
+git bisect start
+
+# Mark current commit as bad
+git bisect bad
+
+# Mark known good commit
+git bisect good <commit-hash>
+
+# Git checks out middle commit
+# Test and mark
+git bisect good  # or git bisect bad
+
+# Continue until found
+git bisect reset  # When done
+```
+
+**Automated:**
+```bash
+git bisect start HEAD <good-commit>
+git bisect run npm test
+```
+
+**Example:**
+```bash
+git bisect start
+git bisect bad HEAD
+git bisect good v1.0.0
+# Test each commit
+git bisect good  # or bad
+# Repeat until found
+git bisect reset
+```
+
+### 30. Explain Git reflog and recovery.
+
+**Answer:**
+Reflog records all HEAD movements.
+
+**View Reflog:**
+```bash
+git reflog
+# Shows: commit-hash HEAD@{n}: action: message
+
+git reflog show HEAD@{5}
+git reflog show branch-name@{2}
+```
+
+**Recovery:**
+```bash
+# Recover deleted branch
+git reflog
+git checkout -b recovered-branch <commit-hash>
+
+# Recover lost commit
+git reflog
+git cherry-pick <commit-hash>
+
+# Reset to previous state
+git reset --hard HEAD@{5}
+```
+
+**Expiration:**
+```bash
+# Default: 90 days
+git config gc.reflogExpire "90 days"
+
+# Keep forever
+git config gc.reflogExpire "never"
+```
+
+**Use Cases:**
+- Recover deleted branches
+- Find lost commits
+- Undo operations
+- Debug issues
+
 ---
 
 This covers Git and GitHub interview questions from beginner to advanced level with detailed explanations and examples.

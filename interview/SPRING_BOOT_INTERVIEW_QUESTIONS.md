@@ -667,6 +667,268 @@ public class GlobalExceptionHandler {
 }
 ```
 
+### 26. Explain Spring Boot Actuator endpoints.
+
+**Answer:**
+Actuator provides production-ready features.
+
+**Dependencies:**
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+**Configuration:**
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+```
+
+**Endpoints:**
+- `/actuator/health` - Application health
+- `/actuator/info` - Application information
+- `/actuator/metrics` - Application metrics
+- `/actuator/env` - Environment variables
+- `/actuator/loggers` - Logger configuration
+
+**Custom Health Indicator:**
+```java
+@Component
+public class CustomHealthIndicator implements HealthIndicator {
+    @Override
+    public Health health() {
+        // Check custom condition
+        if (isHealthy()) {
+            return Health.up()
+                .withDetail("status", "OK")
+                .build();
+        }
+        return Health.down()
+            .withDetail("error", "Service unavailable")
+            .build();
+    }
+}
+```
+
+### 27. Explain Spring Boot testing strategies.
+
+**Answer:**
+**Unit Testing:**
+```java
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+    @Mock
+    private UserRepository userRepository;
+    
+    @InjectMocks
+    private UserService userService;
+    
+    @Test
+    void testCreateUser() {
+        User user = new User("John");
+        when(userRepository.save(any())).thenReturn(user);
+        
+        User result = userService.createUser(user);
+        assertEquals("John", result.getName());
+    }
+}
+```
+
+**Integration Testing:**
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+class UserControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
+    
+    @Test
+    void testGetUser() throws Exception {
+        mockMvc.perform(get("/api/users/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("John"));
+    }
+}
+```
+
+**Test Slices:**
+```java
+@WebMvcTest(UserController.class)
+class UserControllerWebTest {
+    @Autowired
+    private MockMvc mockMvc;
+    
+    @MockBean
+    private UserService userService;
+}
+```
+
+### 28. Explain Spring Boot profiles and configuration.
+
+**Answer:**
+Profiles allow environment-specific configuration.
+
+**Application Properties:**
+```properties
+# application.properties
+spring.profiles.active=dev
+
+# application-dev.properties
+server.port=8080
+logging.level.root=DEBUG
+
+# application-prod.properties
+server.port=80
+logging.level.root=INFO
+```
+
+**YAML Configuration:**
+```yaml
+spring:
+  profiles:
+    active: dev
+
+---
+spring:
+  profiles: dev
+server:
+  port: 8080
+
+---
+spring:
+  profiles: prod
+server:
+  port: 80
+```
+
+**Programmatic:**
+```java
+@Configuration
+@Profile("dev")
+public class DevConfig {
+    // Dev-specific beans
+}
+
+@Configuration
+@Profile("prod")
+public class ProdConfig {
+    // Prod-specific beans
+}
+```
+
+### 29. Explain Spring Boot caching strategies.
+
+**Answer:**
+**Enable Caching:**
+```java
+@SpringBootApplication
+@EnableCaching
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
+
+**Cache Annotations:**
+```java
+@Service
+public class UserService {
+    @Cacheable("users")
+    public User getUser(Long id) {
+        return userRepository.findById(id);
+    }
+    
+    @CacheEvict(value = "users", key = "#id")
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+    
+    @CachePut(value = "users", key = "#user.id")
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
+}
+```
+
+**Cache Providers:**
+- Caffeine
+- Redis
+- EhCache
+- Hazelcast
+
+**Configuration:**
+```yaml
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=5m
+```
+
+### 30. Explain Spring Boot monitoring and metrics.
+
+**Answer:**
+**Micrometer Integration:**
+```java
+@Service
+public class OrderService {
+    private final Counter orderCounter;
+    private final Timer orderTimer;
+    
+    public OrderService(MeterRegistry registry) {
+        this.orderCounter = Counter.builder("orders.total")
+            .description("Total orders")
+            .register(registry);
+        this.orderTimer = Timer.builder("orders.duration")
+            .register(registry);
+    }
+    
+    public void createOrder(Order order) {
+        Timer.Sample sample = Timer.start();
+        try {
+            // Create order
+            orderCounter.increment();
+        } finally {
+            sample.stop(orderTimer);
+        }
+    }
+}
+```
+
+**Custom Metrics:**
+```java
+@Component
+public class CustomMetrics {
+    private final Gauge gauge;
+    
+    public CustomMetrics(MeterRegistry registry) {
+        this.gauge = Gauge.builder("custom.value", this, CustomMetrics::getValue)
+            .register(registry);
+    }
+    
+    private double getValue() {
+        return 42.0;
+    }
+}
+```
+
+**Prometheus Integration:**
+```xml
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
+```
+
 ---
 
 This covers Spring Boot interview questions from beginner to advanced level with detailed explanations and code examples.
