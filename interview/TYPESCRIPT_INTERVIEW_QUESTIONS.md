@@ -1,0 +1,675 @@
+# TypeScript Interview Questions
+
+## Table of Contents
+- [Beginner Level](#beginner-level)
+- [Intermediate Level](#intermediate-level)
+- [Advanced Level](#advanced-level)
+
+---
+
+## Beginner Level
+
+### 1. What is TypeScript? Why use it?
+
+**Answer:**
+TypeScript is a superset of JavaScript that adds static type checking.
+
+**Benefits:**
+- **Type Safety**: Catch errors at compile time
+- **Better IDE Support**: Autocomplete, refactoring
+- **Documentation**: Types serve as documentation
+- **Refactoring**: Safer code changes
+- **Scalability**: Better for large codebases
+
+### 2. Explain basic types in TypeScript.
+
+**Answer:**
+```typescript
+// Primitive types
+let name: string = "John";
+let age: number = 30;
+let isActive: boolean = true;
+let nothing: null = null;
+let notDefined: undefined = undefined;
+
+// Arrays
+let numbers: number[] = [1, 2, 3];
+let names: Array<string> = ["John", "Jane"];
+
+// Tuples
+let tuple: [string, number] = ["John", 30];
+
+// Any
+let anything: any = "can be anything";
+
+// Void
+function log(): void {
+    console.log("Hello");
+}
+
+// Never
+function error(): never {
+    throw new Error("Error");
+}
+```
+
+### 3. What is the difference between `interface` and `type`?
+
+**Answer:**
+**Interface:**
+```typescript
+interface User {
+    name: string;
+    age: number;
+}
+
+interface User {
+    email: string; // Can be extended
+}
+```
+
+**Type:**
+```typescript
+type User = {
+    name: string;
+    age: number;
+}
+
+// Can use unions, intersections
+type ID = string | number;
+type Admin = User & { role: "admin" };
+```
+
+**Differences:**
+- Interfaces can be merged (declaration merging)
+- Types can use unions, intersections, primitives
+- Interfaces are better for object shapes
+- Types are more flexible
+
+### 4. Explain type inference in TypeScript.
+
+**Answer:**
+TypeScript infers types when not explicitly provided.
+
+```typescript
+let x = 10; // TypeScript infers: number
+let y = "hello"; // TypeScript infers: string
+
+function add(a: number, b: number) {
+    return a + b; // Return type inferred as number
+}
+
+// Explicit types
+let x: number = 10;
+function add(a: number, b: number): number {
+    return a + b;
+}
+```
+
+### 5. Explain optional and readonly properties.
+
+**Answer:**
+```typescript
+interface User {
+    name: string;
+    age?: number; // Optional
+    readonly id: number; // Readonly
+}
+
+const user: User = {
+    name: "John",
+    id: 1
+};
+
+// user.id = 2; // Error: Cannot assign to 'id'
+// user.age is optional, may be undefined
+```
+
+### 6. Explain function types in TypeScript.
+
+**Answer:**
+```typescript
+// Function type
+function greet(name: string): string {
+    return `Hello, ${name}`;
+}
+
+// Function type annotation
+let greetFn: (name: string) => string;
+greetFn = (name: string) => `Hello, ${name}`;
+
+// Optional parameters
+function greet(name: string, title?: string): string {
+    return title ? `Hello, ${title} ${name}` : `Hello, ${name}`;
+}
+
+// Default parameters
+function greet(name: string, title: string = "Mr"): string {
+    return `Hello, ${title} ${name}`;
+}
+
+// Rest parameters
+function sum(...numbers: number[]): number {
+    return numbers.reduce((a, b) => a + b, 0);
+}
+```
+
+### 7. Explain union and intersection types.
+
+**Answer:**
+```typescript
+// Union type
+type ID = string | number;
+let id: ID = "123";
+id = 123; // Also valid
+
+// Intersection type
+type Admin = User & { role: "admin" };
+
+interface User {
+    name: string;
+}
+
+interface Admin {
+    role: "admin";
+}
+
+type AdminUser = User & Admin;
+```
+
+### 8. Explain enums in TypeScript.
+
+**Answer:**
+```typescript
+// Numeric enum
+enum Status {
+    Pending,    // 0
+    Approved,   // 1
+    Rejected    // 2
+}
+
+// String enum
+enum Direction {
+    Up = "UP",
+    Down = "DOWN",
+    Left = "LEFT",
+    Right = "RIGHT"
+}
+
+// Const enum (inlined at compile time)
+const enum Color {
+    Red,
+    Green,
+    Blue
+}
+```
+
+---
+
+## Intermediate Level
+
+### 9. Explain generics in TypeScript.
+
+**Answer:**
+Generics allow creating reusable components.
+
+```typescript
+// Generic function
+function identity<T>(arg: T): T {
+    return arg;
+}
+
+let output = identity<string>("hello");
+let output2 = identity<number>(42);
+
+// Generic interface
+interface Box<T> {
+    value: T;
+}
+
+let box: Box<number> = { value: 42 };
+
+// Generic class
+class Stack<T> {
+    private items: T[] = [];
+    
+    push(item: T): void {
+        this.items.push(item);
+    }
+    
+    pop(): T | undefined {
+        return this.items.pop();
+    }
+}
+
+let stack = new Stack<number>();
+```
+
+### 10. Explain type guards and narrowing.
+
+**Answer:**
+Type guards narrow types within conditional blocks.
+
+```typescript
+// typeof guard
+function padLeft(value: string, padding: string | number) {
+    if (typeof padding === "number") {
+        return Array(padding + 1).join(" ") + value;
+    }
+    return padding + value;
+}
+
+// instanceof guard
+function process(value: Date | string) {
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
+    return value.toUpperCase();
+}
+
+// in guard
+interface Fish {
+    swim: () => void;
+}
+interface Bird {
+    fly: () => void;
+}
+
+function move(animal: Fish | Bird) {
+    if ("swim" in animal) {
+        animal.swim();
+    } else {
+        animal.fly();
+    }
+}
+
+// Custom type guard
+function isString(value: unknown): value is string {
+    return typeof value === "string";
+}
+```
+
+### 11. Explain utility types.
+
+**Answer:**
+TypeScript provides utility types for common transformations.
+
+```typescript
+interface User {
+    name: string;
+    age: number;
+    email: string;
+}
+
+// Partial - all properties optional
+type PartialUser = Partial<User>;
+
+// Required - all properties required
+type RequiredUser = Required<User>;
+
+// Readonly - all properties readonly
+type ReadonlyUser = Readonly<User>;
+
+// Pick - select properties
+type UserName = Pick<User, "name">;
+
+// Omit - exclude properties
+type UserWithoutEmail = Omit<User, "email">;
+
+// Record - create object type
+type UserMap = Record<string, User>;
+
+// Exclude - exclude types from union
+type NonNull = Exclude<string | null | undefined, null | undefined>;
+
+// Extract - extract types from union
+type StringOnly = Extract<string | number, string>;
+```
+
+### 12. Explain decorators in TypeScript.
+
+**Answer:**
+Decorators add metadata and modify classes, methods, properties.
+
+```typescript
+// Class decorator
+function sealed(constructor: Function) {
+    Object.seal(constructor);
+    Object.seal(constructor.prototype);
+}
+
+@sealed
+class Greeter {
+    greeting: string;
+    constructor(message: string) {
+        this.greeting = message;
+    }
+}
+
+// Method decorator
+function log(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+    descriptor.value = function (...args: any[]) {
+        console.log(`Calling ${propertyKey} with`, args);
+        return originalMethod.apply(this, args);
+    };
+}
+
+class Calculator {
+    @log
+    add(a: number, b: number): number {
+        return a + b;
+    }
+}
+```
+
+### 13. Explain namespaces and modules.
+
+**Answer:**
+**Namespaces:**
+```typescript
+namespace MathUtils {
+    export function add(a: number, b: number): number {
+        return a + b;
+    }
+}
+
+MathUtils.add(1, 2);
+```
+
+**Modules:**
+```typescript
+// math.ts
+export function add(a: number, b: number): number {
+    return a + b;
+}
+
+export default function multiply(a: number, b: number): number {
+    return a * b;
+}
+
+// app.ts
+import multiply, { add } from './math';
+```
+
+### 14. Explain conditional types.
+
+**Answer:**
+Conditional types select types based on conditions.
+
+```typescript
+type NonNullable<T> = T extends null | undefined ? never : T;
+
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
+
+type Parameters<T> = T extends (...args: infer P) => any ? P : never;
+
+// Example usage
+type T1 = NonNullable<string | null>; // string
+type T2 = ReturnType<() => string>; // string
+type T3 = Parameters<(a: number, b: string) => void>; // [number, string]
+```
+
+### 15. Explain mapped types.
+
+**Answer:**
+Mapped types create new types by transforming properties.
+
+```typescript
+// Make all properties optional
+type Optional<T> = {
+    [P in keyof T]?: T[P];
+};
+
+// Make all properties readonly
+type Readonly<T> = {
+    readonly [P in keyof T]: T[P];
+};
+
+// Make all properties nullable
+type Nullable<T> = {
+    [P in keyof T]: T[P] | null;
+};
+
+// Custom mapped type
+type Getters<T> = {
+    [P in keyof T as `get${Capitalize<string & P>}`]: () => T[P];
+};
+```
+
+---
+
+## Advanced Level
+
+### 16. Explain template literal types.
+
+**Answer:**
+Template literal types create string literal types.
+
+```typescript
+type EventName<T extends string> = `on${Capitalize<T>}`;
+type ClickEvent = EventName<"click">; // "onClick"
+
+type PropName<T extends string> = `get${Capitalize<T>}`;
+type GetName = PropName<"name">; // "getName"
+
+// Complex example
+type ApiEndpoint = "users" | "posts" | "comments";
+type HttpMethod = "get" | "post" | "put" | "delete";
+type ApiRoute = `${HttpMethod} /api/${ApiEndpoint}`;
+```
+
+### 17. Explain recursive types.
+
+**Answer:**
+Types that reference themselves.
+
+```typescript
+// Recursive type
+type JsonValue = 
+    | string
+    | number
+    | boolean
+    | null
+    | JsonValue[]
+    | { [key: string]: JsonValue };
+
+// Recursive interface
+interface TreeNode<T> {
+    value: T;
+    children?: TreeNode<T>[];
+}
+```
+
+### 18. Explain brand types and nominal typing.
+
+**Answer:**
+Brand types create distinct types from same underlying type.
+
+```typescript
+// Brand type
+type UserId = string & { readonly brand: unique symbol };
+type ProductId = string & { readonly brand: unique symbol };
+
+function createUserId(id: string): UserId {
+    return id as UserId;
+}
+
+function createProductId(id: string): ProductId {
+    return id as ProductId;
+}
+
+let userId = createUserId("123");
+let productId = createProductId("123");
+
+// userId === productId; // Type error
+```
+
+### 19. Explain assertion functions.
+
+**Answer:**
+Functions that assert types at runtime.
+
+```typescript
+function assertIsString(value: unknown): asserts value is string {
+    if (typeof value !== "string") {
+        throw new Error("Not a string");
+    }
+}
+
+function process(value: unknown) {
+    assertIsString(value);
+    // value is now string
+    value.toUpperCase();
+}
+```
+
+### 20. Explain module augmentation.
+
+**Answer:**
+Extending existing module types.
+
+```typescript
+// Augment existing module
+declare module "express" {
+    interface Request {
+        user?: User;
+    }
+}
+
+// Now Request has user property
+app.get("/", (req, res) => {
+    req.user; // TypeScript knows this exists
+});
+```
+
+### 21. Explain type-level programming.
+
+**Answer:**
+Programming at the type level.
+
+```typescript
+// Type-level arithmetic
+type Length<T extends any[]> = T["length"];
+
+type Tuple3 = [1, 2, 3];
+type Len = Length<Tuple3>; // 3
+
+// Type-level conditionals
+type If<C extends boolean, T, F> = C extends true ? T : F;
+
+type Result = If<true, string, number>; // string
+
+// Type-level recursion
+type Reverse<T extends any[]> = T extends [infer First, ...infer Rest]
+    ? [...Reverse<Rest>, First]
+    : [];
+```
+
+### 22. Explain variance in TypeScript.
+
+**Answer:**
+How subtyping works with generics.
+
+```typescript
+// Covariance - preserves subtyping
+interface Animal {
+    name: string;
+}
+interface Dog extends Animal {
+    breed: string;
+}
+
+let animals: Animal[] = [];
+let dogs: Dog[] = [];
+animals = dogs; // OK - covariant
+
+// Contravariance - reverses subtyping
+type Handler<T> = (value: T) => void;
+
+let animalHandler: Handler<Animal> = (animal: Animal) => {};
+let dogHandler: Handler<Dog> = (dog: Dog) => {};
+
+dogHandler = animalHandler; // OK - contravariant
+// animalHandler = dogHandler; // Error
+```
+
+### 23. Explain declaration merging.
+
+**Answer:**
+TypeScript merges multiple declarations of same name.
+
+```typescript
+// Interface merging
+interface User {
+    name: string;
+}
+interface User {
+    age: number;
+}
+// Result: { name: string; age: number; }
+
+// Namespace merging
+namespace Math {
+    export function add(a: number, b: number): number {
+        return a + b;
+    }
+}
+namespace Math {
+    export function subtract(a: number, b: number): number {
+        return a - b;
+    }
+}
+```
+
+### 24. Explain type erasure and runtime behavior.
+
+**Answer:**
+TypeScript types are erased at compile time.
+
+```typescript
+// TypeScript
+function add(a: number, b: number): number {
+    return a + b;
+}
+
+// Compiled JavaScript
+function add(a, b) {
+    return a + b;
+}
+
+// Runtime type checking needed
+function isString(value: unknown): value is string {
+    return typeof value === "string";
+}
+```
+
+### 25. Explain advanced generic constraints.
+
+**Answer:**
+```typescript
+// Multiple constraints
+function merge<T extends object, U extends object>(obj1: T, obj2: U): T & U {
+    return { ...obj1, ...obj2 };
+}
+
+// Keyof constraint
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+    return obj[key];
+}
+
+// Conditional constraints
+type NonFunctionPropertyNames<T> = {
+    [K in keyof T]: T[K] extends Function ? never : K;
+}[keyof T];
+
+// Mapped type constraints
+type Readonly<T> = {
+    readonly [P in keyof T]: T[P];
+};
+```
+
+---
+
+This covers TypeScript interview questions from beginner to advanced level with detailed explanations and code examples.
+
