@@ -721,6 +721,420 @@ class AuthorizationHandler extends Handler {
 }
 ```
 
+### 16. Explain Template Method Pattern.
+
+**Answer:**
+Defines algorithm skeleton, subclasses implement steps.
+
+**Java:**
+```java
+abstract class DataProcessor {
+    // Template method
+    public final void process() {
+        readData();
+        processData();
+        saveData();
+    }
+    
+    abstract void readData();
+    abstract void processData();
+    abstract void saveData();
+}
+
+class CSVProcessor extends DataProcessor {
+    void readData() {
+        System.out.println("Reading CSV");
+    }
+    void processData() {
+        System.out.println("Processing CSV");
+    }
+    void saveData() {
+        System.out.println("Saving CSV");
+    }
+}
+```
+
+### 17. Explain State Pattern.
+
+**Answer:**
+Object behavior changes based on internal state.
+
+**Java:**
+```java
+interface State {
+    void handle(Context context);
+}
+
+class ConcreteStateA implements State {
+    public void handle(Context context) {
+        System.out.println("State A");
+        context.setState(new ConcreteStateB());
+    }
+}
+
+class ConcreteStateB implements State {
+    public void handle(Context context) {
+        System.out.println("State B");
+        context.setState(new ConcreteStateA());
+    }
+}
+
+class Context {
+    private State state;
+    
+    public void setState(State state) {
+        this.state = state;
+    }
+    
+    public void request() {
+        state.handle(this);
+    }
+}
+```
+
+### 18. Explain Visitor Pattern.
+
+**Answer:**
+Separates algorithm from object structure.
+
+**Java:**
+```java
+interface Visitor {
+    void visit(ElementA element);
+    void visit(ElementB element);
+}
+
+interface Element {
+    void accept(Visitor visitor);
+}
+
+class ElementA implements Element {
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+}
+
+class ConcreteVisitor implements Visitor {
+    public void visit(ElementA element) {
+        System.out.println("Visiting ElementA");
+    }
+    public void visit(ElementB element) {
+        System.out.println("Visiting ElementB");
+    }
+}
+```
+
+### 19. Explain Mediator Pattern.
+
+**Answer:**
+Reduces coupling by having objects communicate through mediator.
+
+**Java:**
+```java
+interface Mediator {
+    void send(String message, Colleague colleague);
+}
+
+class ConcreteMediator implements Mediator {
+    private Colleague colleague1;
+    private Colleague colleague2;
+    
+    public void setColleague1(Colleague c) {
+        this.colleague1 = c;
+    }
+    
+    public void send(String message, Colleague colleague) {
+        if (colleague == colleague1) {
+            colleague2.receive(message);
+        } else {
+            colleague1.receive(message);
+        }
+    }
+}
+
+abstract class Colleague {
+    protected Mediator mediator;
+    
+    public Colleague(Mediator mediator) {
+        this.mediator = mediator;
+    }
+    
+    public abstract void send(String message);
+    public abstract void receive(String message);
+}
+```
+
+### 20. Explain Memento Pattern.
+
+**Answer:**
+Captures and restores object state.
+
+**Java:**
+```java
+class Memento {
+    private String state;
+    
+    public Memento(String state) {
+        this.state = state;
+    }
+    
+    public String getState() {
+        return state;
+    }
+}
+
+class Originator {
+    private String state;
+    
+    public void setState(String state) {
+        this.state = state;
+    }
+    
+    public Memento save() {
+        return new Memento(state);
+    }
+    
+    public void restore(Memento memento) {
+        state = memento.getState();
+    }
+}
+
+class Caretaker {
+    private List<Memento> mementos = new ArrayList<>();
+    
+    public void addMemento(Memento memento) {
+        mementos.add(memento);
+    }
+    
+    public Memento getMemento(int index) {
+        return mementos.get(index);
+    }
+}
+```
+
+### 21. Explain Flyweight Pattern.
+
+**Answer:**
+Shares common state to reduce memory usage.
+
+**Java:**
+```java
+class Flyweight {
+    private String intrinsicState;
+    
+    public Flyweight(String intrinsicState) {
+        this.intrinsicState = intrinsicState;
+    }
+    
+    public void operation(String extrinsicState) {
+        System.out.println("Intrinsic: " + intrinsicState);
+        System.out.println("Extrinsic: " + extrinsicState);
+    }
+}
+
+class FlyweightFactory {
+    private Map<String, Flyweight> flyweights = new HashMap<>();
+    
+    public Flyweight getFlyweight(String key) {
+        if (!flyweights.containsKey(key)) {
+            flyweights.put(key, new Flyweight(key));
+        }
+        return flyweights.get(key);
+    }
+}
+```
+
+### 22. Explain Bridge Pattern.
+
+**Answer:**
+Separates abstraction from implementation.
+
+**Java:**
+```java
+interface Implementor {
+    void operationImpl();
+}
+
+class ConcreteImplementorA implements Implementor {
+    public void operationImpl() {
+        System.out.println("Implementation A");
+    }
+}
+
+abstract class Abstraction {
+    protected Implementor implementor;
+    
+    public Abstraction(Implementor implementor) {
+        this.implementor = implementor;
+    }
+    
+    public void operation() {
+        implementor.operationImpl();
+    }
+}
+
+class RefinedAbstraction extends Abstraction {
+    public RefinedAbstraction(Implementor implementor) {
+        super(implementor);
+    }
+    
+    public void refinedOperation() {
+        operation();
+    }
+}
+```
+
+### 23. Explain Composite Pattern.
+
+**Answer:**
+Composes objects into tree structures.
+
+**Java:**
+```java
+interface Component {
+    void operation();
+    void add(Component component);
+    void remove(Component component);
+}
+
+class Leaf implements Component {
+    public void operation() {
+        System.out.println("Leaf operation");
+    }
+    
+    public void add(Component component) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void remove(Component component) {
+        throw new UnsupportedOperationException();
+    }
+}
+
+class Composite implements Component {
+    private List<Component> children = new ArrayList<>();
+    
+    public void operation() {
+        for (Component child : children) {
+            child.operation();
+        }
+    }
+    
+    public void add(Component component) {
+        children.add(component);
+    }
+    
+    public void remove(Component component) {
+        children.remove(component);
+    }
+}
+```
+
+### 24. Explain Iterator Pattern.
+
+**Answer:**
+Provides way to access elements sequentially.
+
+**Java:**
+```java
+interface Iterator<T> {
+    boolean hasNext();
+    T next();
+}
+
+interface Aggregate<T> {
+    Iterator<T> createIterator();
+}
+
+class ConcreteIterator<T> implements Iterator<T> {
+    private List<T> items;
+    private int position = 0;
+    
+    public ConcreteIterator(List<T> items) {
+        this.items = items;
+    }
+    
+    public boolean hasNext() {
+        return position < items.size();
+    }
+    
+    public T next() {
+        return items.get(position++);
+    }
+}
+
+class ConcreteAggregate<T> implements Aggregate<T> {
+    private List<T> items = new ArrayList<>();
+    
+    public void add(T item) {
+        items.add(item);
+    }
+    
+    public Iterator<T> createIterator() {
+        return new ConcreteIterator<>(items);
+    }
+}
+```
+
+### 25. Explain Observer Pattern (Detailed).
+
+**Answer:**
+One-to-many dependency between objects.
+
+**Java (Push Model):**
+```java
+interface Observer {
+    void update(String data);
+}
+
+class Subject {
+    private List<Observer> observers = new ArrayList<>();
+    private String state;
+    
+    public void attach(Observer observer) {
+        observers.add(observer);
+    }
+    
+    public void setState(String state) {
+        this.state = state;
+        notifyObservers();
+    }
+    
+    private void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(state);
+        }
+    }
+}
+```
+
+**Java (Pull Model):**
+```java
+interface Observer {
+    void update(Subject subject);
+}
+
+class Subject {
+    private List<Observer> observers = new ArrayList<>();
+    private String state;
+    
+    public String getState() {
+        return state;
+    }
+    
+    public void setState(String state) {
+        this.state = state;
+        notifyObservers();
+    }
+    
+    private void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update(this);
+        }
+    }
+}
+```
+
 ---
 
 This covers design patterns interview questions from beginner to advanced level with implementations in Java and JavaScript.

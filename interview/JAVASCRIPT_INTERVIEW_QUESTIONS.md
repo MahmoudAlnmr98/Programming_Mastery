@@ -862,6 +862,142 @@ for (let [key, value] of Object.entries(obj)) {
 }
 ```
 
+### 26. Explain Symbol in JavaScript.
+
+**Answer:**
+Symbol is unique, immutable primitive type.
+
+```javascript
+// Create symbol
+const sym1 = Symbol('description');
+const sym2 = Symbol('description');
+console.log(sym1 === sym2); // false (unique)
+
+// Use as object key
+const obj = {
+    [sym1]: 'value1',
+    [sym2]: 'value2'
+};
+
+// Well-known symbols
+const arr = [1, 2, 3];
+arr[Symbol.iterator] = function*() {
+    yield 1;
+    yield 2;
+    yield 3;
+};
+```
+
+### 27. Explain BigInt in JavaScript.
+
+**Answer:**
+BigInt represents integers larger than Number.MAX_SAFE_INTEGER.
+
+```javascript
+// Create BigInt
+const bigInt = 9007199254740991n;
+const bigInt2 = BigInt(9007199254740991);
+
+// Operations
+const sum = bigInt + 1n;
+const product = bigInt * 2n;
+
+// Cannot mix with Number
+// const result = bigInt + 1; // TypeError
+const result = bigInt + BigInt(1);
+```
+
+### 28. Explain Optional Chaining and Nullish Coalescing.
+
+**Answer:**
+**Optional Chaining (?.):**
+```javascript
+const user = {
+    address: {
+        street: '123 Main St'
+    }
+};
+
+// Safe property access
+const street = user?.address?.street; // "123 Main St"
+const zip = user?.address?.zip; // undefined (no error)
+
+// Safe method call
+user?.getName?.(); // Only calls if exists
+
+// Safe array access
+const first = arr?.[0];
+```
+
+**Nullish Coalescing (??):**
+```javascript
+// Only null/undefined, not falsy values
+const value = null ?? 'default'; // 'default'
+const value2 = 0 ?? 'default'; // 0 (not 'default')
+const value3 = '' ?? 'default'; // '' (not 'default')
+
+// Combined
+const name = user?.name ?? 'Anonymous';
+```
+
+### 29. Explain Array methods: flat, flatMap, and at.
+
+**Answer:**
+**flat():**
+```javascript
+const arr = [1, [2, 3], [4, [5, 6]]];
+arr.flat(); // [1, 2, 3, 4, [5, 6]]
+arr.flat(2); // [1, 2, 3, 4, 5, 6]
+arr.flat(Infinity); // Flatten all levels
+```
+
+**flatMap():**
+```javascript
+const arr = [1, 2, 3];
+arr.flatMap(x => [x, x * 2]); // [1, 2, 2, 4, 3, 6]
+// Equivalent to: arr.map(...).flat()
+```
+
+**at():**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+arr.at(0); // 1
+arr.at(-1); // 5 (last element)
+arr.at(-2); // 4
+```
+
+### 30. Explain Object methods: Object.assign, Object.entries, Object.fromEntries.
+
+**Answer:**
+**Object.assign():**
+```javascript
+const target = { a: 1 };
+const source = { b: 2, c: 3 };
+Object.assign(target, source); // { a: 1, b: 2, c: 3 }
+
+// Shallow copy
+const copy = Object.assign({}, source);
+```
+
+**Object.entries():**
+```javascript
+const obj = { a: 1, b: 2, c: 3 };
+Object.entries(obj); // [['a', 1], ['b', 2], ['c', 3]]
+
+// Convert to Map
+const map = new Map(Object.entries(obj));
+```
+
+**Object.fromEntries():**
+```javascript
+const entries = [['a', 1], ['b', 2], ['c', 3]];
+Object.fromEntries(entries); // { a: 1, b: 2, c: 3 }
+
+// Convert from Map
+const map = new Map([['a', 1], ['b', 2]]);
+Object.fromEntries(map); // { a: 1, b: 2 }
+```
+
 ---
 
 This covers JavaScript interview questions from beginner to advanced level with detailed explanations and code examples.

@@ -774,6 +774,178 @@ if (annotation != null) {
 - Monitor GC logs
 - Tune based on application behavior
 
+### 26. Explain Java 9+ features (Modules, Records, Pattern Matching).
+
+**Answer:**
+**Java 9 - Modules:**
+```java
+// module-info.java
+module com.example.app {
+    requires java.base;
+    requires java.sql;
+    exports com.example.api;
+}
+```
+
+**Java 14 - Records:**
+```java
+public record Person(String name, int age) {
+    // Automatically generates:
+    // - Constructor
+    // - Getters
+    // - equals(), hashCode(), toString()
+}
+
+// Usage
+Person person = new Person("John", 30);
+System.out.println(person.name()); // John
+```
+
+**Java 14 - Pattern Matching (Preview):**
+```java
+// instanceof pattern matching
+if (obj instanceof String str) {
+    System.out.println(str.length()); // str is available
+}
+
+// Switch expressions
+int result = switch (value) {
+    case 1 -> 10;
+    case 2 -> 20;
+    default -> 0;
+};
+```
+
+### 27. Explain CompletableFuture in detail.
+
+**Answer:**
+CompletableFuture provides asynchronous programming.
+
+```java
+// Create
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+    return "Result";
+});
+
+// Chain operations
+CompletableFuture<String> future = CompletableFuture
+    .supplyAsync(() -> "Hello")
+    .thenApply(s -> s + " World")
+    .thenApply(String::toUpperCase);
+
+// Combine futures
+CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> "Hello");
+CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> "World");
+
+CompletableFuture<String> combined = future1.thenCombine(future2, (a, b) -> a + " " + b);
+
+// Handle errors
+CompletableFuture<String> future = CompletableFuture
+    .supplyAsync(() -> {
+        if (true) throw new RuntimeException("Error");
+        return "Success";
+    })
+    .exceptionally(ex -> "Error: " + ex.getMessage());
+```
+
+### 28. Explain Java's Optional class best practices.
+
+**Answer:**
+Optional represents value that may or may not be present.
+
+```java
+// Create
+Optional<String> empty = Optional.empty();
+Optional<String> of = Optional.of("value"); // Non-null
+Optional<String> nullable = Optional.ofNullable(null); // Can be null
+
+// Usage
+Optional<String> name = Optional.of("John");
+name.ifPresent(System.out::println); // Prints if present
+String value = name.orElse("Default"); // Default if empty
+String value2 = name.orElseGet(() -> "Default"); // Lazy default
+
+// Map and filter
+Optional<String> upper = name.map(String::toUpperCase);
+Optional<String> filtered = name.filter(s -> s.length() > 5);
+```
+
+**Best Practices:**
+- Don't use for method parameters
+- Don't use for class fields
+- Use for return types
+- Avoid Optional.get() without checking
+
+### 29. Explain Java's Stream API advanced operations.
+
+**Answer:**
+**Collectors:**
+```java
+// Grouping
+Map<String, List<Person>> byCity = people.stream()
+    .collect(Collectors.groupingBy(Person::getCity));
+
+// Partitioning
+Map<Boolean, List<Person>> partitioned = people.stream()
+    .collect(Collectors.partitioningBy(p -> p.getAge() > 18));
+
+// Joining
+String names = people.stream()
+    .map(Person::getName)
+    .collect(Collectors.joining(", "));
+
+// Summarizing
+IntSummaryStatistics stats = numbers.stream()
+    .collect(Collectors.summarizingInt(Integer::intValue));
+```
+
+**Custom Collectors:**
+```java
+Collector<Person, ?, List<String>> customCollector = Collector.of(
+    ArrayList::new,
+    (list, person) -> list.add(person.getName()),
+    (list1, list2) -> {
+        list1.addAll(list2);
+        return list1;
+    },
+    Collector.Characteristics.IDENTITY_FINISH
+);
+```
+
+### 30. Explain Java's new Date/Time API (java.time).
+
+**Answer:**
+**LocalDate, LocalTime, LocalDateTime:**
+```java
+LocalDate date = LocalDate.now();
+LocalDate specificDate = LocalDate.of(2024, 1, 15);
+LocalDate parsed = LocalDate.parse("2024-01-15");
+
+LocalTime time = LocalTime.now();
+LocalTime specificTime = LocalTime.of(14, 30);
+
+LocalDateTime dateTime = LocalDateTime.now();
+```
+
+**ZonedDateTime:**
+```java
+ZonedDateTime zoned = ZonedDateTime.now(ZoneId.of("America/New_York"));
+ZonedDateTime utc = ZonedDateTime.now(ZoneId.of("UTC"));
+```
+
+**Duration and Period:**
+```java
+Duration duration = Duration.between(start, end);
+Period period = Period.between(startDate, endDate);
+```
+
+**Formatting:**
+```java
+DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+String formatted = dateTime.format(formatter);
+LocalDateTime parsed = LocalDateTime.parse("2024-01-15 10:30:00", formatter);
+```
+
 ---
 
 This covers Java interview questions from beginner to advanced level. Each answer includes code examples and explanations.

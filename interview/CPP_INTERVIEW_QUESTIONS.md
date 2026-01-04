@@ -378,6 +378,185 @@ int main() {
 }
 ```
 
+### 18. Explain copy elision and RVO (Return Value Optimization).
+
+**Answer:**
+Copy elision allows compiler to omit unnecessary copies.
+
+**RVO (Return Value Optimization):**
+```cpp
+// Compiler may elide copy
+MyClass create() {
+    return MyClass();  // No copy, constructed directly
+}
+
+MyClass obj = create();  // Direct construction
+```
+
+**Mandatory Copy Elision (C++17):**
+- Temporary objects
+- Return statements
+- Initialization from prvalues
+
+### 19. Explain perfect forwarding.
+
+**Answer:**
+Perfect forwarding preserves value category (lvalue/rvalue).
+
+```cpp
+template<typename T>
+void forwarder(T&& arg) {
+    func(std::forward<T>(arg));  // Preserves lvalue/rvalue
+}
+
+// Usage
+int x = 10;
+forwarder(x);        // Passes as lvalue
+forwarder(10);       // Passes as rvalue
+forwarder(move(x));  // Passes as rvalue
+```
+
+### 20. Explain SFINAE (Substitution Failure Is Not An Error).
+
+**Answer:**
+SFINAE allows template substitution failures to be ignored.
+
+```cpp
+#include <type_traits>
+
+// Enable if integer
+template<typename T>
+typename std::enable_if<std::is_integral<T>::value, void>::type
+func(T value) {
+    cout << "Integer: " << value << endl;
+}
+
+// Enable if floating point
+template<typename T>
+typename std::enable_if<std::is_floating_point<T>::value, void>::type
+func(T value) {
+    cout << "Float: " << value << endl;
+}
+```
+
+### 21. Explain CRTP (Curiously Recurring Template Pattern).
+
+**Answer:**
+CRTP is when derived class inherits from template base using itself.
+
+```cpp
+template<typename Derived>
+class Base {
+public:
+    void interface() {
+        static_cast<Derived*>(this)->implementation();
+    }
+};
+
+class Derived : public Base<Derived> {
+public:
+    void implementation() {
+        cout << "Derived implementation" << endl;
+    }
+};
+```
+
+**Benefits:**
+- Static polymorphism
+- No virtual function overhead
+- Compile-time dispatch
+
+### 22. Explain memory alignment and padding.
+
+**Answer:**
+Data structures are aligned for performance.
+
+```cpp
+struct Example {
+    char a;      // 1 byte
+    // 3 bytes padding
+    int b;       // 4 bytes (aligned to 4)
+    double c;    // 8 bytes (aligned to 8)
+    // Total: 16 bytes
+};
+
+// Packed (no padding)
+struct __attribute__((packed)) Packed {
+    char a;
+    int b;
+    double c;
+    // Total: 13 bytes
+};
+```
+
+### 23. Explain std::move and std::forward.
+
+**Answer:**
+**std::move:**
+```cpp
+// Converts to rvalue reference
+string str = "hello";
+string moved = std::move(str);  // str is now empty
+```
+
+**std::forward:**
+```cpp
+// Preserves value category
+template<typename T>
+void wrapper(T&& arg) {
+    func(std::forward<T>(arg));  // Perfect forwarding
+}
+```
+
+### 24. Explain variadic templates.
+
+**Answer:**
+Templates that accept variable number of arguments.
+
+```cpp
+// Base case
+void print() {}
+
+// Recursive case
+template<typename T, typename... Args>
+void print(T first, Args... args) {
+    cout << first << " ";
+    print(args...);  // Recursive call
+}
+
+// Usage
+print(1, 2.5, "hello", 'c');  // 1 2.5 hello c
+```
+
+### 25. Explain RAII and exception safety.
+
+**Answer:**
+RAII ensures resources are released even if exceptions occur.
+
+**Exception Safety Levels:**
+1. **No-throw guarantee**: Never throws
+2. **Strong guarantee**: All-or-nothing (rollback on exception)
+3. **Basic guarantee**: Valid state maintained
+4. **No guarantee**: May leave invalid state
+
+```cpp
+class FileHandler {
+    FILE* file;
+public:
+    FileHandler(const char* name) : file(fopen(name, "r")) {
+        if (!file) throw runtime_error("Cannot open");
+    }
+    
+    ~FileHandler() {
+        if (file) fclose(file);  // Always called
+    }
+    
+    // Copy disabled
+    FileHandler(const FileHandler&) = delete;
+    FileHandler& operator=(const FileHandler&) = delete;
+};
+```
+
 ---
 
 This covers C++ interview questions from beginner to advanced level with detailed explanations and code examples.

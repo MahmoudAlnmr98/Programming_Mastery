@@ -457,6 +457,262 @@ Events → Kafka → Stream Processor → Time-Series DB → Query Service
 Request → Tenant Resolver → [Tenant 1 DB] [Tenant 2 DB] [Tenant 3 DB]
 ```
 
+### 16. Design a Payment Processing System.
+
+**Requirements:**
+- Process payments
+- Handle failures
+- Idempotent operations
+- Fraud detection
+- Refunds
+
+**Answer:**
+**Components:**
+1. **Payment Gateway**: External payment processor
+2. **Payment Service**: Business logic
+3. **Transaction Service**: Track transactions
+4. **Fraud Detection**: Analyze for fraud
+5. **Notification Service**: Send receipts
+
+**Flow:**
+```
+User → Payment Service → Fraud Check → Payment Gateway
+                        ↓
+                   Transaction DB
+                        ↓
+                   Notification Service
+```
+
+**Idempotency:**
+- Use idempotency keys
+- Check before processing
+- Return same result for duplicate requests
+
+### 17. Design a Content Delivery Network (CDN).
+
+**Requirements:**
+- Distribute content globally
+- Low latency
+- High availability
+- Cache management
+
+**Answer:**
+**Architecture:**
+```
+Origin Server → Edge Servers (Global) → Users
+```
+
+**Strategies:**
+- **Push CDN**: Pre-populate edge servers
+- **Pull CDN**: Cache on demand
+- **Hybrid**: Push popular, pull others
+
+**Cache Invalidation:**
+- TTL-based expiration
+- Manual invalidation
+- Version-based URLs
+
+### 18. Design a Distributed Logging System.
+
+**Requirements:**
+- Collect logs from services
+- Store logs
+- Search logs
+- Real-time monitoring
+
+**Answer:**
+**Components:**
+1. **Log Collectors**: Collect from services
+2. **Message Queue**: Buffer logs (Kafka)
+3. **Storage**: Time-series database
+4. **Search Engine**: Elasticsearch
+5. **Dashboard**: Visualization
+
+**Architecture:**
+```
+Services → Log Collectors → Kafka → [Elasticsearch] [Time-Series DB]
+                                              ↓
+                                         Dashboard
+```
+
+### 19. Design a Recommendation System.
+
+**Requirements:**
+- Recommend items to users
+- Real-time recommendations
+- Handle cold start
+- Scalable
+
+**Answer:**
+**Approaches:**
+1. **Collaborative Filtering**: User-based, item-based
+2. **Content-Based**: Item features
+3. **Hybrid**: Combine approaches
+
+**Architecture:**
+```
+User → Recommendation Service → [Feature Store] [Model Service]
+                                        ↓
+                                   [ML Pipeline]
+```
+
+**Cold Start:**
+- Popular items
+- Demographic-based
+- Content-based features
+
+### 20. Design a Distributed Lock Service.
+
+**Requirements:**
+- Acquire/release locks
+- Handle failures
+- Low latency
+- High availability
+
+**Answer:**
+**Implementation Options:**
+1. **Redis**: SET NX with expiration
+2. **ZooKeeper**: Ephemeral nodes
+3. **etcd**: Distributed consensus
+
+**Redis Implementation:**
+```javascript
+function acquireLock(lockKey, timeout) {
+    const lockValue = Date.now().toString();
+    const acquired = redis.set(lockKey, lockValue, 'PX', timeout, 'NX');
+    return acquired ? lockValue : null;
+}
+
+function releaseLock(lockKey, lockValue) {
+    const script = `
+        if redis.call("get", KEYS[1]) == ARGV[1] then
+            return redis.call("del", KEYS[1])
+        else
+            return 0
+        end
+    `;
+    return redis.eval(script, 1, lockKey, lockValue);
+}
+```
+
+### 21. Design a Real-time Analytics Dashboard.
+
+**Requirements:**
+- Real-time metrics
+- Historical data
+- Multiple data sources
+- Low latency queries
+
+**Answer:**
+**Components:**
+1. **Event Collectors**: Collect events
+2. **Stream Processor**: Process in real-time (Kafka Streams, Flink)
+3. **Time-Series DB**: Store metrics (InfluxDB)
+4. **Query Service**: Serve queries
+5. **Dashboard**: Visualization
+
+**Architecture:**
+```
+Events → Kafka → Stream Processor → Time-Series DB → Query Service → Dashboard
+```
+
+### 22. Design a Distributed Configuration Service.
+
+**Requirements:**
+- Store configurations
+- Update configurations
+- Notify services of changes
+- Version control
+
+**Answer:**
+**Components:**
+1. **Config Store**: Database for configs
+2. **Config Service**: CRUD operations
+3. **Notification**: Push updates (WebSocket, polling)
+4. **Versioning**: Track changes
+
+**Implementation:**
+- **etcd**: Distributed key-value store
+- **Consul**: Service discovery + config
+- **ZooKeeper**: Configuration management
+
+### 23. Design a Distributed Task Queue.
+
+**Requirements:**
+- Queue tasks
+- Process tasks
+- Retry failed tasks
+- Priority queues
+
+**Answer:**
+**Components:**
+1. **Task Queue**: Store tasks (Redis, RabbitMQ)
+2. **Workers**: Process tasks
+3. **Scheduler**: Schedule tasks
+4. **Result Store**: Store results
+
+**Architecture:**
+```
+Producer → Task Queue → Workers → Result Store
+```
+
+**Features:**
+- Priority queues
+- Delayed tasks
+- Retry mechanism
+- Dead letter queue
+
+### 24. Design a Distributed Search System.
+
+**Requirements:**
+- Index documents
+- Search across documents
+- Handle large scale
+- Fast queries
+
+**Answer:**
+**Components:**
+1. **Indexer**: Build inverted index
+2. **Search Engine**: Elasticsearch, Solr
+3. **Query Processor**: Process queries
+4. **Ranking**: Rank results
+
+**Inverted Index:**
+```
+"javascript" → [doc1, doc3, doc5]
+"react" → [doc2, doc3, doc7]
+```
+
+**Sharding:**
+- Partition index by document ID
+- Distribute across nodes
+- Aggregate results
+
+### 25. Design a Distributed Cache with Consistency.
+
+**Requirements:**
+- Distributed caching
+- Consistency guarantees
+- High availability
+- Cache invalidation
+
+**Answer:**
+**Strategies:**
+1. **Write-Through**: Write to cache and DB
+2. **Write-Back**: Write to cache, async to DB
+3. **Cache-Aside**: App manages cache
+
+**Consistency:**
+- **Strong**: Synchronous replication
+- **Eventual**: Asynchronous replication
+- **Read-Repair**: Fix inconsistencies on read
+
+**Cache Invalidation:**
+- TTL-based
+- Event-based
+- Manual invalidation
+- Version-based
+
 ---
 
 This covers system design interview questions from beginner to advanced level with detailed explanations and architectures.

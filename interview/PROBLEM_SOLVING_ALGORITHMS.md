@@ -710,6 +710,253 @@ function deserialize(data) {
 }
 ```
 
+### 26. Longest Substring Without Repeating Characters
+
+**Problem:** Find length of longest substring without repeating characters.
+
+**Solution:**
+```javascript
+function lengthOfLongestSubstring(s) {
+    const map = new Map();
+    let maxLen = 0;
+    let start = 0;
+    
+    for (let end = 0; end < s.length; end++) {
+        if (map.has(s[end])) {
+            start = Math.max(start, map.get(s[end]) + 1);
+        }
+        map.set(s[end], end);
+        maxLen = Math.max(maxLen, end - start + 1);
+    }
+    
+    return maxLen;
+}
+```
+
+### 27. Container With Most Water
+
+**Problem:** Find two lines that form container with most water.
+
+**Solution:**
+```javascript
+function maxArea(height) {
+    let left = 0;
+    let right = height.length - 1;
+    let maxArea = 0;
+    
+    while (left < right) {
+        const area = Math.min(height[left], height[right]) * (right - left);
+        maxArea = Math.max(maxArea, area);
+        
+        if (height[left] < height[right]) {
+            left++;
+        } else {
+            right--;
+        }
+    }
+    
+    return maxArea;
+}
+```
+
+### 28. Climbing Stairs
+
+**Problem:** Count ways to climb n stairs (1 or 2 steps at a time).
+
+**Solution:**
+```javascript
+// Dynamic Programming
+function climbStairs(n) {
+    if (n <= 2) return n;
+    
+    let first = 1;
+    let second = 2;
+    
+    for (let i = 3; i <= n; i++) {
+        const third = first + second;
+        first = second;
+        second = third;
+    }
+    
+    return second;
+}
+```
+
+### 29. House Robber
+
+**Problem:** Maximum money that can be robbed without robbing adjacent houses.
+
+**Solution:**
+```javascript
+function rob(nums) {
+    if (nums.length === 0) return 0;
+    if (nums.length === 1) return nums[0];
+    
+    let prev2 = nums[0];
+    let prev1 = Math.max(nums[0], nums[1]);
+    
+    for (let i = 2; i < nums.length; i++) {
+        const current = Math.max(prev1, prev2 + nums[i]);
+        prev2 = prev1;
+        prev1 = current;
+    }
+    
+    return prev1;
+}
+```
+
+### 30. Generate Parentheses
+
+**Problem:** Generate all valid combinations of n pairs of parentheses.
+
+**Solution:**
+```javascript
+function generateParenthesis(n) {
+    const result = [];
+    
+    function backtrack(current, open, close) {
+        if (current.length === n * 2) {
+            result.push(current);
+            return;
+        }
+        
+        if (open < n) {
+            backtrack(current + '(', open + 1, close);
+        }
+        
+        if (close < open) {
+            backtrack(current + ')', open, close + 1);
+        }
+    }
+    
+    backtrack('', 0, 0);
+    return result;
+}
+```
+
+### 31. Merge Intervals
+
+**Problem:** Merge overlapping intervals.
+
+**Solution:**
+```javascript
+function merge(intervals) {
+    if (intervals.length <= 1) return intervals;
+    
+    intervals.sort((a, b) => a[0] - b[0]);
+    const merged = [intervals[0]];
+    
+    for (let i = 1; i < intervals.length; i++) {
+        const current = intervals[i];
+        const last = merged[merged.length - 1];
+        
+        if (current[0] <= last[1]) {
+            last[1] = Math.max(last[1], current[1]);
+        } else {
+            merged.push(current);
+        }
+    }
+    
+    return merged;
+}
+```
+
+### 32. Rotate Array
+
+**Problem:** Rotate array to right by k steps.
+
+**Solution:**
+```javascript
+function rotate(nums, k) {
+    k = k % nums.length;
+    
+    // Reverse entire array
+    reverse(nums, 0, nums.length - 1);
+    // Reverse first k elements
+    reverse(nums, 0, k - 1);
+    // Reverse remaining elements
+    reverse(nums, k, nums.length - 1);
+}
+
+function reverse(nums, start, end) {
+    while (start < end) {
+        [nums[start], nums[end]] = [nums[end], nums[start]];
+        start++;
+        end--;
+    }
+}
+```
+
+### 33. Find Minimum in Rotated Sorted Array
+
+**Problem:** Find minimum element in rotated sorted array.
+
+**Solution:**
+```javascript
+function findMin(nums) {
+    let left = 0;
+    let right = nums.length - 1;
+    
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        
+        if (nums[mid] > nums[right]) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    
+    return nums[left];
+}
+```
+
+### 34. Word Break
+
+**Problem:** Check if string can be segmented into dictionary words.
+
+**Solution:**
+```javascript
+function wordBreak(s, wordDict) {
+    const wordSet = new Set(wordDict);
+    const dp = new Array(s.length + 1).fill(false);
+    dp[0] = true;
+    
+    for (let i = 1; i <= s.length; i++) {
+        for (let j = 0; j < i; j++) {
+            if (dp[j] && wordSet.has(s.substring(j, i))) {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    
+    return dp[s.length];
+}
+```
+
+### 35. Coin Change
+
+**Problem:** Find minimum coins needed to make amount.
+
+**Solution:**
+```javascript
+function coinChange(coins, amount) {
+    const dp = new Array(amount + 1).fill(Infinity);
+    dp[0] = 0;
+    
+    for (let i = 1; i <= amount; i++) {
+        for (const coin of coins) {
+            if (coin <= i) {
+                dp[i] = Math.min(dp[i], dp[i - coin] + 1);
+            }
+        }
+    }
+    
+    return dp[amount] === Infinity ? -1 : dp[amount];
+}
+```
+
 ---
 
 ## Common Patterns

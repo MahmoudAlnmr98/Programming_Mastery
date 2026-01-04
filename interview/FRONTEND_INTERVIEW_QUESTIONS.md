@@ -350,7 +350,250 @@ Binary format for running code in browser.
 - Validate on client and server
 - Sanitize inputs
 
+### 18. Explain Web Components.
+
+**Answer:**
+Web Components are reusable custom HTML elements.
+
+**Components:**
+- **Custom Elements**: Define new HTML elements
+- **Shadow DOM**: Encapsulated DOM
+- **HTML Templates**: Reusable markup
+- **ES Modules**: Component loading
+
+```javascript
+class MyComponent extends HTMLElement {
+    constructor() {
+        super();
+        const shadow = this.attachShadow({mode: 'open'});
+        shadow.innerHTML = `
+            <style>
+                :host { display: block; }
+            </style>
+            <div>Hello from Web Component</div>
+        `;
+    }
+}
+
+customElements.define('my-component', MyComponent);
+```
+
+### 19. Explain CSS-in-JS solutions.
+
+**Answer:**
+CSS-in-JS allows writing CSS in JavaScript.
+
+**Libraries:**
+- **Styled Components**: CSS with template literals
+- **Emotion**: CSS-in-JS with performance
+- **JSS**: JavaScript Style Sheets
+
+**Example (Styled Components):**
+```javascript
+import styled from 'styled-components';
+
+const Button = styled.button`
+    background: ${props => props.primary ? 'blue' : 'gray'};
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+`;
+
+<Button primary>Click me</Button>
+```
+
+**Benefits:**
+- Scoped styles
+- Dynamic styling
+- No class name conflicts
+- Better component encapsulation
+
+### 20. Explain Server-Sent Events (SSE).
+
+**Answer:**
+SSE allows server to push data to client.
+
+```javascript
+// Client
+const eventSource = new EventSource('/events');
+
+eventSource.onmessage = (event) => {
+    console.log('Data:', event.data);
+};
+
+eventSource.onerror = (error) => {
+    console.error('Error:', error);
+};
+
+// Server (Node.js)
+app.get('/events', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
+    setInterval(() => {
+        res.write(`data: ${JSON.stringify({time: Date.now()})}\n\n`);
+    }, 1000);
+});
+```
+
+### 21. Explain CSS Custom Properties (CSS Variables).
+
+**Answer:**
+CSS variables allow dynamic values.
+
+```css
+:root {
+    --primary-color: #3498db;
+    --spacing: 20px;
+}
+
+.button {
+    background: var(--primary-color);
+    padding: var(--spacing);
+}
+
+/* Override in component */
+.dark-theme {
+    --primary-color: #2c3e50;
+}
+```
+
+**JavaScript Access:**
+```javascript
+// Get
+const color = getComputedStyle(document.documentElement)
+    .getPropertyValue('--primary-color');
+
+// Set
+document.documentElement.style.setProperty('--primary-color', '#e74c3c');
+```
+
+### 22. Explain Intersection Observer API.
+
+**Answer:**
+Intersection Observer detects when elements enter/exit viewport.
+
+```javascript
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+}, {
+    threshold: 0.5,  // Trigger when 50% visible
+    rootMargin: '50px'
+});
+
+observer.observe(document.querySelector('.element'));
+```
+
+**Use Cases:**
+- Lazy loading images
+- Infinite scroll
+- Animations on scroll
+- Analytics tracking
+
+### 23. Explain Web Workers in detail.
+
+**Answer:**
+Web Workers run JavaScript in background threads.
+
+**Dedicated Worker:**
+```javascript
+// main.js
+const worker = new Worker('worker.js');
+worker.postMessage({data: 'Hello'});
+worker.onmessage = (e) => {
+    console.log('Result:', e.data);
+};
+
+// worker.js
+self.onmessage = (e) => {
+    const result = processData(e.data);
+    self.postMessage(result);
+};
+```
+
+**Shared Worker:**
+```javascript
+// Multiple scripts can share
+const worker = new SharedWorker('shared-worker.js');
+worker.port.postMessage('Hello');
+worker.port.onmessage = (e) => {
+    console.log(e.data);
+};
+```
+
+**Limitations:**
+- No DOM access
+- No window object
+- Communication via messages only
+
+### 24. Explain IndexedDB.
+
+**Answer:**
+IndexedDB is browser database for large data storage.
+
+```javascript
+// Open database
+const request = indexedDB.open('MyDB', 1);
+
+request.onupgradeneeded = (event) => {
+    const db = event.target.result;
+    const store = db.createObjectStore('users', {keyPath: 'id'});
+    store.createIndex('name', 'name', {unique: false});
+};
+
+request.onsuccess = (event) => {
+    const db = event.target.result;
+    
+    // Add data
+    const transaction = db.transaction(['users'], 'readwrite');
+    const store = transaction.objectStore('users');
+    store.add({id: 1, name: 'John'});
+    
+    // Get data
+    const getRequest = store.get(1);
+    getRequest.onsuccess = () => {
+        console.log(getRequest.result);
+    };
+};
+```
+
+### 25. Explain WebRTC basics.
+
+**Answer:**
+WebRTC enables peer-to-peer communication.
+
+**Components:**
+- **MediaStream**: Audio/video streams
+- **RTCPeerConnection**: Peer connection
+- **RTCDataChannel**: Data transfer
+
+```javascript
+// Get user media
+navigator.mediaDevices.getUserMedia({video: true, audio: true})
+    .then(stream => {
+        videoElement.srcObject = stream;
+    });
+
+// Create peer connection
+const pc = new RTCPeerConnection();
+pc.onicecandidate = (event) => {
+    if (event.candidate) {
+        // Send candidate to peer
+    }
+};
+
+pc.ontrack = (event) => {
+    remoteVideo.srcObject = event.streams[0];
+};
+```
+
 ---
 
-This covers frontend interview questions from beginner to advanced level.
+This covers frontend interview questions from beginner to advanced level with comprehensive coverage.
 

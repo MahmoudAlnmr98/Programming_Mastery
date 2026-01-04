@@ -451,6 +451,180 @@ System eventually converges to consistent state.
 - Good for relationships
 - Social networks, recommendations
 
+### 21. Explain database indexing internals (B-Tree, B+ Tree).
+
+**Answer:**
+**B-Tree:**
+- Balanced tree structure
+- All nodes store data
+- Good for range queries
+- Used in older databases
+
+**B+ Tree:**
+- Only leaf nodes store data
+- Internal nodes store keys only
+- All data in leaves (linked list)
+- Better for range scans
+
+**Comparison:**
+- B+ Tree: Better for sequential access
+- B+ Tree: More efficient for large datasets
+- B+ Tree: Lower tree height
+
+### 22. Explain database connection pooling in detail.
+
+**Answer:**
+Connection pool manages database connections.
+
+**Benefits:**
+- Reuse connections
+- Limit connections
+- Better performance
+- Resource management
+
+**Configuration:**
+```java
+HikariConfig config = new HikariConfig();
+config.setMaximumPoolSize(20);
+config.setMinimumIdle(5);
+config.setConnectionTimeout(30000);
+config.setIdleTimeout(600000);
+config.setMaxLifetime(1800000);
+```
+
+**Pool States:**
+- Active: In use
+- Idle: Available
+- Pending: Waiting for connection
+
+### 23. Explain database query optimization techniques.
+
+**Answer:**
+**Techniques:**
+1. **Use Indexes**: On frequently queried columns
+2. **Avoid SELECT ***: Select only needed columns
+3. **Use JOINs**: Instead of subqueries
+4. **Limit Results**: Use LIMIT/TOP
+5. **Analyze Queries**: Use EXPLAIN
+
+**Query Hints:**
+```sql
+-- Force index usage
+SELECT * FROM users USE INDEX (idx_email) WHERE email = 'test@example.com';
+
+-- Analyze query plan
+EXPLAIN SELECT * FROM users WHERE email = 'test@example.com';
+```
+
+### 24. Explain database locking mechanisms.
+
+**Answer:**
+**Lock Types:**
+- **Shared Lock**: Read lock, multiple readers
+- **Exclusive Lock**: Write lock, single writer
+- **Intent Lock**: Table-level lock
+
+**Lock Granularity:**
+- **Row-level**: Lock individual rows
+- **Page-level**: Lock pages
+- **Table-level**: Lock entire table
+
+**Deadlock Prevention:**
+- Lock ordering
+- Timeout
+- Deadlock detection
+
+### 25. Explain database backup and recovery in detail.
+
+**Answer:**
+**Backup Types:**
+- **Full Backup**: Complete database
+- **Incremental**: Changes since last backup
+- **Differential**: Changes since last full backup
+- **Transaction Log**: All transactions
+
+**Recovery Models:**
+- **Simple**: No log backups
+- **Full**: Complete recovery
+- **Bulk-Logged**: Minimal logging
+
+**RTO/RPO:**
+- **RTO**: Recovery Time Objective
+- **RPO**: Recovery Point Objective
+
+**Point-in-Time Recovery:**
+```sql
+-- Restore full backup
+RESTORE DATABASE MyDB FROM DISK = 'backup.bak';
+
+-- Restore transaction log
+RESTORE LOG MyDB FROM DISK = 'log.trn' WITH STOPAT = '2024-01-01 12:00:00';
+```
+
+### 26. Explain database partitioning strategies.
+
+**Answer:**
+**Partitioning Types:**
+- **Range**: Partition by value ranges
+- **Hash**: Partition by hash function
+- **List**: Partition by list of values
+- **Composite**: Multiple strategies
+
+**Example (Range Partitioning):**
+```sql
+CREATE TABLE orders (
+    id INT,
+    order_date DATE,
+    amount DECIMAL
+) PARTITION BY RANGE (YEAR(order_date)) (
+    PARTITION p2022 VALUES LESS THAN (2023),
+    PARTITION p2023 VALUES LESS THAN (2024),
+    PARTITION p2024 VALUES LESS THAN (2025)
+);
+```
+
+**Benefits:**
+- Better performance
+- Easier management
+- Improved availability
+
+### 27. Explain database replication lag and consistency.
+
+**Answer:**
+**Replication Lag:**
+- Delay between write and replication
+- Causes: Network, load, distance
+
+**Consistency Levels:**
+- **Strong**: Read from primary
+- **Eventual**: Read from replica (may be stale)
+- **Read-Your-Writes**: Read own writes from primary
+
+**Handling Lag:**
+- Monitor replication delay
+- Route critical reads to primary
+- Use read replicas for analytics
+
+### 28. Explain database connection string and security.
+
+**Answer:**
+**Connection String:**
+```
+jdbc:mysql://host:port/database?user=user&password=pass
+```
+
+**Security Best Practices:**
+- Use encrypted connections (SSL/TLS)
+- Store credentials securely
+- Use connection pooling
+- Limit privileges
+- Regular security updates
+
+**Encryption:**
+- **At Rest**: Encrypt database files
+- **In Transit**: SSL/TLS for connections
+- **Application**: Encrypt sensitive data
+
 ---
 
 This covers database interview questions from beginner to advanced level with detailed explanations.

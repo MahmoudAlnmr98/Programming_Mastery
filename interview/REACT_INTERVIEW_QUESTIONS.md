@@ -751,6 +751,135 @@ test('increments counter', () => {
 - Test accessibility
 - Mock external dependencies
 
+### 26. Explain React Portals.
+
+**Answer:**
+Portals render children into DOM node outside parent hierarchy.
+
+```jsx
+import { createPortal } from 'react-dom';
+
+function Modal({ children }) {
+    return createPortal(
+        <div className="modal">
+            {children}
+        </div>,
+        document.body
+    );
+}
+```
+
+**Use Cases:**
+- Modals
+- Tooltips
+- Dropdowns
+- Overlays
+
+### 27. Explain React's useReducer hook.
+
+**Answer:**
+useReducer manages complex state logic.
+
+```jsx
+function reducer(state, action) {
+    switch (action.type) {
+        case 'increment':
+            return { count: state.count + 1 };
+        case 'decrement':
+            return { count: state.count - 1 };
+        case 'reset':
+            return { count: 0 };
+        default:
+            return state;
+    }
+}
+
+function Counter() {
+    const [state, dispatch] = useReducer(reducer, { count: 0 });
+    
+    return (
+        <div>
+            <p>Count: {state.count}</p>
+            <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+            <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+            <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>
+        </div>
+    );
+}
+```
+
+### 28. Explain React's useLayoutEffect hook.
+
+**Answer:**
+useLayoutEffect runs synchronously after DOM mutations but before paint.
+
+```jsx
+function Tooltip({ children, position }) {
+    const ref = useRef(null);
+    
+    useLayoutEffect(() => {
+        // Measure DOM before paint
+        const { width, height } = ref.current.getBoundingClientRect();
+        // Adjust position
+    }, [position]);
+    
+    return <div ref={ref}>{children}</div>;
+}
+```
+
+**Difference from useEffect:**
+- useLayoutEffect: Synchronous, before paint
+- useEffect: Asynchronous, after paint
+
+### 29. Explain React's useImperativeHandle hook.
+
+**Answer:**
+useImperativeHandle customizes instance value exposed to parent via ref.
+
+```jsx
+const FancyInput = forwardRef((props, ref) => {
+    const inputRef = useRef();
+    
+    useImperativeHandle(ref, () => ({
+        focus: () => {
+            inputRef.current.focus();
+        },
+        clear: () => {
+            inputRef.current.value = '';
+        }
+    }));
+    
+    return <input ref={inputRef} {...props} />;
+});
+
+// Usage
+function Parent() {
+    const inputRef = useRef();
+    
+    return (
+        <>
+            <FancyInput ref={inputRef} />
+            <button onClick={() => inputRef.current.focus()}>Focus</button>
+        </>
+    );
+}
+```
+
+### 30. Explain React's useDebugValue hook.
+
+**Answer:**
+useDebugValue displays label in React DevTools for custom hooks.
+
+```jsx
+function useCounter(initialValue) {
+    const [count, setCount] = useState(initialValue);
+    
+    useDebugValue(count > 10 ? 'High' : 'Low');
+    
+    return [count, setCount];
+}
+```
+
 ---
 
 This covers React interview questions from beginner to advanced level with detailed explanations and code examples.
