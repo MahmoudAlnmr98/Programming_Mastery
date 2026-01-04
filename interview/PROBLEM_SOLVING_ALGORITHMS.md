@@ -519,11 +519,1322 @@ function threeSum(nums) {
 }
 ```
 
+### 21. Contains Duplicate (LeetCode Easy)
+
+**Problem:** Given an array of integers, find if the array contains any duplicates.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(n)
+function containsDuplicate(nums) {
+    const seen = new Set();
+    for (let num of nums) {
+        if (seen.has(num)) return true;
+        seen.add(num);
+    }
+    return false;
+}
+
+// Using Set size
+function containsDuplicate(nums) {
+    return new Set(nums).size !== nums.length;
+}
+```
+
+### 22. Missing Number (LeetCode Easy)
+
+**Problem:** Given array containing n distinct numbers from [0, n], find the missing number.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function missingNumber(nums) {
+    const n = nums.length;
+    const expectedSum = (n * (n + 1)) / 2;
+    const actualSum = nums.reduce((sum, num) => sum + num, 0);
+    return expectedSum - actualSum;
+}
+
+// Using XOR
+function missingNumber(nums) {
+    let result = nums.length;
+    for (let i = 0; i < nums.length; i++) {
+        result ^= i ^ nums[i];
+    }
+    return result;
+}
+```
+
+### 23. Single Number (LeetCode Easy)
+
+**Problem:** Find the single element that appears once (others appear twice).
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function singleNumber(nums) {
+    let result = 0;
+    for (let num of nums) {
+        result ^= num;
+    }
+    return result;
+}
+```
+
+### 24. Move Zeroes (LeetCode Easy)
+
+**Problem:** Move all zeros to end while maintaining relative order of non-zero elements.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function moveZeroes(nums) {
+    let writeIndex = 0;
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] !== 0) {
+            nums[writeIndex++] = nums[i];
+        }
+    }
+    
+    while (writeIndex < nums.length) {
+        nums[writeIndex++] = 0;
+    }
+}
+```
+
+### 25. Plus One (LeetCode Easy)
+
+**Problem:** Given large integer represented as array, add one to it.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function plusOne(digits) {
+    for (let i = digits.length - 1; i >= 0; i--) {
+        if (digits[i] < 9) {
+            digits[i]++;
+            return digits;
+        }
+        digits[i] = 0;
+    }
+    return [1, ...digits];
+}
+```
+
+### 26. Intersection of Two Arrays (LeetCode Easy)
+
+**Problem:** Find intersection of two arrays (unique elements).
+
+**Solution:**
+```javascript
+// Time: O(n + m), Space: O(n)
+function intersection(nums1, nums2) {
+    const set1 = new Set(nums1);
+    const result = [];
+    
+    for (let num of nums2) {
+        if (set1.has(num)) {
+            result.push(num);
+            set1.delete(num);
+        }
+    }
+    
+    return result;
+}
+```
+
+### 27. Rotate Array (LeetCode Medium)
+
+**Problem:** Rotate array to right by k steps.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function rotate(nums, k) {
+    k = k % nums.length;
+    
+    function reverse(start, end) {
+        while (start < end) {
+            [nums[start], nums[end]] = [nums[end], nums[start]];
+            start++;
+            end--;
+        }
+    }
+    
+    reverse(0, nums.length - 1);
+    reverse(0, k - 1);
+    reverse(k, nums.length - 1);
+}
+```
+
+### 28. Reverse Words in String (LeetCode Medium)
+
+**Problem:** Reverse order of words in string.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(n)
+function reverseWords(s) {
+    return s.trim().split(/\s+/).reverse().join(' ');
+}
+```
+
+### 29. First Unique Character in String (LeetCode Easy)
+
+**Problem:** Find first non-repeating character and return its index.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1) - max 26 characters
+function firstUniqChar(s) {
+    const count = {};
+    
+    for (let char of s) {
+        count[char] = (count[char] || 0) + 1;
+    }
+    
+    for (let i = 0; i < s.length; i++) {
+        if (count[s[i]] === 1) return i;
+    }
+    
+    return -1;
+}
+```
+
+### 30. Implement Queue using Stacks (LeetCode Easy)
+
+**Problem:** Implement queue using two stacks.
+
+**Solution:**
+```javascript
+class MyQueue {
+    constructor() {
+        this.stack1 = [];
+        this.stack2 = [];
+    }
+    
+    push(x) {
+        this.stack1.push(x);
+    }
+    
+    pop() {
+        if (this.stack2.length === 0) {
+            while (this.stack1.length > 0) {
+                this.stack2.push(this.stack1.pop());
+            }
+        }
+        return this.stack2.pop();
+    }
+    
+    peek() {
+        if (this.stack2.length === 0) {
+            while (this.stack1.length > 0) {
+                this.stack2.push(this.stack1.pop());
+            }
+        }
+        return this.stack2[this.stack2.length - 1];
+    }
+    
+    empty() {
+        return this.stack1.length === 0 && this.stack2.length === 0;
+    }
+}
+```
+
+### 31. Min Stack (LeetCode Easy)
+
+**Problem:** Design stack that supports push, pop, top, and getMin in O(1).
+
+**Solution:**
+```javascript
+class MinStack {
+    constructor() {
+        this.stack = [];
+        this.minStack = [];
+    }
+    
+    push(val) {
+        this.stack.push(val);
+        if (this.minStack.length === 0 || val <= this.minStack[this.minStack.length - 1]) {
+            this.minStack.push(val);
+        }
+    }
+    
+    pop() {
+        const val = this.stack.pop();
+        if (val === this.minStack[this.minStack.length - 1]) {
+            this.minStack.pop();
+        }
+        return val;
+    }
+    
+    top() {
+        return this.stack[this.stack.length - 1];
+    }
+    
+    getMin() {
+        return this.minStack[this.minStack.length - 1];
+    }
+}
+```
+
+### 32. Binary Search (LeetCode Easy)
+
+**Problem:** Search target in sorted array using binary search.
+
+**Solution:**
+```javascript
+// Time: O(log n), Space: O(1)
+function search(nums, target) {
+    let left = 0, right = nums.length - 1;
+    
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        
+        if (nums[mid] === target) return mid;
+        if (nums[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    
+    return -1;
+}
+```
+
+### 33. Search Insert Position (LeetCode Easy)
+
+**Problem:** Find index where target should be inserted in sorted array.
+
+**Solution:**
+```javascript
+// Time: O(log n), Space: O(1)
+function searchInsert(nums, target) {
+    let left = 0, right = nums.length - 1;
+    
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        
+        if (nums[mid] === target) return mid;
+        if (nums[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    
+    return left;
+}
+```
+
+### 34. Sqrt(x) (LeetCode Easy)
+
+**Problem:** Compute square root of x (integer part).
+
+**Solution:**
+```javascript
+// Time: O(log x), Space: O(1)
+function mySqrt(x) {
+    if (x < 2) return x;
+    
+    let left = 1, right = Math.floor(x / 2);
+    
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        const square = mid * mid;
+        
+        if (square === x) return mid;
+        if (square < x) left = mid + 1;
+        else right = mid - 1;
+    }
+    
+    return right;
+}
+```
+
+### 35. Pascal's Triangle (LeetCode Easy)
+
+**Problem:** Generate first n rows of Pascal's triangle.
+
+**Solution:**
+```javascript
+// Time: O(n^2), Space: O(n^2)
+function generate(numRows) {
+    const triangle = [];
+    
+    for (let i = 0; i < numRows; i++) {
+        const row = [1];
+        
+        for (let j = 1; j < i; j++) {
+            row.push(triangle[i - 1][j - 1] + triangle[i - 1][j]);
+        }
+        
+        if (i > 0) row.push(1);
+        triangle.push(row);
+    }
+    
+    return triangle;
+}
+```
+
+### 36. Remove Element (LeetCode Easy)
+
+**Problem:** Remove all instances of val in-place, return new length.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function removeElement(nums, val) {
+    let writeIndex = 0;
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] !== val) {
+            nums[writeIndex++] = nums[i];
+        }
+    }
+    
+    return writeIndex;
+}
+```
+
+### 37. Remove Duplicates from Sorted Array (LeetCode Easy)
+
+**Problem:** Remove duplicates in-place from sorted array, return new length.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function removeDuplicates(nums) {
+    if (nums.length === 0) return 0;
+    
+    let writeIndex = 1;
+    
+    for (let i = 1; i < nums.length; i++) {
+        if (nums[i] !== nums[i - 1]) {
+            nums[writeIndex++] = nums[i];
+        }
+    }
+    
+    return writeIndex;
+}
+```
+
+### 38. Majority Element (LeetCode Easy)
+
+**Problem:** Find element that appears more than n/2 times.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1) - Boyer-Moore Algorithm
+function majorityElement(nums) {
+    let candidate = null;
+    let count = 0;
+    
+    for (let num of nums) {
+        if (count === 0) {
+            candidate = num;
+        }
+        count += (num === candidate) ? 1 : -1;
+    }
+    
+    return candidate;
+}
+```
+
+### 39. Best Time to Buy and Sell Stock II (LeetCode Easy)
+
+**Problem:** Find maximum profit (can buy and sell multiple times).
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function maxProfit(prices) {
+    let profit = 0;
+    
+    for (let i = 1; i < prices.length; i++) {
+        if (prices[i] > prices[i - 1]) {
+            profit += prices[i] - prices[i - 1];
+        }
+    }
+    
+    return profit;
+}
+```
+
+### 40. Contains Duplicate II (LeetCode Easy)
+
+**Problem:** Check if array contains duplicate within k distance.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(k)
+function containsNearbyDuplicate(nums, k) {
+    const map = new Map();
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (map.has(nums[i]) && i - map.get(nums[i]) <= k) {
+            return true;
+        }
+        map.set(nums[i], i);
+    }
+    
+    return false;
+}
+```
+
+### 41. Power of Two (LeetCode Easy)
+
+**Problem:** Check if number is power of 2.
+
+**Solution:**
+```javascript
+// Time: O(1), Space: O(1)
+function isPowerOfTwo(n) {
+    if (n <= 0) return false;
+    return (n & (n - 1)) === 0;
+}
+```
+
+### 42. Reverse Linked List (LeetCode Easy)
+
+**Problem:** Reverse a singly linked list.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function reverseList(head) {
+    let prev = null;
+    let current = head;
+    
+    while (current !== null) {
+        const next = current.next;
+        current.next = prev;
+        prev = current;
+        current = next;
+    }
+    
+    return prev;
+}
+```
+
+### 43. Merge Two Sorted Lists (LeetCode Easy)
+
+**Problem:** Merge two sorted linked lists.
+
+**Solution:**
+```javascript
+// Time: O(n + m), Space: O(1)
+function mergeTwoLists(list1, list2) {
+    const dummy = new ListNode(0);
+    let current = dummy;
+    
+    while (list1 !== null && list2 !== null) {
+        if (list1.val < list2.val) {
+            current.next = list1;
+            list1 = list1.next;
+        } else {
+            current.next = list2;
+            list2 = list2.next;
+        }
+        current = current.next;
+    }
+    
+    current.next = list1 || list2;
+    return dummy.next;
+}
+```
+
+### 44. Linked List Cycle (LeetCode Easy)
+
+**Problem:** Detect if linked list has cycle.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1) - Floyd's Cycle Detection
+function hasCycle(head) {
+    if (!head || !head.next) return false;
+    
+    let slow = head;
+    let fast = head.next;
+    
+    while (fast && fast.next) {
+        if (slow === fast) return true;
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    
+    return false;
+}
+```
+
+### 45. Delete Node in Linked List (LeetCode Easy)
+
+**Problem:** Delete node (except tail) given only access to that node.
+
+**Solution:**
+```javascript
+// Time: O(1), Space: O(1)
+function deleteNode(node) {
+    node.val = node.next.val;
+    node.next = node.next.next;
+}
+```
+
+### 46. Remove Nth Node From End (LeetCode Medium)
+
+**Problem:** Remove nth node from end of list.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function removeNthFromEnd(head, n) {
+    const dummy = new ListNode(0);
+    dummy.next = head;
+    
+    let first = dummy;
+    let second = dummy;
+    
+    for (let i = 0; i <= n; i++) {
+        first = first.next;
+    }
+    
+    while (first !== null) {
+        first = first.next;
+        second = second.next;
+    }
+    
+    second.next = second.next.next;
+    return dummy.next;
+}
+```
+
+### 47. Same Tree (LeetCode Easy)
+
+**Problem:** Check if two binary trees are identical.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function isSameTree(p, q) {
+    if (!p && !q) return true;
+    if (!p || !q) return false;
+    if (p.val !== q.val) return false;
+    
+    return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+}
+```
+
+### 48. Maximum Depth of Binary Tree (LeetCode Easy)
+
+**Problem:** Find maximum depth of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function maxDepth(root) {
+    if (!root) return 0;
+    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}
+```
+
+### 49. Symmetric Tree (LeetCode Easy)
+
+**Problem:** Check if binary tree is symmetric.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function isSymmetric(root) {
+    if (!root) return true;
+    return isMirror(root.left, root.right);
+}
+
+function isMirror(left, right) {
+    if (!left && !right) return true;
+    if (!left || !right) return false;
+    if (left.val !== right.val) return false;
+    
+    return isMirror(left.left, right.right) && 
+           isMirror(left.right, right.left);
+}
+```
+
+### 50. Invert Binary Tree (LeetCode Easy)
+
+**Problem:** Invert binary tree (mirror it).
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function invertTree(root) {
+    if (!root) return null;
+    
+    [root.left, root.right] = [root.right, root.left];
+    
+    invertTree(root.left);
+    invertTree(root.right);
+    
+    return root;
+}
+```
+
+### 51. Path Sum (LeetCode Easy)
+
+**Problem:** Check if tree has root-to-leaf path with given sum.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function hasPathSum(root, targetSum) {
+    if (!root) return false;
+    if (!root.left && !root.right) return root.val === targetSum;
+    
+    return hasPathSum(root.left, targetSum - root.val) ||
+           hasPathSum(root.right, targetSum - root.val);
+}
+```
+
+### 52. Count and Say (LeetCode Medium)
+
+**Problem:** Generate nth term of count-and-say sequence.
+
+**Solution:**
+```javascript
+// Time: O(2^n), Space: O(2^n)
+function countAndSay(n) {
+    if (n === 1) return "1";
+    
+    const prev = countAndSay(n - 1);
+    let result = "";
+    let count = 1;
+    
+    for (let i = 0; i < prev.length; i++) {
+        if (prev[i] === prev[i + 1]) {
+            count++;
+        } else {
+            result += count + prev[i];
+            count = 1;
+        }
+    }
+    
+    return result;
+}
+```
+
+### 53. Length of Last Word (LeetCode Easy)
+
+**Problem:** Find length of last word in string.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function lengthOfLastWord(s) {
+    let length = 0;
+    let i = s.length - 1;
+    
+    // Skip trailing spaces
+    while (i >= 0 && s[i] === ' ') i--;
+    
+    // Count last word
+    while (i >= 0 && s[i] !== ' ') {
+        length++;
+        i--;
+    }
+    
+    return length;
+}
+```
+
+### 54. Add Binary (LeetCode Easy)
+
+**Problem:** Add two binary strings, return binary string.
+
+**Solution:**
+```javascript
+// Time: O(max(m, n)), Space: O(max(m, n))
+function addBinary(a, b) {
+    let result = "";
+    let carry = 0;
+    let i = a.length - 1;
+    let j = b.length - 1;
+    
+    while (i >= 0 || j >= 0 || carry > 0) {
+        const sum = (i >= 0 ? parseInt(a[i]) : 0) + 
+                   (j >= 0 ? parseInt(b[j]) : 0) + 
+                   carry;
+        result = (sum % 2) + result;
+        carry = Math.floor(sum / 2);
+        i--;
+        j--;
+    }
+    
+    return result;
+}
+```
+
+### 55. Implement strStr() (LeetCode Easy)
+
+**Problem:** Find first occurrence of needle in haystack, return index.
+
+**Solution:**
+```javascript
+// Time: O(n * m), Space: O(1)
+function strStr(haystack, needle) {
+    if (needle === "") return 0;
+    
+    for (let i = 0; i <= haystack.length - needle.length; i++) {
+        if (haystack.substring(i, i + needle.length) === needle) {
+            return i;
+        }
+    }
+    
+    return -1;
+}
+```
+
+### 56. Longest Common Prefix (LeetCode Easy)
+
+**Problem:** Find longest common prefix string amongst array of strings.
+
+**Solution:**
+```javascript
+// Time: O(S), Space: O(1) where S is sum of all characters
+function longestCommonPrefix(strs) {
+    if (strs.length === 0) return "";
+    
+    let prefix = strs[0];
+    
+    for (let i = 1; i < strs.length; i++) {
+        while (strs[i].indexOf(prefix) !== 0) {
+            prefix = prefix.substring(0, prefix.length - 1);
+            if (prefix === "") return "";
+        }
+    }
+    
+    return prefix;
+}
+```
+
+### 57. Excel Sheet Column Number (LeetCode Easy)
+
+**Problem:** Convert Excel column title to number (A=1, Z=26, AA=27).
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function titleToNumber(columnTitle) {
+    let result = 0;
+    
+    for (let i = 0; i < columnTitle.length; i++) {
+        result = result * 26 + (columnTitle.charCodeAt(i) - 64);
+    }
+    
+    return result;
+}
+```
+
+### 58. Happy Number (LeetCode Easy)
+
+**Problem:** Determine if number is happy (sum of squares of digits eventually equals 1).
+
+**Solution:**
+```javascript
+// Time: O(log n), Space: O(log n)
+function isHappy(n) {
+    const seen = new Set();
+    
+    while (n !== 1 && !seen.has(n)) {
+        seen.add(n);
+        n = getNext(n);
+    }
+    
+    return n === 1;
+}
+
+function getNext(n) {
+    let sum = 0;
+    while (n > 0) {
+        const digit = n % 10;
+        sum += digit * digit;
+        n = Math.floor(n / 10);
+    }
+    return sum;
+}
+```
+
+### 59. Count Primes (LeetCode Medium)
+
+**Problem:** Count number of primes less than n.
+
+**Solution:**
+```javascript
+// Time: O(n log log n), Space: O(n) - Sieve of Eratosthenes
+function countPrimes(n) {
+    if (n <= 2) return 0;
+    
+    const isPrime = new Array(n).fill(true);
+    isPrime[0] = false;
+    isPrime[1] = false;
+    
+    for (let i = 2; i * i < n; i++) {
+        if (isPrime[i]) {
+            for (let j = i * i; j < n; j += i) {
+                isPrime[j] = false;
+            }
+        }
+    }
+    
+    return isPrime.filter(Boolean).length;
+}
+```
+
+### 60. Power of Three (LeetCode Easy)
+
+**Problem:** Check if integer is power of 3.
+
+**Solution:**
+```javascript
+// Time: O(1), Space: O(1)
+function isPowerOfThree(n) {
+    if (n <= 0) return false;
+    return 1162261467 % n === 0; // 3^19 is largest power of 3 in 32-bit int
+}
+```
+
+### 61. Valid Anagram (LeetCode Easy)
+
+**Problem:** Check if two strings are anagrams of each other.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1) - max 26 characters
+function isAnagram(s, t) {
+    if (s.length !== t.length) return false;
+    
+    const count = new Array(26).fill(0);
+    
+    for (let i = 0; i < s.length; i++) {
+        count[s.charCodeAt(i) - 97]++;
+        count[t.charCodeAt(i) - 97]--;
+    }
+    
+    return count.every(c => c === 0);
+}
+```
+
+### 62. First Bad Version (LeetCode Easy)
+
+**Problem:** Find first bad version using binary search.
+
+**Solution:**
+```javascript
+// Time: O(log n), Space: O(1)
+function firstBadVersion(n) {
+    let left = 1, right = n;
+    
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        if (isBadVersion(mid)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    
+    return left;
+}
+```
+
+### 63. Climbing Stairs (LeetCode Easy)
+
+**Problem:** Count ways to climb n stairs (1 or 2 steps at a time).
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function climbStairs(n) {
+    if (n <= 2) return n;
+    
+    let first = 1, second = 2;
+    
+    for (let i = 3; i <= n; i++) {
+        const third = first + second;
+        first = second;
+        second = third;
+    }
+    
+    return second;
+}
+```
+
+### 64. Best Time to Buy and Sell Stock (LeetCode Easy)
+
+**Problem:** Find maximum profit from one transaction.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function maxProfit(prices) {
+    let minPrice = Infinity;
+    let maxProfit = 0;
+    
+    for (let price of prices) {
+        minPrice = Math.min(minPrice, price);
+        maxProfit = Math.max(maxProfit, price - minPrice);
+    }
+    
+    return maxProfit;
+}
+```
+
+### 65. Maximum Depth of Binary Tree (LeetCode Easy)
+
+**Problem:** Find maximum depth of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function maxDepth(root) {
+    if (!root) return 0;
+    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}
+```
+
+### 66. Same Tree (LeetCode Easy)
+
+**Problem:** Check if two binary trees are identical.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function isSameTree(p, q) {
+    if (!p && !q) return true;
+    if (!p || !q) return false;
+    if (p.val !== q.val) return false;
+    
+    return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+}
+```
+
+### 67. Invert Binary Tree (LeetCode Easy)
+
+**Problem:** Invert a binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function invertTree(root) {
+    if (!root) return null;
+    
+    [root.left, root.right] = [root.right, root.left];
+    
+    invertTree(root.left);
+    invertTree(root.right);
+    
+    return root;
+}
+```
+
+### 68. Valid Parentheses (LeetCode Easy)
+
+**Problem:** Check if parentheses string is valid.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(n)
+function isValid(s) {
+    const stack = [];
+    const map = { ')': '(', '}': '{', ']': '[' };
+    
+    for (let char of s) {
+        if (char in map) {
+            if (stack.length === 0 || stack.pop() !== map[char]) {
+                return false;
+            }
+        } else {
+            stack.push(char);
+        }
+    }
+    
+    return stack.length === 0;
+}
+```
+
+### 69. Merge Two Sorted Lists (LeetCode Easy)
+
+**Problem:** Merge two sorted linked lists.
+
+**Solution:**
+```javascript
+// Time: O(n + m), Space: O(1)
+function mergeTwoLists(list1, list2) {
+    const dummy = new ListNode(0);
+    let current = dummy;
+    
+    while (list1 && list2) {
+        if (list1.val < list2.val) {
+            current.next = list1;
+            list1 = list1.next;
+        } else {
+            current.next = list2;
+            list2 = list2.next;
+        }
+        current = current.next;
+    }
+    
+    current.next = list1 || list2;
+    return dummy.next;
+}
+```
+
+### 70. Symmetric Tree (LeetCode Easy)
+
+**Problem:** Check if binary tree is symmetric.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function isSymmetric(root) {
+    if (!root) return true;
+    return isMirror(root.left, root.right);
+}
+
+function isMirror(left, right) {
+    if (!left && !right) return true;
+    if (!left || !right) return false;
+    if (left.val !== right.val) return false;
+    
+    return isMirror(left.left, right.right) && 
+           isMirror(left.right, right.left);
+}
+```
+
+### 71. Path Sum (LeetCode Easy)
+
+**Problem:** Check if tree has root-to-leaf path with given sum.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function hasPathSum(root, targetSum) {
+    if (!root) return false;
+    if (!root.left && !root.right) return root.val === targetSum;
+    
+    return hasPathSum(root.left, targetSum - root.val) ||
+           hasPathSum(root.right, targetSum - root.val);
+}
+```
+
+### 72. Minimum Depth of Binary Tree (LeetCode Easy)
+
+**Problem:** Find minimum depth of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function minDepth(root) {
+    if (!root) return 0;
+    if (!root.left && !root.right) return 1;
+    if (!root.left) return 1 + minDepth(root.right);
+    if (!root.right) return 1 + minDepth(root.left);
+    
+    return 1 + Math.min(minDepth(root.left), minDepth(root.right));
+}
+```
+
+### 73. Balanced Binary Tree (LeetCode Easy)
+
+**Problem:** Check if binary tree is height-balanced.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function isBalanced(root) {
+    return getHeight(root) !== -1;
+}
+
+function getHeight(root) {
+    if (!root) return 0;
+    
+    const left = getHeight(root.left);
+    if (left === -1) return -1;
+    
+    const right = getHeight(root.right);
+    if (right === -1) return -1;
+    
+    if (Math.abs(left - right) > 1) return -1;
+    
+    return 1 + Math.max(left, right);
+}
+```
+
+### 74. Convert Sorted Array to BST (LeetCode Easy)
+
+**Problem:** Convert sorted array to height-balanced BST.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(log n)
+function sortedArrayToBST(nums) {
+    return buildBST(nums, 0, nums.length - 1);
+}
+
+function buildBST(nums, left, right) {
+    if (left > right) return null;
+    
+    const mid = Math.floor((left + right) / 2);
+    const root = new TreeNode(nums[mid]);
+    
+    root.left = buildBST(nums, left, mid - 1);
+    root.right = buildBST(nums, mid + 1, right);
+    
+    return root;
+}
+```
+
+### 75. Binary Tree Level Order Traversal (LeetCode Medium)
+
+**Problem:** Return level order traversal of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(n)
+function levelOrder(root) {
+    if (!root) return [];
+    
+    const result = [];
+    const queue = [root];
+    
+    while (queue.length > 0) {
+        const level = [];
+        const size = queue.length;
+        
+        for (let i = 0; i < size; i++) {
+            const node = queue.shift();
+            level.push(node.val);
+            
+            if (node.left) queue.push(node.left);
+            if (node.right) queue.push(node.right);
+        }
+        
+        result.push(level);
+    }
+    
+    return result;
+}
+```
+
+### 76. Binary Tree Inorder Traversal (LeetCode Easy)
+
+**Problem:** Return inorder traversal of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function inorderTraversal(root) {
+    const result = [];
+    
+    function traverse(node) {
+        if (!node) return;
+        traverse(node.left);
+        result.push(node.val);
+        traverse(node.right);
+    }
+    
+    traverse(root);
+    return result;
+}
+```
+
+### 77. Binary Tree Preorder Traversal (LeetCode Easy)
+
+**Problem:** Return preorder traversal of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function preorderTraversal(root) {
+    const result = [];
+    
+    function traverse(node) {
+        if (!node) return;
+        result.push(node.val);
+        traverse(node.left);
+        traverse(node.right);
+    }
+    
+    traverse(root);
+    return result;
+}
+```
+
+### 78. Binary Tree Postorder Traversal (LeetCode Easy)
+
+**Problem:** Return postorder traversal of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function postorderTraversal(root) {
+    const result = [];
+    
+    function traverse(node) {
+        if (!node) return;
+        traverse(node.left);
+        traverse(node.right);
+        result.push(node.val);
+    }
+    
+    traverse(root);
+    return result;
+}
+```
+
+### 79. Maximum Subarray (Kadane's Algorithm) (LeetCode Easy)
+
+**Problem:** Find maximum sum of contiguous subarray.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function maxSubArray(nums) {
+    let maxSum = nums[0];
+    let currentSum = nums[0];
+    
+    for (let i = 1; i < nums.length; i++) {
+        currentSum = Math.max(nums[i], currentSum + nums[i]);
+        maxSum = Math.max(maxSum, currentSum);
+    }
+    
+    return maxSum;
+}
+```
+
+### 80. House Robber (LeetCode Medium)
+
+**Problem:** Maximum money that can be robbed from houses (can't rob adjacent).
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function rob(nums) {
+    if (nums.length === 0) return 0;
+    if (nums.length === 1) return nums[0];
+    
+    let prev2 = nums[0];
+    let prev1 = Math.max(nums[0], nums[1]);
+    
+    for (let i = 2; i < nums.length; i++) {
+        const current = Math.max(prev1, prev2 + nums[i]);
+        prev2 = prev1;
+        prev1 = current;
+    }
+    
+    return prev1;
+}
+```
+
 ---
 
 ## Advanced Level
 
-### 21. Merge K Sorted Lists
+### 81. Merge K Sorted Lists
 
 **Problem:** Merge k sorted linked lists.
 
@@ -565,7 +1876,7 @@ function mergeTwoLists(l1, l2) {
 }
 ```
 
-### 22. Longest Palindromic Substring
+### 82. Longest Palindromic Substring
 
 **Problem:** Find longest palindromic substring.
 
@@ -598,7 +1909,7 @@ function longestPalindrome(s) {
 }
 ```
 
-### 23. Trapping Rain Water
+### 83. Trapping Rain Water
 
 **Problem:** Calculate trapped rainwater.
 
@@ -633,7 +1944,7 @@ function trap(height) {
 }
 ```
 
-### 24. Word Ladder
+### 84. Word Ladder
 
 **Problem:** Find shortest transformation sequence between two words.
 
@@ -667,7 +1978,7 @@ function ladderLength(beginWord, endWord, wordList) {
 }
 ```
 
-### 25. Serialize and Deserialize Binary Tree
+### 85. Serialize and Deserialize Binary Tree
 
 **Problem:** Convert binary tree to string and back.
 
@@ -710,7 +2021,7 @@ function deserialize(data) {
 }
 ```
 
-### 26. Longest Substring Without Repeating Characters
+### 86. Longest Substring Without Repeating Characters
 
 **Problem:** Find length of longest substring without repeating characters.
 
@@ -733,7 +2044,7 @@ function lengthOfLongestSubstring(s) {
 }
 ```
 
-### 27. Container With Most Water
+### 87. Container With Most Water
 
 **Problem:** Find two lines that form container with most water.
 
@@ -759,7 +2070,7 @@ function maxArea(height) {
 }
 ```
 
-### 28. Climbing Stairs
+### 88. Climbing Stairs
 
 **Problem:** Count ways to climb n stairs (1 or 2 steps at a time).
 
@@ -782,7 +2093,7 @@ function climbStairs(n) {
 }
 ```
 
-### 29. House Robber
+### 89. House Robber
 
 **Problem:** Maximum money that can be robbed without robbing adjacent houses.
 
@@ -805,7 +2116,7 @@ function rob(nums) {
 }
 ```
 
-### 30. Generate Parentheses
+### 90. Generate Parentheses
 
 **Problem:** Generate all valid combinations of n pairs of parentheses.
 
@@ -834,7 +2145,7 @@ function generateParenthesis(n) {
 }
 ```
 
-### 31. Merge Intervals
+### 91. Merge Intervals
 
 **Problem:** Merge overlapping intervals.
 
@@ -861,7 +2172,7 @@ function merge(intervals) {
 }
 ```
 
-### 32. Rotate Array
+### 92. Rotate Array
 
 **Problem:** Rotate array to right by k steps.
 
@@ -887,7 +2198,7 @@ function reverse(nums, start, end) {
 }
 ```
 
-### 33. Find Minimum in Rotated Sorted Array
+### 93. Find Minimum in Rotated Sorted Array
 
 **Problem:** Find minimum element in rotated sorted array.
 
@@ -911,7 +2222,7 @@ function findMin(nums) {
 }
 ```
 
-### 34. Word Break
+### 94. Word Break
 
 **Problem:** Check if string can be segmented into dictionary words.
 
@@ -935,7 +2246,7 @@ function wordBreak(s, wordDict) {
 }
 ```
 
-### 35. Coin Change
+### 95. Coin Change
 
 **Problem:** Find minimum coins needed to make amount.
 
@@ -957,7 +2268,7 @@ function coinChange(coins, amount) {
 }
 ```
 
-### 36. Implement Stack using Array.
+### 96. Implement Stack using Array.
 
 **Problem:** Implement stack data structure.
 
@@ -991,7 +2302,7 @@ class Stack {
 }
 ```
 
-### 37. Implement Queue using Array.
+### 97. Implement Queue using Array.
 
 **Problem:** Implement queue data structure.
 
@@ -1025,7 +2336,7 @@ class Queue {
 }
 ```
 
-### 38. Implement Binary Search Tree.
+### 98. Implement Binary Search Tree.
 
 **Problem:** Implement BST with insert, search, delete.
 
@@ -1070,7 +2381,7 @@ class BST {
 }
 ```
 
-### 39. Implement Linked List.
+### 99. Implement Linked List.
 
 **Problem:** Implement singly linked list.
 
@@ -1124,7 +2435,7 @@ class LinkedList {
 }
 ```
 
-### 40. Implement Hash Table.
+### 100. Implement Hash Table.
 
 **Problem:** Implement hash table with collision handling.
 
@@ -1207,7 +2518,7 @@ class HashTable {
 - Used for generating all solutions
 - Examples: N-Queens, Generate Parentheses, Combination Sum
 
-### 41. Longest Palindromic Substring
+### 101. Longest Palindromic Substring
 
 **Problem:** Find the longest palindromic substring in a string.
 
@@ -1243,7 +2554,7 @@ function longestPalindrome(s) {
 longestPalindrome("babad"); // "bab" or "aba"
 ```
 
-### 42. Container With Most Water
+### 102. Container With Most Water
 
 **Problem:** Find two lines that together with x-axis forms container with most water.
 
@@ -1272,7 +2583,7 @@ function maxArea(height) {
 maxArea([1,8,6,2,5,4,8,3,7]); // 49
 ```
 
-### 43. Three Sum
+### 103. Three Sum
 
 **Problem:** Find all unique triplets that sum to zero.
 
@@ -1312,7 +2623,7 @@ function threeSum(nums) {
 threeSum([-1,0,1,2,-1,-4]); // [[-1,-1,2],[-1,0,1]]
 ```
 
-### 44. Merge Intervals
+### 104. Merge Intervals
 
 **Problem:** Merge overlapping intervals.
 
@@ -1343,7 +2654,7 @@ function merge(intervals) {
 merge([[1,3],[2,6],[8,10],[15,18]]); // [[1,6],[8,10],[15,18]]
 ```
 
-### 45. Best Time to Buy and Sell Stock
+### 105. Best Time to Buy and Sell Stock
 
 **Problem:** Find maximum profit from buying and selling stock once.
 
@@ -1366,7 +2677,7 @@ function maxProfit(prices) {
 maxProfit([7,1,5,3,6,4]); // 5 (buy at 1, sell at 6)
 ```
 
-### 46. Climbing Stairs
+### 106. Climbing Stairs
 
 **Problem:** Count ways to climb n stairs (1 or 2 steps at a time).
 
@@ -1391,7 +2702,7 @@ function climbStairs(n) {
 climbStairs(5); // 8
 ```
 
-### 47. House Robber
+### 107. House Robber
 
 **Problem:** Maximum money that can be robbed without robbing adjacent houses.
 
@@ -1417,7 +2728,7 @@ function rob(nums) {
 rob([2,7,9,3,1]); // 12 (rob houses 0, 2, 4)
 ```
 
-### 48. Valid Parentheses
+### 108. Valid Parentheses
 
 **Problem:** Check if parentheses are valid.
 
@@ -1450,7 +2761,7 @@ isValid("()[]{}"); // true
 isValid("([)]"); // false
 ```
 
-### 49. Generate Parentheses
+### 109. Generate Parentheses
 
 **Problem:** Generate all valid parentheses combinations with n pairs.
 
@@ -1483,7 +2794,7 @@ function generateParenthesis(n) {
 generateParenthesis(3); // ["((()))","(()())","(())()","()(())","()()()"]
 ```
 
-### 50. Letter Combinations of Phone Number
+### 110. Letter Combinations of Phone Number
 
 **Problem:** Generate all letter combinations from phone number digits.
 
@@ -1526,7 +2837,7 @@ function letterCombinations(digits) {
 letterCombinations("23"); // ["ad","ae","af","bd","be","bf","cd","ce","cf"]
 ```
 
-### 51. Combination Sum
+### 111. Combination Sum
 
 **Problem:** Find all unique combinations that sum to target (can reuse numbers).
 
@@ -1559,7 +2870,7 @@ function combinationSum(candidates, target) {
 combinationSum([2,3,6,7], 7); // [[2,2,3],[7]]
 ```
 
-### 52. Permutations
+### 112. Permutations
 
 **Problem:** Generate all permutations of array.
 
@@ -1592,7 +2903,7 @@ function permute(nums) {
 permute([1,2,3]); // [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
 ```
 
-### 53. Subsets
+### 113. Subsets
 
 **Problem:** Generate all subsets of array.
 
@@ -1620,7 +2931,7 @@ function subsets(nums) {
 subsets([1,2,3]); // [[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
 ```
 
-### 54. Word Search
+### 114. Word Search
 
 **Problem:** Check if word exists in 2D board (adjacent cells).
 
@@ -1658,7 +2969,7 @@ function exist(board, word) {
 }
 ```
 
-### 55. Number of Islands
+### 115. Number of Islands
 
 **Problem:** Count number of islands (connected '1's) in 2D grid.
 
@@ -1697,7 +3008,7 @@ function numIslands(grid) {
 }
 ```
 
-### 56. Course Schedule
+### 116. Course Schedule
 
 **Problem:** Check if all courses can be finished (detect cycle in graph).
 
@@ -1734,7 +3045,7 @@ function canFinish(numCourses, prerequisites) {
 }
 ```
 
-### 57. Longest Increasing Subsequence
+### 117. Longest Increasing Subsequence
 
 **Problem:** Find length of longest increasing subsequence.
 
@@ -1770,7 +3081,7 @@ function lengthOfLIS(nums) {
 lengthOfLIS([10,9,2,5,3,7,101,18]); // 4
 ```
 
-### 58. Coin Change
+### 118. Coin Change
 
 **Problem:** Find minimum coins needed to make amount.
 
@@ -1796,7 +3107,7 @@ function coinChange(coins, amount) {
 coinChange([1,2,5], 11); // 3 (5 + 5 + 1)
 ```
 
-### 59. Edit Distance
+### 119. Edit Distance
 
 **Problem:** Find minimum operations to convert word1 to word2.
 
@@ -1829,32 +3140,9 @@ function minDistance(word1, word2) {
 }
 ```
 
-### 60. Maximum Subarray (Kadane's Algorithm)
+---
 
-**Problem:** Find maximum sum of contiguous subarray.
-
-**Solution:**
-```javascript
-// Time: O(n), Space: O(1)
-function maxSubArray(nums) {
-    let maxSum = nums[0];
-    let currentSum = nums[0];
-    
-    for (let i = 1; i < nums.length; i++) {
-        currentSum = Math.max(nums[i], currentSum + nums[i]);
-        maxSum = Math.max(maxSum, currentSum);
-    }
-    
-    return maxSum;
-}
-
-// Example
-maxSubArray([-2,1,-3,4,-1,2,1,-5,4]); // 6 ([4,-1,2,1])
-```
-
-### 61. Contains Duplicate (LeetCode Easy)
-
-**Problem:** Given an array of integers, find if the array contains any duplicates.
+This covers problem-solving and algorithm questions from beginner to advanced level with solutions and explanations.
 
 **Solution:**
 ```javascript

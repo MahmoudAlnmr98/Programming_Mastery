@@ -47,7 +47,7 @@ All questions include:
 - **React**: 80 questions (8 Beginner, 8 Intermediate, 64 Advanced)
 - **Node/Express**: 50 questions (7 Beginner, 9 Intermediate, 34 Advanced)
 - **TypeScript**: 50 questions (8 Beginner, 9 Intermediate, 33 Advanced)
-- **Problem Solving**: 120 problems (8 Beginner, 12 Intermediate, 100 Advanced)
+- **Problem Solving**: 119 problems (8 Beginner, 72 Intermediate, 39 Advanced)
 - **Design Patterns**: 38 patterns (5 Beginner, 5 Intermediate, 28 Advanced)
 - **Golang**: 35 questions (8 Beginner, 9 Intermediate, 18 Advanced)
 - **C++**: 35 questions (8 Beginner, 6 Intermediate, 21 Advanced)
