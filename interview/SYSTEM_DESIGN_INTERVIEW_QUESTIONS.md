@@ -964,6 +964,418 @@ SELECT * FROM users;  -- Only returns tenant's users
 - Usage quotas
 - Billing per tenant
 
+### 31. Design a Distributed Cache System.
+
+**Requirements:**
+- Store key-value pairs
+- High availability
+- Low latency
+- Handle 1M requests/second
+
+**Answer:**
+**Components:**
+1. **Cache Servers**: Redis/Memcached clusters
+2. **Consistent Hashing**: Distribute keys across servers
+3. **Replication**: Master-slave for availability
+4. **Cache Invalidation**: TTL, LRU eviction
+
+**Architecture:**
+```
+Client → Load Balancer → Cache Cluster
+                          ├── Node 1 (Hash Ring)
+                          ├── Node 2 (Hash Ring)
+                          └── Node 3 (Hash Ring)
+```
+
+**Key Design:**
+- Consistent hashing for distribution
+- Replication for fault tolerance
+- Cache warming strategies
+- Cache aside pattern
+
+### 32. Design a Search Engine (Google-like).
+
+**Requirements:**
+- Index billions of web pages
+- Fast search results
+- Handle 1B queries/day
+- Rank results by relevance
+
+**Answer:**
+**Components:**
+1. **Web Crawler**: Discover and fetch pages
+2. **Indexer**: Build inverted index
+3. **Ranking Service**: PageRank, relevance scoring
+4. **Query Processor**: Parse and execute queries
+5. **Result Aggregator**: Combine results
+
+**Architecture:**
+```
+Crawler → Indexer → Inverted Index → Query Processor → Results
+```
+
+**Key Design:**
+- Inverted index: word → [doc1, doc2, ...]
+- Distributed indexing (MapReduce)
+- Ranking algorithms (PageRank, TF-IDF)
+- Caching popular queries
+
+### 33. Design a Notification System.
+
+**Requirements:**
+- Send notifications (email, SMS, push)
+- Support multiple channels
+- Handle 10M notifications/day
+- Delivery tracking
+
+**Answer:**
+**Components:**
+1. **Notification Service**: Core service
+2. **Channel Handlers**: Email, SMS, Push
+3. **Message Queue**: Async processing
+4. **Template Engine**: Message templates
+5. **Delivery Tracker**: Status tracking
+
+**Architecture:**
+```
+API → Notification Service → Message Queue → Channel Handlers
+                                              ├── Email Service
+                                              ├── SMS Service
+                                              └── Push Service
+```
+
+**Key Design:**
+- Queue-based async processing
+- Retry mechanism for failures
+- Rate limiting per channel
+- Template management
+
+### 34. Design a File Storage System (Dropbox-like).
+
+**Requirements:**
+- Store files up to 10GB
+- Sync across devices
+- Version history
+- Handle 100M users
+
+**Answer:**
+**Components:**
+1. **API Gateway**: Handle requests
+2. **Metadata Service**: File metadata (name, size, version)
+3. **Storage Service**: Object storage (S3-like)
+4. **Sync Service**: Detect and sync changes
+5. **Version Control**: Track file versions
+
+**Architecture:**
+```
+Client → API Gateway → Metadata DB → Storage Service
+                        ↓
+                    Sync Service
+```
+
+**Key Design:**
+- Separate metadata and file storage
+- Chunking for large files
+- Delta sync (only changed chunks)
+- Conflict resolution
+
+### 35. Design a Real-time Analytics System.
+
+**Requirements:**
+- Process 1M events/second
+- Real-time dashboards
+- Historical data storage
+- Support multiple metrics
+
+**Answer:**
+**Components:**
+1. **Event Ingestion**: Kafka/Pulsar
+2. **Stream Processing**: Flink/Storm
+3. **Time-Series DB**: InfluxDB, TimescaleDB
+4. **Aggregation Service**: Pre-compute metrics
+5. **Dashboard Service**: Serve analytics
+
+**Architecture:**
+```
+Events → Kafka → Stream Processor → Time-Series DB → Dashboard
+```
+
+**Key Design:**
+- Event streaming architecture
+- Windowing for aggregations
+- Pre-aggregation for common queries
+- Caching for dashboards
+
+### 36. Design a Payment Processing System.
+
+**Requirements:**
+- Process payments securely
+- Support multiple payment methods
+- Handle 1M transactions/day
+- Fraud detection
+
+**Answer:**
+**Components:**
+1. **Payment Gateway**: Process payments
+2. **Payment Methods**: Credit card, PayPal, etc.
+3. **Fraud Detection**: ML-based detection
+4. **Transaction Service**: Record transactions
+5. **Settlement Service**: Batch settlement
+
+**Architecture:**
+```
+Client → Payment Gateway → Fraud Detection → Payment Processor
+                                              ↓
+                                        Transaction DB
+```
+
+**Key Design:**
+- Idempotency keys
+- Two-phase commit for consistency
+- Encryption (PCI-DSS compliance)
+- Retry with exponential backoff
+
+### 37. Design a Social Media Feed (Twitter-like).
+
+**Requirements:**
+- Post tweets (280 chars)
+- Follow/unfollow users
+- Timeline generation
+- Handle 500M users
+
+**Answer:**
+**Components:**
+1. **Post Service**: Create/read posts
+2. **Follow Service**: Manage relationships
+3. **Timeline Service**: Generate feeds
+4. **Fan-out Service**: Push to followers
+5. **Search Service**: Full-text search
+
+**Architecture:**
+```
+Post → Fan-out → Followers' Timeline Cache
+                ↓
+            Timeline Service
+```
+
+**Key Design:**
+- Push model (fan-out on write)
+- Pull model (on read) for inactive users
+- Hybrid approach
+- Caching for hot timelines
+
+### 38. Design a Video Streaming Service (YouTube-like).
+
+**Requirements:**
+- Upload videos
+- Stream videos
+- Handle 1B users
+- Support multiple resolutions
+
+**Answer:**
+**Components:**
+1. **Upload Service**: Handle video uploads
+2. **Transcoding Service**: Convert to multiple formats
+3. **CDN**: Distribute video content
+4. **Streaming Service**: Adaptive bitrate streaming
+5. **Metadata Service**: Video info, thumbnails
+
+**Architecture:**
+```
+Upload → Transcoding → Storage → CDN → Client
+```
+
+**Key Design:**
+- Chunked upload for large files
+- Multiple quality levels (240p, 480p, 720p, 1080p)
+- CDN for global distribution
+- Adaptive bitrate (HLS/DASH)
+
+### 39. Design a Distributed Lock Service.
+
+**Requirements:**
+- Acquire/release locks
+- Handle lock expiration
+- High availability
+- Low latency
+
+**Answer:**
+**Components:**
+1. **Lock Service**: Core locking logic
+2. **Consensus Algorithm**: Raft/Paxos
+3. **Lease Management**: TTL for locks
+4. **Watch Service**: Notify on lock release
+
+**Architecture:**
+```
+Client → Lock Service Cluster (Raft) → Lock Storage
+```
+
+**Key Design:**
+- Distributed consensus (Raft)
+- Lease-based locks (auto-expire)
+- Watch mechanism for notifications
+- Fencing tokens for safety
+
+### 40. Design a Recommendation System (Netflix-like).
+
+**Requirements:**
+- Recommend content to users
+- Handle 200M users
+- Real-time recommendations
+- Multiple recommendation types
+
+**Answer:**
+**Components:**
+1. **Feature Store**: User/item features
+2. **ML Models**: Collaborative filtering, content-based
+3. **Ranking Service**: Score and rank items
+4. **A/B Testing**: Test different algorithms
+5. **Cache**: Pre-computed recommendations
+
+**Architecture:**
+```
+User → Recommendation API → ML Models → Ranking → Results
+```
+
+**Key Design:**
+- Collaborative filtering (user-based, item-based)
+- Content-based filtering
+- Hybrid approach
+- Real-time and batch processing
+
+### 41. Design a Distributed Logging System.
+
+**Requirements:**
+- Collect logs from services
+- Store logs efficiently
+- Search and query logs
+- Handle 1B log entries/day
+
+**Answer:**
+**Components:**
+1. **Log Collector**: Collect from services
+2. **Message Queue**: Buffer logs
+3. **Log Storage**: Distributed storage
+4. **Index Service**: Index for search
+5. **Query Service**: Search interface
+
+**Architecture:**
+```
+Services → Log Collector → Kafka → Storage → Index → Query
+```
+
+**Key Design:**
+- Structured logging (JSON)
+- Partitioning by time/service
+- Compression for storage
+- Full-text search index
+
+### 42. Design a Distributed Configuration Service.
+
+**Requirements:**
+- Store configuration
+- Real-time updates
+- Version history
+- Support multiple environments
+
+**Answer:**
+**Components:**
+1. **Config Service**: Core service
+2. **Watch Service**: Notify on changes
+3. **Version Control**: Track versions
+4. **Environment Management**: Dev, staging, prod
+
+**Architecture:**
+```
+Config Service → Watch Service → Clients
+```
+
+**Key Design:**
+- Hierarchical configuration
+- Watch mechanism (push updates)
+- Versioning and rollback
+- Encryption for sensitive data
+
+### 43. Design a Distributed Task Scheduler (Cron-like).
+
+**Requirements:**
+- Schedule tasks
+- Execute at specified times
+- Handle failures
+- Support millions of tasks
+
+**Answer:**
+**Components:**
+1. **Scheduler Service**: Schedule tasks
+2. **Task Queue**: Priority queue
+3. **Worker Pool**: Execute tasks
+4. **Retry Service**: Handle failures
+5. **Monitoring**: Track execution
+
+**Architecture:**
+```
+Scheduler → Task Queue → Workers → Retry Service
+```
+
+**Key Design:**
+- Priority queue (time-based)
+- Distributed workers
+- Idempotent tasks
+- Dead letter queue for failures
+
+### 44. Design a Distributed Counter Service.
+
+**Requirements:**
+- Increment/decrement counters
+- High throughput
+- Eventually consistent
+- Handle 10M operations/second
+
+**Answer:**
+**Components:**
+1. **Counter Service**: Core service
+2. **Sharding**: Distribute counters
+3. **Replication**: For availability
+4. **Aggregation Service**: Merge shards
+
+**Architecture:**
+```
+Client → Counter Service → Shards → Replication
+```
+
+**Key Design:**
+- Sharding by counter ID
+- CRDTs for conflict resolution
+- Batching for efficiency
+- Periodic aggregation
+
+### 45. Design a Distributed Queue System.
+
+**Requirements:**
+- Enqueue/dequeue messages
+- At-least-once delivery
+- Ordering guarantees
+- Handle 1M messages/second
+
+**Answer:**
+**Components:**
+1. **Queue Service**: Core service
+2. **Partitioning**: Distribute queues
+3. **Replication**: For durability
+4. **Consumer Groups**: Parallel processing
+
+**Architecture:**
+```
+Producer → Queue Partitions → Consumer Groups
+```
+
+**Key Design:**
+- Partitioning for scalability
+- Replication for durability
+- Consumer groups for parallelism
+- Dead letter queue
+
 ---
 
 This covers system design interview questions from beginner to advanced level with detailed explanations and architectures.

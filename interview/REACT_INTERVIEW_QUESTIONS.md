@@ -1158,6 +1158,694 @@ test('matches snapshot', () => {
 });
 ```
 
+### 38. Explain React's useRef hook in detail.
+
+**Answer:**
+useRef returns mutable ref object that persists across renders.
+
+```jsx
+import { useRef, useEffect } from 'react';
+
+function Component() {
+    const inputRef = useRef(null);
+    const countRef = useRef(0);
+    
+    useEffect(() => {
+        inputRef.current.focus(); // Access DOM element
+    }, []);
+    
+    const handleClick = () => {
+        countRef.current += 1; // Mutable value (doesn't trigger re-render)
+        console.log(countRef.current);
+    };
+    
+    return (
+        <>
+            <input ref={inputRef} />
+            <button onClick={handleClick}>Count: {countRef.current}</button>
+        </>
+    );
+}
+```
+
+**Use Cases:**
+- DOM element access
+- Storing mutable values without re-render
+- Previous value tracking
+
+### 39. Explain React's forwardRef and useImperativeHandle.
+
+**Answer:**
+**forwardRef:**
+```jsx
+const FancyInput = forwardRef((props, ref) => {
+    return <input ref={ref} {...props} />;
+});
+
+// Usage
+function Parent() {
+    const inputRef = useRef();
+    
+    return (
+        <>
+            <FancyInput ref={inputRef} />
+            <button onClick={() => inputRef.current.focus()}>Focus</button>
+        </>
+    );
+}
+```
+
+**useImperativeHandle:**
+```jsx
+const FancyInput = forwardRef((props, ref) => {
+    const inputRef = useRef();
+    
+    useImperativeHandle(ref, () => ({
+        focus: () => inputRef.current.focus(),
+        clear: () => { inputRef.current.value = ''; },
+        getValue: () => inputRef.current.value
+    }));
+    
+    return <input ref={inputRef} {...props} />;
+});
+```
+
+### 40. Explain React's useTransition hook.
+
+**Answer:**
+useTransition marks state updates as non-urgent transitions.
+
+```jsx
+import { useTransition, useState } from 'react';
+
+function App() {
+    const [isPending, startTransition] = useTransition();
+    const [count, setCount] = useState(0);
+    const [items, setItems] = useState([]);
+    
+    const handleClick = () => {
+        setCount(count + 1); // Urgent update
+        
+        startTransition(() => {
+            // Non-urgent update
+            setItems(Array.from({ length: 10000 }, (_, i) => i));
+        });
+    };
+    
+    return (
+        <div>
+            {isPending && <div>Loading...</div>}
+            <button onClick={handleClick}>Count: {count}</button>
+            <ul>
+                {items.map(item => <li key={item}>{item}</li>)}
+            </ul>
+        </div>
+    );
+}
+```
+
+**Benefits:**
+- Keeps UI responsive during heavy updates
+- Prioritizes urgent updates
+- Better user experience
+
+### 41. Explain React's useDeferredValue hook.
+
+**Answer:**
+useDeferredValue defers value updates until more urgent updates complete.
+
+```jsx
+import { useDeferredValue, useState, useMemo } from 'react';
+
+function SearchResults({ query }) {
+    const deferredQuery = useDeferredValue(query);
+    
+    const results = useMemo(() => {
+        return expensiveSearch(deferredQuery);
+    }, [deferredQuery]);
+    
+    return (
+        <div>
+            {query !== deferredQuery && <div>Searching...</div>}
+            <ResultsList results={results} />
+        </div>
+    );
+}
+```
+
+**Use Cases:**
+- Deferring expensive computations
+- Keeping UI responsive
+- Prioritizing urgent updates
+
+### 42. Explain React's useId hook.
+
+**Answer:**
+useId generates unique IDs for accessibility attributes.
+
+```jsx
+import { useId } from 'react';
+
+function Form() {
+    const nameId = useId();
+    const emailId = useId();
+    
+    return (
+        <>
+            <label htmlFor={nameId}>Name</label>
+            <input id={nameId} type="text" />
+            
+            <label htmlFor={emailId}>Email</label>
+            <input id={emailId} type="email" />
+        </>
+    );
+}
+```
+
+**Benefits:**
+- Unique IDs across server and client
+- Stable across re-renders
+- No hydration mismatches
+
+### 43. Explain React's useSyncExternalStore hook.
+
+**Answer:**
+useSyncExternalStore subscribes to external stores.
+
+```jsx
+import { useSyncExternalStore } from 'react';
+
+function useStore(store) {
+    return useSyncExternalStore(
+        store.subscribe,
+        store.getSnapshot
+    );
+}
+
+// Usage
+function Component() {
+    const value = useStore(myStore);
+    return <div>{value}</div>;
+}
+```
+
+**Use Cases:**
+- Redux, Zustand, other state management
+- Browser APIs (localStorage, etc.)
+- External data sources
+
+### 44. Explain React's useInsertionEffect hook.
+
+**Answer:**
+useInsertionEffect runs synchronously before DOM mutations.
+
+```jsx
+import { useInsertionEffect } from 'react';
+
+function Component() {
+    useInsertionEffect(() => {
+        // Inject styles before DOM updates
+        const style = document.createElement('style');
+        style.textContent = '.my-class { color: red; }';
+        document.head.appendChild(style);
+        
+        return () => {
+            document.head.removeChild(style);
+        };
+    });
+    
+    return <div className="my-class">Content</div>;
+}
+```
+
+**Use Cases:**
+- CSS-in-JS libraries
+- Dynamic style injection
+- DOM mutations before paint
+
+### 45. Explain React's Strict Mode and its effects.
+
+**Answer:**
+Strict Mode helps identify problems in development.
+
+**Effects:**
+- Double-invokes functions to detect side effects
+- Warns about deprecated APIs
+- Detects unexpected side effects
+- Detects legacy string ref usage
+
+```jsx
+import { StrictMode } from 'react';
+
+function App() {
+    return (
+        <StrictMode>
+            <MyApp />
+        </StrictMode>
+    );
+}
+```
+
+**Double Invocation:**
+```jsx
+function Component() {
+    useEffect(() => {
+        console.log('Effect runs'); // Logs twice in Strict Mode (dev only)
+    }, []);
+    
+    return <div>Content</div>;
+}
+```
+
+### 46. Explain React's key prop and its importance.
+
+**Answer:**
+Keys help React identify which items changed, added, or removed.
+
+```jsx
+// Without key - inefficient
+{items.map(item => <Item data={item} />)}
+
+// With key - efficient
+{items.map(item => <Item key={item.id} data={item} />)}
+```
+
+**Rules:**
+- Must be unique among siblings
+- Should be stable (not random)
+- Don't use index if list can reorder
+- Don't use index if items can be added/removed
+
+**Common Mistakes:**
+```jsx
+// Bad - index as key
+{items.map((item, index) => <Item key={index} data={item} />)}
+
+// Bad - random key
+{items.map(item => <Item key={Math.random()} data={item} />)}
+
+// Good - stable unique key
+{items.map(item => <Item key={item.id} data={item} />)}
+```
+
+### 47. Explain React's render props pattern vs hooks.
+
+**Answer:**
+**Render Props:**
+```jsx
+function Mouse({ render }) {
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            setPosition({ x: e.clientX, y: e.clientY });
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+    
+    return render(position);
+}
+
+// Usage
+<Mouse render={({ x, y }) => <p>Position: {x}, {y}</p>} />
+```
+
+**Hooks (Preferred):**
+```jsx
+function useMouse() {
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    
+    useEffect(() => {
+        const handleMouseMove = (e) => {
+            setPosition({ x: e.clientX, y: e.clientY });
+        };
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, []);
+    
+    return position;
+}
+
+// Usage
+function Component() {
+    const { x, y } = useMouse();
+    return <p>Position: {x}, {y}</p>;
+}
+```
+
+**When to use:**
+- Hooks: Preferred for most cases
+- Render Props: When you need flexibility in rendering
+
+### 48. Explain React's compound components pattern.
+
+**Answer:**
+Compound components work together to form complete UI.
+
+```jsx
+function Tabs({ children }) {
+    const [activeIndex, setActiveIndex] = useState(0);
+    
+    return (
+        <TabsContext.Provider value={{ activeIndex, setActiveIndex }}>
+            {children}
+        </TabsContext.Provider>
+    );
+}
+
+function TabList({ children }) {
+    return <div className="tab-list">{children}</div>;
+}
+
+function Tab({ index, children }) {
+    const { activeIndex, setActiveIndex } = useContext(TabsContext);
+    return (
+        <button
+            className={activeIndex === index ? 'active' : ''}
+            onClick={() => setActiveIndex(index)}
+        >
+            {children}
+        </button>
+    );
+}
+
+function TabPanels({ children }) {
+    const { activeIndex } = useContext(TabsContext);
+    return <div>{children[activeIndex]}</div>;
+}
+
+function TabPanel({ children }) {
+    return <div>{children}</div>;
+}
+
+// Usage
+<Tabs>
+    <TabList>
+        <Tab index={0}>Tab 1</Tab>
+        <Tab index={1}>Tab 2</Tab>
+    </TabList>
+    <TabPanels>
+        <TabPanel>Content 1</TabPanel>
+        <TabPanel>Content 2</TabPanel>
+    </TabPanels>
+</Tabs>
+```
+
+### 49. Explain React's controlled vs uncontrolled components in detail.
+
+**Answer:**
+**Controlled Component:**
+```jsx
+function ControlledInput() {
+    const [value, setValue] = useState('');
+    
+    return (
+        <input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+        />
+    );
+}
+```
+
+**Uncontrolled Component:**
+```jsx
+function UncontrolledInput() {
+    const inputRef = useRef(null);
+    
+    const handleSubmit = () => {
+        console.log(inputRef.current.value);
+    };
+    
+    return (
+        <>
+            <input ref={inputRef} type="text" />
+            <button onClick={handleSubmit}>Submit</button>
+        </>
+    );
+}
+```
+
+**When to use:**
+- Controlled: Most cases, need validation, form libraries
+- Uncontrolled: Simple forms, file inputs, third-party libraries
+
+### 50. Explain React's error boundaries in detail.
+
+**Answer:**
+Error boundaries catch JavaScript errors in component tree.
+
+```jsx
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+    
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+    
+    componentDidCatch(error, errorInfo) {
+        // Log to error reporting service
+        console.error('Error:', error, errorInfo);
+    }
+    
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div>
+                    <h2>Something went wrong</h2>
+                    <button onClick={() => this.setState({ hasError: false })}>
+                        Try again
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+// Usage
+<ErrorBoundary>
+    <App />
+</ErrorBoundary>
+```
+
+**Limitations:**
+- Doesn't catch errors in event handlers
+- Doesn't catch errors in async code
+- Doesn't catch errors during SSR
+
+### 51. Explain React's Suspense and lazy loading.
+
+**Answer:**
+**Code Splitting:**
+```jsx
+import { lazy, Suspense } from 'react';
+
+const LazyComponent = lazy(() => import('./LazyComponent'));
+
+function App() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <LazyComponent />
+        </Suspense>
+    );
+}
+```
+
+**Multiple Suspense Boundaries:**
+```jsx
+function App() {
+    return (
+        <Suspense fallback={<div>Loading app...</div>}>
+            <Header />
+            <Suspense fallback={<div>Loading content...</div>}>
+                <Content />
+            </Suspense>
+        </Suspense>
+    );
+}
+```
+
+**Benefits:**
+- Smaller initial bundle
+- Faster initial load
+- Load code on demand
+
+### 52. Explain React's reconciliation algorithm in detail.
+
+**Answer:**
+**Diffing Algorithm:**
+1. Elements of different types: Tear down old, build new
+2. Same DOM element: Update changed attributes
+3. Component elements: Update props, re-render if needed
+4. List items: Use keys for efficient updates
+
+**Example:**
+```jsx
+// Different types - full replacement
+<div>
+    <Counter />
+</div>
+// Changes to
+<span>
+    <Counter />
+</span>
+// Counter unmounts and remounts
+
+// Same type - update attributes
+<div className="before" />
+// Changes to
+<div className="after" />
+// Only className updated
+
+// List with keys
+<ul>
+    <li key="a">A</li>
+    <li key="b">B</li>
+</ul>
+// Changes to
+<ul>
+    <li key="b">B</li>
+    <li key="a">A</li>
+</ul>
+// Only reordered, not recreated
+```
+
+### 53. Explain React's performance optimization techniques.
+
+**Answer:**
+**1. React.memo:**
+```jsx
+const ExpensiveComponent = React.memo(({ data }) => {
+    return <div>{data}</div>;
+}, (prevProps, nextProps) => {
+    return prevProps.data === nextProps.data;
+});
+```
+
+**2. useMemo:**
+```jsx
+const expensiveValue = useMemo(() => {
+    return computeExpensiveValue(a, b);
+}, [a, b]);
+```
+
+**3. useCallback:**
+```jsx
+const handleClick = useCallback(() => {
+    doSomething(id);
+}, [id]);
+```
+
+**4. Code Splitting:**
+```jsx
+const LazyComponent = React.lazy(() => import('./LazyComponent'));
+```
+
+**5. Virtualization:**
+```jsx
+import { FixedSizeList } from 'react-window';
+
+function List({ items }) {
+    return (
+        <FixedSizeList
+            height={600}
+            itemCount={items.length}
+            itemSize={50}
+        >
+            {({ index, style }) => (
+                <div style={style}>{items[index]}</div>
+            )}
+        </FixedSizeList>
+    );
+}
+```
+
+### 54. Explain React's Server Components (RSC) in detail.
+
+**Answer:**
+Server Components render on server, reducing client bundle.
+
+**Server Component:**
+```jsx
+// app/users/page.js (Server Component)
+async function UsersPage() {
+    const users = await fetchUsers(); // Runs on server
+    
+    return (
+        <div>
+            {users.map(user => (
+                <UserCard key={user.id} user={user} />
+            ))}
+        </div>
+    );
+}
+```
+
+**Client Component:**
+```jsx
+'use client'; // Directive for Client Component
+
+import { useState } from 'react';
+
+function Counter() {
+    const [count, setCount] = useState(0);
+    return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+```
+
+**Benefits:**
+- Smaller client bundle
+- Direct database access
+- Better security (API keys on server)
+- Improved performance
+
+### 55. Explain React's testing best practices.
+
+**Answer:**
+**Unit Testing:**
+```jsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import Button from './Button';
+
+test('renders button and handles click', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    const button = screen.getByRole('button', { name: /click me/i });
+    expect(button).toBeInTheDocument();
+    
+    fireEvent.click(button);
+    expect(handleClick).toHaveBeenCalledTimes(1);
+});
+```
+
+**Testing Hooks:**
+```jsx
+import { renderHook, act } from '@testing-library/react';
+import { useCounter } from './useCounter';
+
+test('increments counter', () => {
+    const { result } = renderHook(() => useCounter());
+    
+    act(() => {
+        result.current.increment();
+    });
+    
+    expect(result.current.count).toBe(1);
+});
+```
+
+**Best Practices:**
+- Test user behavior, not implementation
+- Use data-testid sparingly
+- Test accessibility
+- Mock external dependencies
+
 ---
 
 This covers React interview questions from beginner to advanced level with detailed explanations and code examples.

@@ -677,5 +677,352 @@ GOGC=50   # More frequent GC (less memory)
 
 ---
 
+### 26. Explain Go Context Package.
+
+**Answer:**
+Context carries deadlines, cancellation signals, and values.
+
+**Basic Usage:**
+```go
+ctx := context.Background()
+ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+defer cancel()
+
+// Pass context to functions
+result, err := doSomething(ctx)
+```
+
+**With Deadline:**
+```go
+ctx, cancel := context.WithDeadline(context.Background(), deadline)
+defer cancel()
+```
+
+**With Value:**
+```go
+ctx := context.WithValue(context.Background(), "userID", 123)
+userID := ctx.Value("userID").(int)
+```
+
+**Cancellation:**
+```go
+ctx, cancel := context.WithCancel(context.Background())
+go func() {
+    time.Sleep(2 * time.Second)
+    cancel() // Cancel after 2 seconds
+}()
+```
+
+### 27. Explain Go Error Handling Best Practices.
+
+**Answer:**
+**Error Wrapping:**
+```go
+import "fmt"
+
+func process() error {
+    if err := step1(); err != nil {
+        return fmt.Errorf("step1 failed: %w", err)
+    }
+    return nil
+}
+```
+
+**Custom Errors:**
+```go
+type ValidationError struct {
+    Field   string
+    Message string
+}
+
+func (e *ValidationError) Error() string {
+    return fmt.Sprintf("%s: %s", e.Field, e.Message)
+}
+```
+
+**Error Checking:**
+```go
+if err != nil {
+    if validationErr, ok := err.(*ValidationError); ok {
+        // Handle validation error
+    }
+    return err
+}
+```
+
+### 28. Explain Go Testing.
+
+**Answer:**
+**Unit Test:**
+```go
+func TestAdd(t *testing.T) {
+    result := Add(2, 3)
+    if result != 5 {
+        t.Errorf("Expected 5, got %d", result)
+    }
+}
+```
+
+**Table-Driven Tests:**
+```go
+func TestAdd(t *testing.T) {
+    tests := []struct {
+        a, b, expected int
+    }{
+        {2, 3, 5},
+        {0, 0, 0},
+        {-1, 1, 0},
+    }
+    
+    for _, tt := range tests {
+        result := Add(tt.a, tt.b)
+        if result != tt.expected {
+            t.Errorf("Add(%d, %d) = %d, expected %d", tt.a, tt.b, result, tt.expected)
+        }
+    }
+}
+```
+
+**Benchmark:**
+```go
+func BenchmarkAdd(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        Add(2, 3)
+    }
+}
+```
+
+### 29. Explain Go Modules.
+
+**Answer:**
+Modules manage dependencies.
+
+**Initialize:**
+```bash
+go mod init example.com/project
+```
+
+**Add Dependency:**
+```bash
+go get github.com/gin-gonic/gin
+```
+
+**Update:**
+```bash
+go get -u github.com/gin-gonic/gin
+```
+
+**Tidy:**
+```bash
+go mod tidy
+```
+
+**Vendor:**
+```bash
+go mod vendor
+```
+
+### 30. Explain Go Concurrency Patterns.
+
+**Answer:**
+**Worker Pool:**
+```go
+func workerPool(jobs <-chan int, results chan<- int) {
+    for job := range jobs {
+        results <- process(job)
+    }
+}
+
+func main() {
+    jobs := make(chan int, 100)
+    results := make(chan int, 100)
+    
+    // Start workers
+    for w := 0; w < 3; w++ {
+        go workerPool(jobs, results)
+    }
+    
+    // Send jobs
+    for j := 1; j <= 5; j++ {
+        jobs <- j
+    }
+    close(jobs)
+    
+    // Collect results
+    for r := 1; r <= 5; r++ {
+        fmt.Println(<-results)
+    }
+}
+```
+
+**Pipeline:**
+```go
+func pipeline(input <-chan int) <-chan int {
+    output := make(chan int)
+    go func() {
+        defer close(output)
+        for n := range input {
+            output <- n * 2
+        }
+    }()
+    return output
+}
+```
+
+### 31. Explain Go Reflection.
+
+**Answer:**
+Reflection allows examining types at runtime.
+
+**Type Information:**
+```go
+import "reflect"
+
+func inspect(v interface{}) {
+    t := reflect.TypeOf(v)
+    v := reflect.ValueOf(v)
+    
+    fmt.Println("Type:", t.Name())
+    fmt.Println("Kind:", t.Kind())
+    fmt.Println("Value:", v.Interface())
+}
+```
+
+**Struct Fields:**
+```go
+type Person struct {
+    Name string
+    Age  int
+}
+
+func inspectStruct(s interface{}) {
+    v := reflect.ValueOf(s)
+    t := reflect.TypeOf(s)
+    
+    for i := 0; i < v.NumField(); i++ {
+        field := t.Field(i)
+        value := v.Field(i)
+        fmt.Printf("%s: %v\n", field.Name, value.Interface())
+    }
+}
+```
+
+### 32. Explain Go Interface Best Practices.
+
+**Answer:**
+**Small Interfaces:**
+```go
+type Reader interface {
+    Read([]byte) (int, error)
+}
+
+type Writer interface {
+    Write([]byte) (int, error)
+}
+```
+
+**Composition:**
+```go
+type ReadWriter interface {
+    Reader
+    Writer
+}
+```
+
+**Accept Interfaces, Return Structs:**
+```go
+func Process(r Reader) error {
+    // Accept interface
+}
+
+func NewService() *Service {
+    // Return concrete type
+    return &Service{}
+}
+```
+
+### 33. Explain Go Memory Management.
+
+**Answer:**
+**Stack vs Heap:**
+- Stack: Fast, automatic cleanup
+- Heap: Slower, managed by GC
+
+**Escape Analysis:**
+```go
+// Escapes to heap
+func escape() *int {
+    x := 42
+    return &x // x escapes to heap
+}
+
+// Stays on stack
+func noEscape() int {
+    x := 42
+    return x // x stays on stack
+}
+```
+
+**GC Tuning:**
+```bash
+GOGC=100 go run main.go  # Default
+GOGC=200 go run main.go  # Less frequent GC
+```
+
+### 34. Explain Go Build Tags.
+
+**Answer:**
+Build tags control compilation.
+
+**File-Level:**
+```go
+// +build linux darwin
+
+package main
+```
+
+**Line-Level:**
+```go
+//go:build linux || darwin
+```
+
+**Build:**
+```bash
+go build -tags=dev
+```
+
+**Use Cases:**
+- Platform-specific code
+- Feature flags
+- Testing
+
+### 35. Explain Go Embedding.
+
+**Answer:**
+Embedding allows including files in binary.
+
+**Embed Files:**
+```go
+import _ "embed"
+
+//go:embed template.html
+var template string
+
+//go:embed static/*
+var staticFiles embed.FS
+```
+
+**Usage:**
+```go
+func main() {
+    fmt.Println(template)
+    
+    data, _ := staticFiles.ReadFile("static/style.css")
+    fmt.Println(string(data))
+}
+```
+
+---
+
 This covers Golang interview questions from beginner to advanced level with detailed explanations and code examples.
 

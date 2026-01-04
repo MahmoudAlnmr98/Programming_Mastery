@@ -929,6 +929,511 @@ public class CustomMetrics {
 </dependency>
 ```
 
+### 31. Explain Spring Boot Actuator Endpoints.
+
+**Answer:**
+Actuator provides production-ready features.
+
+**Dependencies:**
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+
+**Configuration:**
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+```
+
+**Endpoints:**
+- `/actuator/health`: Application health
+- `/actuator/info`: Application information
+- `/actuator/metrics`: Application metrics
+- `/actuator/env`: Environment variables
+
+### 32. Explain Spring Boot Profiles.
+
+**Answer:**
+Profiles enable environment-specific configuration.
+
+**Application Properties:**
+```yaml
+# application.yml
+spring:
+  profiles:
+    active: dev
+
+---
+# application-dev.yml
+server:
+  port: 8080
+
+---
+# application-prod.yml
+server:
+  port: 443
+```
+
+**Programmatic:**
+```java
+@Profile("dev")
+@Configuration
+public class DevConfig {
+    // Dev-specific configuration
+}
+```
+
+**Activation:**
+```bash
+java -jar app.jar --spring.profiles.active=prod
+```
+
+### 33. Explain Spring Boot Auto-Configuration.
+
+**Answer:**
+Auto-configuration automatically configures beans.
+
+**How it works:**
+1. Spring Boot scans classpath
+2. Finds `@ConditionalOnClass` annotations
+3. Auto-configures based on dependencies
+
+**Example:**
+```java
+@Configuration
+@ConditionalOnClass(DataSource.class)
+public class DataSourceAutoConfiguration {
+    @Bean
+    @ConditionalOnMissingBean
+    public DataSource dataSource() {
+        return new HikariDataSource();
+    }
+}
+```
+
+**Disable:**
+```java
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+public class Application {
+    // ...
+}
+```
+
+### 34. Explain Spring Boot Externalized Configuration.
+
+**Answer:**
+Externalized configuration allows external property sources.
+
+**Property Sources (Order):**
+1. Command line arguments
+2. `SPRING_APPLICATION_JSON`
+3. `ServletConfig` init parameters
+4. `ServletContext` init parameters
+5. JNDI attributes
+6. Java system properties
+7. OS environment variables
+8. `application-{profile}.properties`
+9. `application.properties`
+
+**Usage:**
+```java
+@Value("${app.name}")
+private String appName;
+
+@ConfigurationProperties(prefix = "app")
+public class AppProperties {
+    private String name;
+    private int version;
+    // Getters and setters
+}
+```
+
+### 35. Explain Spring Boot Testing.
+
+**Answer:**
+Spring Boot provides testing support.
+
+**Unit Test:**
+```java
+@SpringBootTest
+class UserServiceTest {
+    @MockBean
+    private UserRepository userRepository;
+    
+    @Autowired
+    private UserService userService;
+    
+    @Test
+    void testCreateUser() {
+        // Test implementation
+    }
+}
+```
+
+**Web Test:**
+```java
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+class UserControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
+    
+    @Test
+    void testGetUser() throws Exception {
+        mockMvc.perform(get("/api/users/1"))
+            .andExpect(status().isOk());
+    }
+}
+```
+
+### 36. Explain Spring Boot Data JPA.
+
+**Answer:**
+Spring Data JPA simplifies database access.
+
+**Entity:**
+```java
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(nullable = false)
+    private String name;
+    
+    // Getters and setters
+}
+```
+
+**Repository:**
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+    List<User> findByName(String name);
+    Optional<User> findByEmail(String email);
+    
+    @Query("SELECT u FROM User u WHERE u.age > :age")
+    List<User> findUsersOlderThan(@Param("age") int age);
+}
+```
+
+### 37. Explain Spring Boot Transaction Management.
+
+**Answer:**
+Spring Boot provides declarative transaction management.
+
+**Configuration:**
+```java
+@Configuration
+@EnableTransactionManagement
+public class TransactionConfig {
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        return new DataSourceTransactionManager(dataSource());
+    }
+}
+```
+
+**Usage:**
+```java
+@Service
+@Transactional
+public class UserService {
+    @Transactional(rollbackFor = Exception.class)
+    public void createUser(User user) {
+        userRepository.save(user);
+        // Transaction automatically managed
+    }
+    
+    @Transactional(readOnly = true)
+    public User getUser(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+}
+```
+
+### 38. Explain Spring Boot Caching.
+
+**Answer:**
+Spring Boot provides caching abstraction.
+
+**Configuration:**
+```java
+@Configuration
+@EnableCaching
+public class CacheConfig {
+    @Bean
+    public CacheManager cacheManager() {
+        return new ConcurrentMapCacheManager("users");
+    }
+}
+```
+
+**Usage:**
+```java
+@Service
+public class UserService {
+    @Cacheable("users")
+    public User getUser(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+    
+    @CacheEvict(value = "users", key = "#id")
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+    
+    @CachePut(value = "users", key = "#user.id")
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
+}
+```
+
+### 39. Explain Spring Boot Security.
+
+**Answer:**
+Spring Security provides authentication and authorization.
+
+**Configuration:**
+```java
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/public/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin();
+        return http.build();
+    }
+}
+```
+
+**JWT Authentication:**
+```java
+@Configuration
+public class JwtConfig {
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
+    }
+}
+```
+
+### 40. Explain Spring Boot REST API Best Practices.
+
+**Answer:**
+**RESTful Design:**
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+    @GetMapping
+    public ResponseEntity<List<User>> getUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUser(@PathVariable Long id) {
+        return userService.getUser(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        User created = userService.createUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+}
+```
+
+**Exception Handling:**
+```java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new ErrorResponse(ex.getMessage()));
+    }
+}
+```
+
+### 41. Explain Spring Boot Async Processing.
+
+**Answer:**
+Spring Boot supports asynchronous processing.
+
+**Configuration:**
+```java
+@Configuration
+@EnableAsync
+public class AsyncConfig {
+    @Bean
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.initialize();
+        return executor;
+    }
+}
+```
+
+**Usage:**
+```java
+@Service
+public class EmailService {
+    @Async
+    public CompletableFuture<Void> sendEmail(String to, String subject) {
+        // Send email asynchronously
+        return CompletableFuture.completedFuture(null);
+    }
+}
+```
+
+### 42. Explain Spring Boot Scheduling.
+
+**Answer:**
+Spring Boot supports scheduled tasks.
+
+**Configuration:**
+```java
+@Configuration
+@EnableScheduling
+public class SchedulingConfig {
+    // Configuration
+}
+```
+
+**Usage:**
+```java
+@Component
+public class ScheduledTasks {
+    @Scheduled(fixedRate = 5000)
+    public void reportCurrentTime() {
+        System.out.println("Current time: " + new Date());
+    }
+    
+    @Scheduled(cron = "0 0 12 * * ?")
+    public void dailyTask() {
+        // Run daily at noon
+    }
+}
+```
+
+### 43. Explain Spring Boot Validation.
+
+**Answer:**
+Spring Boot provides validation support.
+
+**Entity:**
+```java
+public class User {
+    @NotNull
+    @Size(min = 2, max = 50)
+    private String name;
+    
+    @Email
+    @NotBlank
+    private String email;
+    
+    @Min(18)
+    @Max(100)
+    private int age;
+}
+```
+
+**Controller:**
+```java
+@PostMapping
+public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+    return ResponseEntity.ok(userService.createUser(user));
+}
+```
+
+### 44. Explain Spring Boot Monitoring.
+
+**Answer:**
+Spring Boot Actuator provides monitoring.
+
+**Custom Metrics:**
+```java
+@Service
+public class UserService {
+    private final Counter userCounter;
+    
+    public UserService(MeterRegistry meterRegistry) {
+        this.userCounter = Counter.builder("users.created")
+            .description("Number of users created")
+            .register(meterRegistry);
+    }
+    
+    public User createUser(User user) {
+        userCounter.increment();
+        return userRepository.save(user);
+    }
+}
+```
+
+**Health Indicators:**
+```java
+@Component
+public class CustomHealthIndicator implements HealthIndicator {
+    @Override
+    public Health health() {
+        // Check health
+        return Health.up().build();
+    }
+}
+```
+
+### 45. Explain Spring Boot Docker Deployment.
+
+**Answer:**
+Docker deployment for Spring Boot applications.
+
+**Dockerfile:**
+```dockerfile
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY target/app.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+**Docker Compose:**
+```yaml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=mydb
+```
+
 ---
 
 This covers Spring Boot interview questions from beginner to advanced level with detailed explanations and code examples.

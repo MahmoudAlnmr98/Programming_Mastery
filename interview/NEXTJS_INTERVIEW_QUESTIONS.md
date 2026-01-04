@@ -909,6 +909,383 @@ test('homepage loads', async ({ page }) => {
 });
 ```
 
+### 31. Explain Next.js Image Optimization.
+
+**Answer:**
+Next.js Image component provides automatic image optimization.
+
+```jsx
+import Image from 'next/image';
+
+function MyComponent() {
+    return (
+        <Image
+            src="/image.jpg"
+            alt="Description"
+            width={500}
+            height={300}
+            priority // Load immediately
+            placeholder="blur" // Blur placeholder
+            blurDataURL="data:image/..."
+        />
+    );
+}
+```
+
+**Features:**
+- Automatic format optimization (WebP, AVIF)
+- Responsive images
+- Lazy loading
+- Blur placeholder
+
+### 32. Explain Next.js Font Optimization.
+
+**Answer:**
+Next.js optimizes fonts automatically.
+
+```jsx
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
+
+export default function Layout({ children }) {
+    return (
+        <html className={inter.className}>
+            <body>{children}</body>
+        </html>
+    );
+}
+```
+
+**Benefits:**
+- Zero layout shift
+- Automatic font subsetting
+- Self-hosting fonts
+
+### 33. Explain Next.js API Routes Middleware.
+
+**Answer:**
+Middleware runs before API routes.
+
+```javascript
+// middleware.js
+export function middleware(request) {
+    if (request.nextUrl.pathname.startsWith('/api')) {
+        // Add custom header
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set('x-custom-header', 'value');
+        
+        return NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        });
+    }
+}
+```
+
+### 34. Explain Next.js Route Handlers (App Router).
+
+**Answer:**
+Route handlers replace API routes in App Router.
+
+```javascript
+// app/api/users/route.js
+export async function GET(request) {
+    const users = await fetchUsers();
+    return Response.json(users);
+}
+
+export async function POST(request) {
+    const body = await request.json();
+    const user = await createUser(body);
+    return Response.json(user, { status: 201 });
+}
+```
+
+**HTTP Methods:**
+- GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS
+
+### 35. Explain Next.js Server Actions.
+
+**Answer:**
+Server Actions enable server-side mutations.
+
+```javascript
+// app/actions.js
+'use server';
+
+export async function createUser(formData) {
+    const name = formData.get('name');
+    const email = formData.get('email');
+    
+    await saveUser({ name, email });
+    revalidatePath('/users');
+}
+```
+
+**Usage:**
+```jsx
+// app/form.jsx
+import { createUser } from './actions';
+
+export default function Form() {
+    return (
+        <form action={createUser}>
+            <input name="name" />
+            <input name="email" />
+            <button type="submit">Submit</button>
+        </form>
+    );
+}
+```
+
+### 36. Explain Next.js Streaming and Suspense.
+
+**Answer:**
+Streaming enables progressive rendering.
+
+```jsx
+import { Suspense } from 'react';
+
+export default function Page() {
+    return (
+        <div>
+            <Suspense fallback={<div>Loading...</div>}>
+                <SlowComponent />
+            </Suspense>
+            <FastComponent />
+        </div>
+    );
+}
+```
+
+**Benefits:**
+- Faster Time to First Byte (TTFB)
+- Progressive page rendering
+- Better user experience
+
+### 37. Explain Next.js Metadata API.
+
+**Answer:**
+Metadata API for SEO and social sharing.
+
+```javascript
+// app/layout.js
+export const metadata = {
+    title: 'My App',
+    description: 'App description',
+    openGraph: {
+        title: 'My App',
+        description: 'App description',
+        images: ['/og-image.jpg'],
+    },
+};
+```
+
+**Dynamic Metadata:**
+```javascript
+export async function generateMetadata({ params }) {
+    const post = await getPost(params.id);
+    return {
+        title: post.title,
+        description: post.description,
+    };
+}
+```
+
+### 38. Explain Next.js Error Boundaries.
+
+**Answer:**
+Error boundaries catch errors in component tree.
+
+```jsx
+// app/error.js
+'use client';
+
+export default function Error({ error, reset }) {
+    return (
+        <div>
+            <h2>Something went wrong!</h2>
+            <button onClick={() => reset()}>Try again</button>
+        </div>
+    );
+}
+```
+
+**Global Error:**
+```jsx
+// app/global-error.js
+export default function GlobalError({ error, reset }) {
+    return (
+        <html>
+            <body>
+                <h2>Something went wrong!</h2>
+                <button onClick={() => reset()}>Try again</button>
+            </body>
+        </html>
+    );
+}
+```
+
+### 39. Explain Next.js Loading States.
+
+**Answer:**
+Loading UI shows while page loads.
+
+```jsx
+// app/loading.js
+export default function Loading() {
+    return <div>Loading...</div>;
+}
+```
+
+**Streaming with Loading:**
+```jsx
+// app/dashboard/loading.js
+export default function Loading() {
+    return <DashboardSkeleton />;
+}
+```
+
+### 40. Explain Next.js Route Groups.
+
+**Answer:**
+Route groups organize routes without affecting URL.
+
+```
+app/
+  (marketing)/
+    about/
+    contact/
+  (shop)/
+    products/
+    cart/
+```
+
+**Benefits:**
+- Organize routes
+- Shared layouts
+- No URL impact
+
+### 41. Explain Next.js Parallel Routes.
+
+**Answer:**
+Parallel routes render multiple pages simultaneously.
+
+```
+app/
+  @analytics/
+    page.js
+  @team/
+    page.js
+  layout.js
+```
+
+**Usage:**
+```jsx
+// app/layout.js
+export default function Layout({ children, analytics, team }) {
+    return (
+        <>
+            {analytics}
+            {team}
+            {children}
+        </>
+    );
+}
+```
+
+### 42. Explain Next.js Intercepting Routes.
+
+**Answer:**
+Intercepting routes show routes in different contexts.
+
+```
+app/
+  @modal/
+    (.)photos/
+      [id]/
+        page.js
+  photos/
+    [id]/
+      page.js
+```
+
+**Use Cases:**
+- Modals
+- Sidebars
+- Conditional rendering
+
+### 43. Explain Next.js Middleware Matcher.
+
+**Answer:**
+Matcher configures which paths middleware runs on.
+
+```javascript
+export const config = {
+    matcher: [
+        '/api/:path*',
+        '/dashboard/:path*',
+    ],
+};
+```
+
+**Advanced Matcher:**
+```javascript
+export const config = {
+    matcher: [
+        '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    ],
+};
+```
+
+### 44. Explain Next.js Environment Variables.
+
+**Answer:**
+Environment variables configuration.
+
+```javascript
+// .env.local
+NEXT_PUBLIC_API_URL=https://api.example.com
+DATABASE_URL=postgresql://...
+
+// Usage
+const apiUrl = process.env.NEXT_PUBLIC_API_URL; // Client accessible
+const dbUrl = process.env.DATABASE_URL; // Server only
+```
+
+**Naming:**
+- `NEXT_PUBLIC_*`: Exposed to browser
+- Others: Server-only
+
+### 45. Explain Next.js Deployment Strategies.
+
+**Answer:**
+**Vercel (Recommended):**
+- Automatic deployments
+- Edge functions
+- Analytics
+
+**Docker:**
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+CMD ["npm", "start"]
+```
+
+**Static Export:**
+```javascript
+// next.config.js
+module.exports = {
+    output: 'export',
+};
+```
+
 ---
 
 This covers Next.js interview questions from beginner to advanced level with detailed explanations and code examples.

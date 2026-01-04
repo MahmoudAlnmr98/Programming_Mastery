@@ -790,6 +790,387 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 ```
 
+### 34. Explain Microservices Communication Patterns.
+
+**Answer:**
+**Synchronous:**
+- REST API
+- gRPC
+- GraphQL
+
+**Asynchronous:**
+- Message Queue (RabbitMQ, Kafka)
+- Event Bus
+- Pub/Sub
+
+**Service Mesh:**
+- Istio, Linkerd
+- Handles service-to-service communication
+
+### 35. Explain API Gateway Pattern.
+
+**Answer:**
+Single entry point for all client requests.
+
+**Functions:**
+- Routing
+- Authentication
+- Rate limiting
+- Load balancing
+- Request/response transformation
+
+**Example:**
+```
+Client → API Gateway → [Service 1] [Service 2] [Service 3]
+```
+
+**Benefits:**
+- Centralized cross-cutting concerns
+- Simplified client
+- Service abstraction
+
+### 36. Explain Circuit Breaker Pattern.
+
+**Answer:**
+Prevents cascading failures.
+
+**States:**
+- Closed: Normal operation
+- Open: Failing, reject requests
+- Half-Open: Testing if service recovered
+
+**Implementation:**
+```javascript
+class CircuitBreaker {
+    constructor(threshold = 5, timeout = 60000) {
+        this.failureCount = 0;
+        this.threshold = threshold;
+        this.timeout = timeout;
+        this.state = 'CLOSED';
+    }
+    
+    async execute(fn) {
+        if (this.state === 'OPEN') {
+            throw new Error('Circuit breaker is OPEN');
+        }
+        
+        try {
+            const result = await fn();
+            this.onSuccess();
+            return result;
+        } catch (error) {
+            this.onFailure();
+            throw error;
+        }
+    }
+    
+    onSuccess() {
+        this.failureCount = 0;
+        this.state = 'CLOSED';
+    }
+    
+    onFailure() {
+        this.failureCount++;
+        if (this.failureCount >= this.threshold) {
+            this.state = 'OPEN';
+            setTimeout(() => {
+                this.state = 'HALF_OPEN';
+            }, this.timeout);
+        }
+    }
+}
+```
+
+### 37. Explain Saga Pattern.
+
+**Answer:**
+Manages distributed transactions.
+
+**Choreography:**
+- Each service knows what to do next
+- Services communicate via events
+
+**Orchestration:**
+- Central orchestrator coordinates
+- Services respond to commands
+
+**Compensating Transactions:**
+- Each step has compensating action
+- Rollback on failure
+
+### 38. Explain Event Sourcing.
+
+**Answer:**
+Store events instead of current state.
+
+**Benefits:**
+- Complete audit trail
+- Time travel
+- Replay events
+
+**Example:**
+```javascript
+// Events
+{ type: 'AccountCreated', accountId: '123', balance: 0 }
+{ type: 'Deposit', accountId: '123', amount: 100 }
+{ type: 'Withdrawal', accountId: '123', amount: 50 }
+
+// Current state: balance = 50
+```
+
+### 39. Explain CQRS (Command Query Responsibility Segregation).
+
+**Answer:**
+Separate read and write models.
+
+**Command Side:**
+- Write operations
+- Optimized for writes
+- Normalized schema
+
+**Query Side:**
+- Read operations
+- Optimized for reads
+- Denormalized schema
+
+**Benefits:**
+- Independent scaling
+- Optimized for each operation
+- Better performance
+
+### 40. Explain Database Sharding.
+
+**Answer:**
+Horizontal partitioning of database.
+
+**Sharding Strategies:**
+- Range-based: By ID range
+- Hash-based: Hash function
+- Directory-based: Lookup table
+
+**Challenges:**
+- Cross-shard queries
+- Rebalancing
+- Joins across shards
+
+### 41. Explain Database Replication.
+
+**Answer:**
+Copy data across multiple servers.
+
+**Types:**
+- Master-Slave: One master, multiple slaves
+- Master-Master: Multiple masters
+- Multi-Master: All nodes can write
+
+**Benefits:**
+- High availability
+- Read scalability
+- Disaster recovery
+
+### 42. Explain Load Balancing Algorithms.
+
+**Answer:**
+**Round Robin:**
+- Distribute requests sequentially
+
+**Least Connections:**
+- Route to server with fewest connections
+
+**Weighted Round Robin:**
+- Assign weights to servers
+
+**IP Hash:**
+- Hash client IP to server
+
+**Geographic:**
+- Route based on location
+
+### 43. Explain Health Checks and Monitoring.
+
+**Answer:**
+**Health Checks:**
+```javascript
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'healthy',
+        timestamp: Date.now(),
+        uptime: process.uptime()
+    });
+});
+```
+
+**Metrics:**
+- Response time
+- Error rate
+- Throughput
+- Resource usage
+
+**Tools:**
+- Prometheus
+- Grafana
+- New Relic
+- Datadog
+
+### 44. Explain Distributed Tracing.
+
+**Answer:**
+Track requests across services.
+
+**Concepts:**
+- Trace: Complete request journey
+- Span: Single operation
+- Context: Propagation between services
+
+**Tools:**
+- Jaeger
+- Zipkin
+- AWS X-Ray
+
+### 45. Explain API Rate Limiting Strategies.
+
+**Answer:**
+**Fixed Window:**
+- Count requests in time window
+
+**Sliding Window:**
+- Count requests in sliding window
+
+**Token Bucket:**
+- Tokens added at rate
+- Request consumes token
+
+**Leaky Bucket:**
+- Requests added to bucket
+- Processed at fixed rate
+
+**Implementation:**
+```javascript
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests
+});
+
+app.use('/api/', limiter);
+```
+
+### 46. Explain Message Queue Patterns.
+
+**Answer:**
+**Point-to-Point:**
+- One producer, one consumer
+- Message consumed once
+
+**Pub/Sub:**
+- One producer, multiple consumers
+- Message broadcast to all
+
+**Request/Reply:**
+- Request message
+- Reply message with correlation ID
+
+**Work Queue:**
+- Multiple workers
+- Load distribution
+
+### 47. Explain Backend Caching Strategies.
+
+**Answer:**
+**Cache-Aside:**
+```javascript
+async function getData(key) {
+    let data = await cache.get(key);
+    if (!data) {
+        data = await db.query(key);
+        await cache.set(key, data);
+    }
+    return data;
+}
+```
+
+**Write-Through:**
+- Write to cache and DB simultaneously
+
+**Write-Back:**
+- Write to cache first
+- Write to DB asynchronously
+
+**Refresh-Ahead:**
+- Refresh cache before expiration
+
+### 48. Explain Backend Security Best Practices.
+
+**Answer:**
+**1. Authentication:**
+- JWT tokens
+- OAuth 2.0
+- Session management
+
+**2. Authorization:**
+- RBAC (Role-Based Access Control)
+- ABAC (Attribute-Based Access Control)
+
+**3. Input Validation:**
+- Validate all inputs
+- Sanitize data
+- Parameterized queries
+
+**4. Encryption:**
+- HTTPS/TLS
+- Encrypt sensitive data at rest
+- Hash passwords (bcrypt, argon2)
+
+**5. Security Headers:**
+- CORS
+- CSP
+- X-Frame-Options
+- X-XSS-Protection
+
+### 49. Explain GraphQL vs REST.
+
+**Answer:**
+**REST:**
+- Multiple endpoints
+- Fixed data structure
+- Over-fetching/under-fetching
+
+**GraphQL:**
+- Single endpoint
+- Flexible queries
+- Client specifies fields
+
+**Example:**
+```graphql
+query {
+    user(id: "123") {
+        name
+        email
+        posts {
+            title
+        }
+    }
+}
+```
+
+### 50. Explain WebSocket vs HTTP.
+
+**Answer:**
+**HTTP:**
+- Request-response
+- Stateless
+- One-way communication
+
+**WebSocket:**
+- Persistent connection
+- Bidirectional
+- Real-time communication
+
+**Use Cases:**
+- HTTP: REST APIs, web pages
+- WebSocket: Chat, gaming, real-time updates
+
 ---
 
 This covers backend interview questions from beginner to advanced level with comprehensive coverage of essential topics.

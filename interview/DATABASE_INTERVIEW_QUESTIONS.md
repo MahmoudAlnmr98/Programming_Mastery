@@ -800,6 +800,637 @@ BEGIN
 END;
 ```
 
+### 34. Explain SQL Window Functions.
+
+**Answer:**
+Window functions perform calculations across set of rows.
+
+**ROW_NUMBER():**
+```sql
+SELECT 
+    name, 
+    salary,
+    ROW_NUMBER() OVER (ORDER BY salary DESC) as rank
+FROM employees;
+```
+
+**RANK() and DENSE_RANK():**
+```sql
+SELECT 
+    name, 
+    salary,
+    RANK() OVER (ORDER BY salary DESC) as rank,
+    DENSE_RANK() OVER (ORDER BY salary DESC) as dense_rank
+FROM employees;
+-- RANK: 1, 2, 2, 4 (skips 3)
+-- DENSE_RANK: 1, 2, 2, 3 (no gaps)
+```
+
+**PARTITION BY:**
+```sql
+SELECT 
+    department,
+    name,
+    salary,
+    ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) as dept_rank
+FROM employees;
+```
+
+**LAG() and LEAD():**
+```sql
+SELECT 
+    date,
+    sales,
+    LAG(sales, 1) OVER (ORDER BY date) as prev_sales,
+    LEAD(sales, 1) OVER (ORDER BY date) as next_sales
+FROM sales;
+```
+
+**SUM() OVER:**
+```sql
+SELECT 
+    date,
+    sales,
+    SUM(sales) OVER (ORDER BY date) as running_total
+FROM sales;
+```
+
+### 35. Explain SQL Common Table Expressions (CTEs).
+
+**Answer:**
+CTEs provide temporary result set for query.
+
+**Simple CTE:**
+```sql
+WITH high_salary AS (
+    SELECT * FROM employees WHERE salary > 50000
+)
+SELECT * FROM high_salary WHERE department = 'IT';
+```
+
+**Recursive CTE:**
+```sql
+WITH RECURSIVE hierarchy AS (
+    -- Base case
+    SELECT id, name, manager_id, 1 as level
+    FROM employees
+    WHERE manager_id IS NULL
+    
+    UNION ALL
+    
+    -- Recursive case
+    SELECT e.id, e.name, e.manager_id, h.level + 1
+    FROM employees e
+    JOIN hierarchy h ON e.manager_id = h.id
+)
+SELECT * FROM hierarchy;
+```
+
+**Multiple CTEs:**
+```sql
+WITH 
+    high_salary AS (
+        SELECT * FROM employees WHERE salary > 50000
+    ),
+    it_employees AS (
+        SELECT * FROM high_salary WHERE department = 'IT'
+    )
+SELECT * FROM it_employees;
+```
+
+### 36. Explain SQL Subqueries vs JOINs.
+
+**Answer:**
+**Subquery:**
+```sql
+-- Scalar subquery
+SELECT name, 
+       (SELECT AVG(salary) FROM employees) as avg_salary
+FROM employees;
+
+-- Correlated subquery
+SELECT name, salary
+FROM employees e1
+WHERE salary > (
+    SELECT AVG(salary) 
+    FROM employees e2 
+    WHERE e2.department = e1.department
+);
+
+-- EXISTS subquery
+SELECT name
+FROM employees e
+WHERE EXISTS (
+    SELECT 1 FROM projects p 
+    WHERE p.employee_id = e.id
+);
+```
+
+**JOIN:**
+```sql
+SELECT e.name, p.project_name
+FROM employees e
+INNER JOIN projects p ON e.id = p.employee_id;
+```
+
+**When to use:**
+- **Subquery**: When you need single value or existence check
+- **JOIN**: When you need data from multiple tables
+
+### 37. Explain SQL Indexes and their types.
+
+**Answer:**
+**B-Tree Index (Default):**
+```sql
+CREATE INDEX idx_name ON employees(name);
+-- Good for: Equality and range queries
+```
+
+**Composite Index:**
+```sql
+CREATE INDEX idx_dept_salary ON employees(department, salary);
+-- Order matters: (department, salary) vs (salary, department)
+```
+
+**Unique Index:**
+```sql
+CREATE UNIQUE INDEX idx_email ON employees(email);
+```
+
+**Partial Index:**
+```sql
+CREATE INDEX idx_active ON employees(name) WHERE active = true;
+```
+
+**Covering Index:**
+```sql
+CREATE INDEX idx_covering ON employees(department, salary, name);
+-- Includes all columns needed for query
+```
+
+**Hash Index:**
+```sql
+-- PostgreSQL
+CREATE INDEX idx_hash ON employees USING HASH(email);
+-- Good for: Equality only
+```
+
+### 38. Explain SQL Query Optimization Techniques.
+
+**Answer:**
+**1. Use Indexes:**
+```sql
+-- Add index on frequently queried columns
+CREATE INDEX idx_department ON employees(department);
+```
+
+**2. Avoid SELECT *:**
+```sql
+-- Bad
+SELECT * FROM employees;
+
+-- Good
+SELECT id, name, email FROM employees;
+```
+
+**3. Use LIMIT:**
+```sql
+SELECT * FROM employees ORDER BY salary DESC LIMIT 10;
+```
+
+**4. Avoid Functions on Indexed Columns:**
+```sql
+-- Bad (can't use index)
+SELECT * FROM employees WHERE UPPER(name) = 'JOHN';
+
+-- Good
+SELECT * FROM employees WHERE name = 'John';
+```
+
+**5. Use EXISTS instead of COUNT:**
+```sql
+-- Bad
+SELECT * FROM employees 
+WHERE (SELECT COUNT(*) FROM projects WHERE employee_id = employees.id) > 0;
+
+-- Good
+SELECT * FROM employees e
+WHERE EXISTS (SELECT 1 FROM projects p WHERE p.employee_id = e.id);
+```
+
+**6. Avoid N+1 Queries:**
+```sql
+-- Bad: Multiple queries
+SELECT * FROM employees;
+-- Then for each employee:
+SELECT * FROM projects WHERE employee_id = ?
+
+-- Good: Single query with JOIN
+SELECT e.*, p.*
+FROM employees e
+LEFT JOIN projects p ON e.id = p.employee_id;
+```
+
+### 39. Explain SQL Transactions and Isolation Levels.
+
+**Answer:**
+**Transaction Properties (ACID):**
+- **Atomicity**: All or nothing
+- **Consistency**: Valid state
+- **Isolation**: Concurrent transactions don't interfere
+- **Durability**: Committed changes persist
+
+**Isolation Levels:**
+```sql
+-- Read Uncommitted (lowest isolation)
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+-- Issues: Dirty reads
+
+-- Read Committed (default in most DBs)
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+-- Issues: Non-repeatable reads
+
+-- Repeatable Read
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+-- Issues: Phantom reads
+
+-- Serializable (highest isolation)
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+-- No issues but slowest
+```
+
+**Transaction Example:**
+```sql
+BEGIN TRANSACTION;
+    UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+    UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;
+-- Or
+ROLLBACK;
+```
+
+### 40. Explain SQL Stored Procedures and Functions.
+
+**Answer:**
+**Stored Procedure:**
+```sql
+CREATE PROCEDURE GetEmployeeByDepartment(IN dept_name VARCHAR(50))
+BEGIN
+    SELECT * FROM employees WHERE department = dept_name;
+END;
+
+-- Call
+CALL GetEmployeeByDepartment('IT');
+```
+
+**Function:**
+```sql
+CREATE FUNCTION GetEmployeeCount(dept_name VARCHAR(50))
+RETURNS INT
+BEGIN
+    DECLARE count INT;
+    SELECT COUNT(*) INTO count FROM employees WHERE department = dept_name;
+    RETURN count;
+END;
+
+-- Use
+SELECT GetEmployeeCount('IT');
+```
+
+**Differences:**
+- **Procedure**: Can return multiple values, can have side effects
+- **Function**: Returns single value, should be pure (no side effects)
+
+### 41. Explain SQL Triggers.
+
+**Answer:**
+Triggers execute automatically on specified events.
+
+**BEFORE INSERT Trigger:**
+```sql
+CREATE TRIGGER before_employee_insert
+BEFORE INSERT ON employees
+FOR EACH ROW
+BEGIN
+    IF NEW.salary < 0 THEN
+        SET NEW.salary = 0;
+    END IF;
+END;
+```
+
+**AFTER UPDATE Trigger:**
+```sql
+CREATE TRIGGER after_employee_update
+AFTER UPDATE ON employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO employee_audit (employee_id, old_salary, new_salary, changed_at)
+    VALUES (NEW.id, OLD.salary, NEW.salary, NOW());
+END;
+```
+
+**INSTEAD OF Trigger (Views):**
+```sql
+CREATE TRIGGER instead_of_delete
+INSTEAD OF DELETE ON employee_view
+FOR EACH ROW
+BEGIN
+    DELETE FROM employees WHERE id = OLD.id;
+END;
+```
+
+### 42. Explain SQL Views and Materialized Views.
+
+**Answer:**
+**View (Virtual):**
+```sql
+CREATE VIEW high_salary_employees AS
+SELECT name, salary, department
+FROM employees
+WHERE salary > 50000;
+
+-- Use
+SELECT * FROM high_salary_employees;
+```
+
+**Materialized View (Physical):**
+```sql
+-- PostgreSQL
+CREATE MATERIALIZED VIEW sales_summary AS
+SELECT 
+    product_id,
+    SUM(quantity) as total_quantity,
+    SUM(amount) as total_amount
+FROM sales
+GROUP BY product_id;
+
+-- Refresh
+REFRESH MATERIALIZED VIEW sales_summary;
+```
+
+**Differences:**
+- **View**: Virtual, always up-to-date, slower for complex queries
+- **Materialized View**: Physical storage, faster, needs refresh
+
+### 43. Explain SQL Pivot and Unpivot.
+
+**Answer:**
+**Pivot (Rows to Columns):**
+```sql
+-- PostgreSQL
+SELECT *
+FROM (
+    SELECT department, name, salary
+    FROM employees
+) AS source
+PIVOT (
+    SUM(salary)
+    FOR department IN ('IT', 'HR', 'Finance')
+) AS pivot_table;
+```
+
+**Unpivot (Columns to Rows):**
+```sql
+SELECT name, 'Q1' as quarter, q1_sales as sales
+FROM sales
+UNION ALL
+SELECT name, 'Q2', q2_sales
+FROM sales
+UNION ALL
+SELECT name, 'Q3', q3_sales
+FROM sales
+UNION ALL
+SELECT name, 'Q4', q4_sales
+FROM sales;
+```
+
+### 44. Explain SQL Aggregate Functions.
+
+**Answer:**
+**Basic Aggregates:**
+```sql
+SELECT 
+    COUNT(*) as total,
+    SUM(salary) as total_salary,
+    AVG(salary) as avg_salary,
+    MIN(salary) as min_salary,
+    MAX(salary) as max_salary
+FROM employees;
+```
+
+**GROUP BY:**
+```sql
+SELECT 
+    department,
+    COUNT(*) as count,
+    AVG(salary) as avg_salary
+FROM employees
+GROUP BY department;
+```
+
+**HAVING:**
+```sql
+SELECT 
+    department,
+    AVG(salary) as avg_salary
+FROM employees
+GROUP BY department
+HAVING AVG(salary) > 50000;
+```
+
+**DISTINCT with Aggregates:**
+```sql
+SELECT COUNT(DISTINCT department) FROM employees;
+```
+
+### 45. Explain SQL Date and Time Functions.
+
+**Answer:**
+**Date Functions:**
+```sql
+-- Current date/time
+SELECT NOW(), CURRENT_DATE, CURRENT_TIME;
+
+-- Extract parts
+SELECT 
+    EXTRACT(YEAR FROM hire_date) as year,
+    EXTRACT(MONTH FROM hire_date) as month,
+    EXTRACT(DAY FROM hire_date) as day
+FROM employees;
+
+-- Date arithmetic
+SELECT hire_date + INTERVAL '1 year' as anniversary
+FROM employees;
+
+-- Date difference
+SELECT DATEDIFF('2024-01-01', '2023-01-01') as days_diff;
+
+-- Format date
+SELECT DATE_FORMAT(hire_date, '%Y-%m-%d') as formatted_date
+FROM employees;
+```
+
+### 46. Explain SQL String Functions.
+
+**Answer:**
+**Common String Functions:**
+```sql
+-- Concatenation
+SELECT CONCAT(first_name, ' ', last_name) as full_name FROM employees;
+
+-- Substring
+SELECT SUBSTRING(name, 1, 5) FROM employees;
+
+-- Length
+SELECT LENGTH(name) FROM employees;
+
+-- Upper/Lower
+SELECT UPPER(name), LOWER(name) FROM employees;
+
+-- Trim
+SELECT TRIM('  hello  ') as trimmed;
+
+-- Replace
+SELECT REPLACE(name, 'John', 'Jon') FROM employees;
+
+-- Pattern matching
+SELECT * FROM employees WHERE name LIKE 'J%';
+SELECT * FROM employees WHERE name REGEXP '^J';
+```
+
+### 47. Explain SQL NULL Handling.
+
+**Answer:**
+**IS NULL / IS NOT NULL:**
+```sql
+SELECT * FROM employees WHERE manager_id IS NULL;
+SELECT * FROM employees WHERE manager_id IS NOT NULL;
+```
+
+**COALESCE:**
+```sql
+SELECT COALESCE(manager_id, 0) as manager_id FROM employees;
+-- Returns first non-NULL value
+```
+
+**NULLIF:**
+```sql
+SELECT NULLIF(salary, 0) as salary FROM employees;
+-- Returns NULL if values are equal
+```
+
+**Aggregates with NULL:**
+```sql
+-- COUNT(*) counts all rows
+-- COUNT(column) ignores NULLs
+SELECT COUNT(*), COUNT(manager_id) FROM employees;
+```
+
+### 48. Explain SQL CASE Statements.
+
+**Answer:**
+**Simple CASE:**
+```sql
+SELECT 
+    name,
+    CASE department
+        WHEN 'IT' THEN 'Technology'
+        WHEN 'HR' THEN 'Human Resources'
+        ELSE 'Other'
+    END as dept_name
+FROM employees;
+```
+
+**Searched CASE:**
+```sql
+SELECT 
+    name,
+    salary,
+    CASE
+        WHEN salary > 100000 THEN 'High'
+        WHEN salary > 50000 THEN 'Medium'
+        ELSE 'Low'
+    END as salary_level
+FROM employees;
+```
+
+**CASE in Aggregates:**
+```sql
+SELECT 
+    COUNT(CASE WHEN salary > 100000 THEN 1 END) as high_salary_count,
+    COUNT(CASE WHEN salary <= 100000 THEN 1 END) as other_count
+FROM employees;
+```
+
+### 49. Explain SQL UNION, INTERSECT, and EXCEPT.
+
+**Answer:**
+**UNION (All distinct rows):**
+```sql
+SELECT name FROM employees
+UNION
+SELECT name FROM contractors;
+-- Removes duplicates
+```
+
+**UNION ALL (All rows):**
+```sql
+SELECT name FROM employees
+UNION ALL
+SELECT name FROM contractors;
+-- Keeps duplicates
+```
+
+**INTERSECT (Common rows):**
+```sql
+SELECT name FROM employees
+INTERSECT
+SELECT name FROM contractors;
+```
+
+**EXCEPT (Rows in first but not second):**
+```sql
+SELECT name FROM employees
+EXCEPT
+SELECT name FROM contractors;
+```
+
+### 50. Explain NoSQL Database Types.
+
+**Answer:**
+**Document Databases (MongoDB, CouchDB):**
+```javascript
+// MongoDB example
+{
+    "_id": "123",
+    "name": "John",
+    "email": "john@example.com",
+    "address": {
+        "street": "123 Main St",
+        "city": "New York"
+    }
+}
+```
+
+**Key-Value Stores (Redis, DynamoDB):**
+```javascript
+// Redis example
+SET user:123:name "John"
+GET user:123:name
+```
+
+**Column-Family (Cassandra, HBase):**
+- Stores data in columns instead of rows
+- Good for time-series data
+
+**Graph Databases (Neo4j):**
+```cypher
+// Neo4j example
+CREATE (john:Person {name: "John"})
+CREATE (jane:Person {name: "Jane"})
+CREATE (john)-[:FRIENDS]->(jane)
+```
+
 ---
 
 This covers database interview questions from beginner to advanced level with detailed explanations.

@@ -828,6 +828,332 @@ const useStore = create(set => ({
 }));
 ```
 
+### 31. Explain CSS Specificity in detail.
+
+**Answer:**
+Specificity determines which CSS rule applies when multiple rules target same element.
+
+**Specificity Calculation:**
+- Inline styles: 1000
+- IDs: 100
+- Classes, attributes, pseudo-classes: 10
+- Elements, pseudo-elements: 1
+
+**Examples:**
+```css
+/* Specificity: 1 */
+div { color: red; }
+
+/* Specificity: 10 */
+.container { color: blue; }
+
+/* Specificity: 11 */
+div.container { color: green; }
+
+/* Specificity: 100 */
+#header { color: yellow; }
+
+/* Specificity: 110 */
+#header .container { color: purple; }
+
+/* Specificity: 1000 */
+<div style="color: orange;"> /* Inline */
+```
+
+**Important:**
+```css
+/* !important overrides everything */
+div { color: red !important; }
+```
+
+### 32. Explain CSS BEM Methodology.
+
+**Answer:**
+BEM (Block Element Modifier) naming convention.
+
+**Structure:**
+- Block: Standalone component
+- Element: Part of block
+- Modifier: Variation of block/element
+
+**Example:**
+```css
+/* Block */
+.button { }
+
+/* Element */
+.button__icon { }
+.button__text { }
+
+/* Modifier */
+.button--primary { }
+.button--large { }
+.button--disabled { }
+```
+
+**HTML:**
+```html
+<button class="button button--primary button--large">
+    <span class="button__icon">✓</span>
+    <span class="button__text">Submit</span>
+</button>
+```
+
+### 33. Explain CSS Custom Properties (Variables).
+
+**Answer:**
+CSS variables for reusable values.
+
+```css
+:root {
+    --primary-color: #007bff;
+    --font-size: 16px;
+    --spacing: 1rem;
+}
+
+.element {
+    color: var(--primary-color);
+    font-size: var(--font-size);
+    margin: var(--spacing);
+}
+
+/* With fallback */
+.element {
+    color: var(--primary-color, #000);
+}
+
+/* Scoped variables */
+.component {
+    --local-color: red;
+    color: var(--local-color);
+}
+```
+
+**JavaScript:**
+```javascript
+// Get
+const color = getComputedStyle(document.documentElement)
+    .getPropertyValue('--primary-color');
+
+// Set
+document.documentElement.style.setProperty('--primary-color', '#ff0000');
+```
+
+### 34. Explain CSS Animations vs Transitions.
+
+**Answer:**
+**Transitions:**
+```css
+.element {
+    transition: property duration timing-function delay;
+    transition: width 0.3s ease-in-out;
+}
+
+.element:hover {
+    width: 200px;
+}
+```
+
+**Animations:**
+```css
+@keyframes slide {
+    from { transform: translateX(0); }
+    to { transform: translateX(100px); }
+}
+
+.element {
+    animation: slide 1s ease-in-out infinite;
+    animation-name: slide;
+    animation-duration: 1s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+```
+
+**Differences:**
+- **Transitions**: Simple property changes, triggered by state
+- **Animations**: Complex sequences, can loop, more control
+
+### 35. Explain CSS Grid vs Flexbox.
+
+**Answer:**
+**Flexbox (1D):**
+```css
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+```
+
+**Grid (2D):**
+```css
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
+    gap: 20px;
+}
+```
+
+**When to use:**
+- **Flexbox**: 1D layouts, component alignment
+- **Grid**: 2D layouts, page structure
+
+### 36. Explain Web Accessibility (a11y).
+
+**Answer:**
+Making web accessible to people with disabilities.
+
+**Semantic HTML:**
+```html
+<!-- Bad -->
+<div onclick="...">Click me</div>
+
+<!-- Good -->
+<button>Click me</button>
+```
+
+**ARIA Attributes:**
+```html
+<button aria-label="Close dialog">×</button>
+<div role="alert" aria-live="polite">Error message</div>
+```
+
+**Keyboard Navigation:**
+```css
+/* Focus styles */
+button:focus {
+    outline: 2px solid blue;
+}
+```
+
+**Alt Text:**
+```html
+<img src="photo.jpg" alt="Description of image">
+```
+
+### 37. Explain Progressive Web Apps (PWA).
+
+**Answer:**
+Web apps that work like native apps.
+
+**Service Worker:**
+```javascript
+// Register
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+}
+
+// sw.js
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open('v1').then((cache) => {
+            return cache.addAll(['/index.html', '/style.css']);
+        })
+    );
+});
+```
+
+**Manifest:**
+```json
+{
+    "name": "My App",
+    "short_name": "App",
+    "start_url": "/",
+    "display": "standalone",
+    "icons": [...]
+}
+```
+
+**Features:**
+- Offline support
+- Installable
+- Push notifications
+- Background sync
+
+### 38. Explain Web Performance Optimization.
+
+**Answer:**
+**Techniques:**
+1. **Minification**: Reduce file size
+2. **Compression**: Gzip/Brotli
+3. **Caching**: Browser cache, CDN
+4. **Lazy Loading**: Load on demand
+5. **Code Splitting**: Split bundles
+6. **Image Optimization**: WebP, lazy load
+7. **Critical CSS**: Inline above fold
+
+**Lazy Loading:**
+```html
+<img src="image.jpg" loading="lazy" alt="...">
+```
+
+**Code Splitting:**
+```javascript
+const Component = lazy(() => import('./Component'));
+```
+
+### 39. Explain Cross-Origin Resource Sharing (CORS).
+
+**Answer:**
+CORS allows cross-origin requests.
+
+**Server Response:**
+```javascript
+// Express.js
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+```
+
+**Preflight Request:**
+```javascript
+// Browser sends OPTIONS request first
+// Server responds with allowed methods/headers
+```
+
+**CORS Errors:**
+- Missing CORS headers
+- Credentials not allowed
+- Method not allowed
+
+### 40. Explain Web Security Best Practices.
+
+**Answer:**
+**1. HTTPS:**
+- Encrypt data in transit
+- SSL/TLS certificates
+
+**2. Content Security Policy (CSP):**
+```html
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; script-src 'self' 'unsafe-inline';">
+```
+
+**3. XSS Prevention:**
+```javascript
+// Sanitize user input
+function sanitize(input) {
+    return input.replace(/<script>/g, '');
+}
+```
+
+**4. CSRF Protection:**
+```javascript
+// CSRF tokens
+const token = generateCSRFToken();
+```
+
+**5. Input Validation:**
+- Validate on client and server
+- Sanitize inputs
+- Use parameterized queries
+
 ---
 
 This covers frontend interview questions from beginner to advanced level with comprehensive coverage.

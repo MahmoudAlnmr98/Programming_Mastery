@@ -1324,6 +1324,569 @@ function* filter(iterable, predicate) {
 }
 ```
 
+### 38. Explain the difference between `Object.freeze()`, `Object.seal()`, and `Object.preventExtensions()`.
+
+**Answer:**
+**Object.preventExtensions():**
+```javascript
+const obj = { name: "John" };
+Object.preventExtensions(obj);
+obj.age = 30; // Error in strict mode, silently fails otherwise
+obj.name = "Jane"; // OK - can modify existing
+delete obj.name; // OK - can delete
+```
+
+**Object.seal():**
+```javascript
+const obj = { name: "John" };
+Object.seal(obj);
+obj.age = 30; // Error - cannot add
+obj.name = "Jane"; // OK - can modify existing
+delete obj.name; // Error - cannot delete
+```
+
+**Object.freeze():**
+```javascript
+const obj = { name: "John" };
+Object.freeze(obj);
+obj.age = 30; // Error - cannot add
+obj.name = "Jane"; // Error - cannot modify
+delete obj.name; // Error - cannot delete
+```
+
+**Summary:**
+- `preventExtensions`: Cannot add, can modify/delete
+- `seal`: Cannot add/delete, can modify
+- `freeze`: Cannot add/modify/delete (shallow)
+
+### 39. Explain the difference between `Array.from()`, `Array.of()`, and spread operator.
+
+**Answer:**
+**Array.from():**
+```javascript
+// From array-like objects
+Array.from('hello'); // ['h', 'e', 'l', 'l', 'o']
+Array.from({ length: 5 }, (_, i) => i); // [0, 1, 2, 3, 4]
+
+// From iterables
+Array.from(new Set([1, 2, 3])); // [1, 2, 3]
+```
+
+**Array.of():**
+```javascript
+Array.of(1, 2, 3); // [1, 2, 3]
+Array.of(7); // [7] (not [7, undefined, undefined, undefined, undefined, undefined, undefined])
+Array(7); // [empty × 7] - different behavior
+```
+
+**Spread Operator:**
+```javascript
+const arr = [1, 2, 3];
+const newArr = [...arr]; // [1, 2, 3] - shallow copy
+
+// Combining arrays
+const combined = [...arr, 4, 5]; // [1, 2, 3, 4, 5]
+```
+
+### 40. Explain the difference between `setTimeout` and `setInterval`.
+
+**Answer:**
+**setTimeout:**
+```javascript
+// Executes once after delay
+const timer = setTimeout(() => {
+    console.log('Executed once');
+}, 1000);
+
+clearTimeout(timer); // Cancel before execution
+```
+
+**setInterval:**
+```javascript
+// Executes repeatedly at intervals
+const interval = setInterval(() => {
+    console.log('Executed repeatedly');
+}, 1000);
+
+clearInterval(interval); // Stop execution
+```
+
+**Common Pitfall:**
+```javascript
+// Wrong - creates multiple intervals
+function startTimer() {
+    setInterval(() => {
+        console.log('Tick');
+    }, 1000);
+}
+
+// Correct - single interval
+let intervalId;
+function startTimer() {
+    if (!intervalId) {
+        intervalId = setInterval(() => {
+            console.log('Tick');
+        }, 1000);
+    }
+}
+```
+
+### 41. Explain the difference between `Object.keys()`, `Object.values()`, and `Object.entries()`.
+
+**Answer:**
+```javascript
+const obj = { a: 1, b: 2, c: 3 };
+
+// Object.keys() - returns keys
+Object.keys(obj); // ['a', 'b', 'c']
+
+// Object.values() - returns values
+Object.values(obj); // [1, 2, 3]
+
+// Object.entries() - returns [key, value] pairs
+Object.entries(obj); // [['a', 1], ['b', 2], ['c', 3]]
+
+// Iteration
+for (const [key, value] of Object.entries(obj)) {
+    console.log(key, value);
+}
+
+// Convert to Map
+const map = new Map(Object.entries(obj));
+```
+
+### 42. Explain the difference between `Array.isArray()` and `instanceof Array`.
+
+**Answer:**
+```javascript
+// Array.isArray() - recommended
+Array.isArray([]); // true
+Array.isArray({}); // false
+Array.isArray(null); // false
+
+// instanceof - can fail with cross-frame/iframe
+const arr = [];
+arr instanceof Array; // true
+
+// Problem with instanceof
+const iframe = document.createElement('iframe');
+document.body.appendChild(iframe);
+const iframeArray = iframe.contentWindow.Array;
+const arr2 = new iframeArray();
+arr2 instanceof Array; // false (different Array constructor)
+Array.isArray(arr2); // true (works correctly)
+```
+
+**Best Practice:** Always use `Array.isArray()`.
+
+### 43. Explain the difference between `parseInt()` and `parseFloat()`.
+
+**Answer:**
+**parseInt():**
+```javascript
+parseInt('123'); // 123
+parseInt('123.45'); // 123 (stops at decimal)
+parseInt('123abc'); // 123 (stops at non-numeric)
+parseInt('abc123'); // NaN
+parseInt('10', 2); // 2 (binary)
+parseInt('10', 8); // 8 (octal)
+parseInt('10', 16); // 16 (hexadecimal)
+```
+
+**parseFloat():**
+```javascript
+parseFloat('123'); // 123
+parseFloat('123.45'); // 123.45
+parseFloat('123.45.67'); // 123.45 (stops at second decimal)
+parseFloat('123abc'); // 123 (stops at non-numeric)
+parseFloat('abc123'); // NaN
+```
+
+**Number():**
+```javascript
+Number('123'); // 123
+Number('123.45'); // 123.45
+Number('123abc'); // NaN (strict)
+Number(''); // 0
+Number(' '); // 0
+```
+
+### 44. Explain the difference between `String.slice()`, `String.substring()`, and `String.substr()`.
+
+**Answer:**
+**slice():**
+```javascript
+const str = 'Hello World';
+str.slice(0, 5); // 'Hello'
+str.slice(-5); // 'World' (negative index)
+str.slice(5, 0); // '' (returns empty if start > end)
+```
+
+**substring():**
+```javascript
+const str = 'Hello World';
+str.substring(0, 5); // 'Hello'
+str.substring(-5); // 'Hello World' (treats negative as 0)
+str.substring(5, 0); // 'Hello' (swaps if start > end)
+```
+
+**substr() (deprecated):**
+```javascript
+const str = 'Hello World';
+str.substr(0, 5); // 'Hello' (start, length)
+str.substr(-5); // 'World' (negative start from end)
+str.substr(5, 0); // '' (length 0)
+```
+
+**Best Practice:** Use `slice()` for modern code.
+
+### 45. Explain the difference between `Array.splice()` and `Array.slice()`.
+
+**Answer:**
+**slice() - Non-mutating:**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+const newArr = arr.slice(1, 3); // [2, 3]
+console.log(arr); // [1, 2, 3, 4, 5] (unchanged)
+```
+
+**splice() - Mutating:**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+const removed = arr.splice(1, 2); // [2, 3]
+console.log(arr); // [1, 4, 5] (modified)
+console.log(removed); // [2, 3]
+
+// Insert elements
+arr.splice(1, 0, 'a', 'b'); // Insert at index 1
+console.log(arr); // [1, 'a', 'b', 4, 5]
+
+// Replace elements
+arr.splice(1, 2, 'x', 'y'); // Replace 2 elements
+console.log(arr); // [1, 'x', 'y', 4, 5]
+```
+
+### 46. Explain the difference between `Array.find()` and `Array.filter()`.
+
+**Answer:**
+**find() - Returns first match:**
+```javascript
+const users = [
+    { id: 1, name: 'John', active: true },
+    { id: 2, name: 'Jane', active: false },
+    { id: 3, name: 'Bob', active: true }
+];
+
+const user = users.find(u => u.active); // { id: 1, name: 'John', active: true }
+const user2 = users.find(u => u.id === 5); // undefined
+```
+
+**filter() - Returns all matches:**
+```javascript
+const activeUsers = users.filter(u => u.active);
+// [{ id: 1, name: 'John', active: true }, { id: 3, name: 'Bob', active: true }]
+
+const empty = users.filter(u => u.id === 5); // []
+```
+
+**Key Differences:**
+- `find()` returns first element or `undefined`
+- `filter()` returns array (empty if no matches)
+
+### 47. Explain the difference between `Array.some()` and `Array.every()`.
+
+**Answer:**
+**some() - Returns true if any element passes:**
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+numbers.some(n => n > 3); // true (4 and 5 are > 3)
+numbers.some(n => n > 10); // false (none > 10)
+```
+
+**every() - Returns true if all elements pass:**
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+numbers.every(n => n > 0); // true (all > 0)
+numbers.every(n => n > 3); // false (1, 2, 3 are not > 3)
+```
+
+**Use Cases:**
+```javascript
+// Validation
+const form = { name: 'John', age: 25, email: 'john@example.com' };
+const isValid = Object.values(form).every(val => val !== '');
+const hasEmpty = Object.values(form).some(val => val === '');
+```
+
+### 48. Explain the difference between `Array.includes()` and `Array.indexOf()`.
+
+**Answer:**
+**includes() - Returns boolean:**
+```javascript
+const arr = [1, 2, 3, NaN];
+arr.includes(2); // true
+arr.includes(4); // false
+arr.includes(NaN); // true (correctly handles NaN)
+arr.includes(2, 3); // false (starts from index 3)
+```
+
+**indexOf() - Returns index or -1:**
+```javascript
+const arr = [1, 2, 3, NaN];
+arr.indexOf(2); // 1
+arr.indexOf(4); // -1
+arr.indexOf(NaN); // -1 (cannot find NaN)
+arr.indexOf(2, 3); // -1 (starts from index 3)
+```
+
+**When to use:**
+- `includes()`: Check existence (simpler)
+- `indexOf()`: Need index position
+
+### 49. Explain the difference between `String.trim()`, `String.trimStart()`, and `String.trimEnd()`.
+
+**Answer:**
+```javascript
+const str = '  Hello World  ';
+
+str.trim(); // 'Hello World' (both sides)
+str.trimStart(); // 'Hello World  ' (left side)
+str.trimEnd(); // '  Hello World' (right side)
+
+// Legacy
+str.trimLeft(); // Same as trimStart()
+str.trimRight(); // Same as trimEnd()
+```
+
+### 50. Explain the difference between `String.startsWith()` and `String.endsWith()`.
+
+**Answer:**
+```javascript
+const str = 'Hello World';
+
+str.startsWith('Hello'); // true
+str.startsWith('World'); // false
+str.startsWith('World', 6); // true (starts from index 6)
+
+str.endsWith('World'); // true
+str.endsWith('Hello'); // false
+str.endsWith('Hello', 5); // true (checks first 5 characters)
+```
+
+### 51. Explain the difference between `String.replace()` and `String.replaceAll()`.
+
+**Answer:**
+**replace() - Replaces first match:**
+```javascript
+const str = 'Hello World World';
+str.replace('World', 'Universe'); // 'Hello Universe World'
+str.replace(/World/g, 'Universe'); // 'Hello Universe Universe' (with regex)
+```
+
+**replaceAll() - Replaces all matches:**
+```javascript
+const str = 'Hello World World';
+str.replaceAll('World', 'Universe'); // 'Hello Universe Universe'
+str.replaceAll(/World/g, 'Universe'); // 'Hello Universe Universe'
+```
+
+### 52. Explain the difference between `Array.push()` and `Array.unshift()`.
+
+**Answer:**
+**push() - Adds to end:**
+```javascript
+const arr = [1, 2, 3];
+arr.push(4); // [1, 2, 3, 4]
+arr.push(5, 6); // [1, 2, 3, 4, 5, 6]
+```
+
+**unshift() - Adds to beginning:**
+```javascript
+const arr = [1, 2, 3];
+arr.unshift(0); // [0, 1, 2, 3]
+arr.unshift(-2, -1); // [-2, -1, 0, 1, 2, 3]
+```
+
+**Performance:** `push()` is faster than `unshift()` (no need to shift elements).
+
+### 53. Explain the difference between `Array.pop()` and `Array.shift()`.
+
+**Answer:**
+**pop() - Removes from end:**
+```javascript
+const arr = [1, 2, 3];
+const last = arr.pop(); // 3
+console.log(arr); // [1, 2]
+```
+
+**shift() - Removes from beginning:**
+```javascript
+const arr = [1, 2, 3];
+const first = arr.shift(); // 1
+console.log(arr); // [2, 3]
+```
+
+**Performance:** `pop()` is faster than `shift()`.
+
+### 54. Explain the difference between `Array.concat()` and spread operator for arrays.
+
+**Answer:**
+**concat() - Method:**
+```javascript
+const arr1 = [1, 2, 3];
+const arr2 = [4, 5, 6];
+const combined = arr1.concat(arr2); // [1, 2, 3, 4, 5, 6]
+const combined2 = arr1.concat(arr2, [7, 8]); // [1, 2, 3, 4, 5, 6, 7, 8]
+```
+
+**Spread Operator - Syntax:**
+```javascript
+const arr1 = [1, 2, 3];
+const arr2 = [4, 5, 6];
+const combined = [...arr1, ...arr2]; // [1, 2, 3, 4, 5, 6]
+const combined2 = [...arr1, ...arr2, 7, 8]; // [1, 2, 3, 4, 5, 6, 7, 8]
+```
+
+**Differences:**
+- Spread is more readable and flexible
+- `concat()` can handle non-array values: `[1, 2].concat(3)` vs `[...[1, 2], 3]`
+
+### 55. Explain the difference between `Array.reduce()` and `Array.reduceRight()`.
+
+**Answer:**
+**reduce() - Left to right:**
+```javascript
+const arr = [1, 2, 3, 4];
+arr.reduce((acc, val) => acc + val, 0); // 10
+// Steps: 0+1=1, 1+2=3, 3+3=6, 6+4=10
+```
+
+**reduceRight() - Right to left:**
+```javascript
+const arr = [1, 2, 3, 4];
+arr.reduceRight((acc, val) => acc + val, 0); // 10
+// Steps: 0+4=4, 4+3=7, 7+2=9, 9+1=10
+
+// String reversal
+const str = 'hello';
+str.split('').reduceRight((acc, char) => acc + char, ''); // 'olleh'
+```
+
+### 56. Explain the difference between `Array.sort()` with and without compare function.
+
+**Answer:**
+**Without compare function (string sort):**
+```javascript
+const numbers = [10, 2, 5, 1, 9];
+numbers.sort(); // [1, 10, 2, 5, 9] (incorrect - string comparison)
+
+const strings = ['banana', 'apple', 'cherry'];
+strings.sort(); // ['apple', 'banana', 'cherry'] (correct)
+```
+
+**With compare function:**
+```javascript
+const numbers = [10, 2, 5, 1, 9];
+numbers.sort((a, b) => a - b); // [1, 2, 5, 9, 10] (ascending)
+numbers.sort((a, b) => b - a); // [10, 9, 5, 2, 1] (descending)
+
+// Objects
+const users = [
+    { name: 'John', age: 30 },
+    { name: 'Jane', age: 25 }
+];
+users.sort((a, b) => a.age - b.age); // Sort by age
+```
+
+### 57. Explain the difference between `Array.forEach()` and `Array.map()`.
+
+**Answer:**
+**forEach() - Iterates, returns undefined:**
+```javascript
+const arr = [1, 2, 3];
+const result = arr.forEach(n => n * 2); // undefined
+console.log(arr); // [1, 2, 3] (unchanged)
+
+// Side effects
+arr.forEach(n => console.log(n)); // 1, 2, 3
+```
+
+**map() - Transforms, returns new array:**
+```javascript
+const arr = [1, 2, 3];
+const doubled = arr.map(n => n * 2); // [2, 4, 6]
+console.log(arr); // [1, 2, 3] (unchanged)
+```
+
+**When to use:**
+- `forEach()`: Side effects, no return value needed
+- `map()`: Transform array, need return value
+
+### 58. Explain the difference between `Array.flat()` and `Array.flatMap()`.
+
+**Answer:**
+**flat() - Flattens array:**
+```javascript
+const arr = [1, [2, 3], [4, [5, 6]]];
+arr.flat(); // [1, 2, 3, 4, [5, 6]]
+arr.flat(2); // [1, 2, 3, 4, 5, 6]
+arr.flat(Infinity); // [1, 2, 3, 4, 5, 6] (all levels)
+```
+
+**flatMap() - Map then flatten:**
+```javascript
+const arr = [1, 2, 3];
+arr.flatMap(n => [n, n * 2]); // [1, 2, 2, 4, 3, 6]
+// Equivalent to: arr.map(n => [n, n * 2]).flat()
+
+// Only flattens one level
+arr.flatMap(n => [[n * 2]]); // [[2], [4], [6]] (not flattened)
+```
+
+### 59. Explain the difference between `Array.findIndex()` and `Array.indexOf()`.
+
+**Answer:**
+**indexOf() - Simple value search:**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+arr.indexOf(3); // 2
+arr.indexOf(6); // -1
+arr.indexOf(3, 3); // -1 (starts from index 3)
+```
+
+**findIndex() - Condition-based search:**
+```javascript
+const users = [
+    { id: 1, name: 'John', active: true },
+    { id: 2, name: 'Jane', active: false },
+    { id: 3, name: 'Bob', active: true }
+];
+
+users.findIndex(u => u.active); // 0 (first active user)
+users.findIndex(u => u.id === 2); // 1
+users.findIndex(u => u.id === 5); // -1
+```
+
+### 60. Explain the difference between `Array.fill()` and `Array.from()` for array initialization.
+
+**Answer:**
+**fill() - Fills existing array:**
+```javascript
+const arr = new Array(5).fill(0); // [0, 0, 0, 0, 0]
+const arr2 = new Array(5).fill(0, 1, 3); // [empty, 0, 0, empty, empty]
+```
+
+**Array.from() - Creates and fills:**
+```javascript
+Array.from({ length: 5 }, () => 0); // [0, 0, 0, 0, 0]
+Array.from({ length: 5 }, (_, i) => i); // [0, 1, 2, 3, 4]
+Array.from({ length: 5 }, (_, i) => i * 2); // [0, 2, 4, 6, 8]
+```
+
+**When to use:**
+- `fill()`: Same value for all elements
+- `Array.from()`: Different values based on index
+
 ---
 
 This covers JavaScript interview questions from beginner to advanced level with detailed explanations and code examples.

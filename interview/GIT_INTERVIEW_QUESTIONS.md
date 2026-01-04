@@ -750,6 +750,450 @@ git config gc.reflogExpire "never"
 - Undo operations
 - Debug issues
 
+### 31. Explain Git Worktree.
+
+**Answer:**
+Worktree allows multiple working directories for same repository.
+
+**Create Worktree:**
+```bash
+git worktree add ../feature-branch feature-branch
+```
+
+**List Worktrees:**
+```bash
+git worktree list
+```
+
+**Remove Worktree:**
+```bash
+git worktree remove ../feature-branch
+```
+
+**Use Cases:**
+- Work on multiple branches simultaneously
+- Testing different versions
+- Parallel development
+
+### 32. Explain Git Submodules.
+
+**Answer:**
+Submodules allow including one repository in another.
+
+**Add Submodule:**
+```bash
+git submodule add https://github.com/user/repo.git path/to/submodule
+```
+
+**Clone with Submodules:**
+```bash
+git clone --recursive https://github.com/user/main-repo.git
+# Or
+git submodule update --init --recursive
+```
+
+**Update Submodule: Latest Commit:**
+```bash
+cd path/to/submodule
+git pull origin main
+cd ..
+git add path/to/submodule
+git commit -m "Update submodule"
+```
+
+### 33. Explain Git Hooks.
+
+**Answer:**
+Hooks are scripts that run automatically at certain points.
+
+**Pre-commit Hook:**
+```bash
+#!/bin/sh
+# .git/hooks/pre-commit
+npm run lint
+if [ $? -ne 0 ]; then
+    echo "Linting failed"
+    exit 1
+fi
+```
+
+**Pre-push Hook:**
+```bash
+#!/bin/sh
+# .git/hooks/pre-push
+npm run test
+```
+
+**Client-Side Hooks:**
+- `pre-commit`: Before commit
+- `prepare-commit-msg`: Before commit message editor
+- `commit-msg`: Validate commit message
+- `post-commit`: After commit
+- `pre-push`: Before push
+
+**Server-Side Hooks:**
+- `pre-receive`: Before accepting push
+- `update`: Before updating branch
+- `post-receive`: After accepting push
+
+### 34. Explain Git Bisect.
+
+**Answer:**
+Bisect helps find commit that introduced bug.
+
+**Start Bisect:**
+```bash
+git bisect start
+git bisect bad  # Current commit is bad
+git bisect good <commit-hash>  # Known good commit
+```
+
+**Mark Current State:**
+```bash
+git bisect good  # Current commit is good
+# Or
+git bisect bad   # Current commit is bad
+```
+
+**Reset:**
+```bash
+git bisect reset
+```
+
+**Automated:**
+```bash
+git bisect run npm test
+```
+
+### 35. Explain Git Reflog.
+
+**Answer:**
+Reflog records all HEAD movements.
+
+**View Reflog:**
+```bash
+git reflog
+```
+
+**Recover Lost Commit:**
+```bash
+git reflog
+# Find commit hash
+git checkout <commit-hash>
+```
+
+**Branch Reflog:**
+```bash
+git reflog show branch-name
+```
+
+**Use Cases:**
+- Recover lost commits
+- Undo operations
+- Debug issues
+
+### 36. Explain Git Cherry-pick.
+
+**Answer:**
+Cherry-pick applies specific commit to current branch.
+
+**Basic:**
+```bash
+git cherry-pick <commit-hash>
+```
+
+**Multiple Commits:**
+```bash
+git cherry-pick <commit1> <commit2>
+```
+
+**Range:**
+```bash
+git cherry-pick <start-commit>..<end-commit>
+```
+
+**Edit Commit Message:**
+```bash
+git cherry-pick -e <commit-hash>
+```
+
+**Use Cases:**
+- Apply bug fix to multiple branches
+- Backport features
+- Selective commit application
+
+### 37. Explain Git Archive.
+
+**Answer:**
+Archive creates snapshot of repository.
+
+**Create Archive:**
+```bash
+git archive --format=zip --output=archive.zip HEAD
+```
+
+**Specific Directory:**
+```bash
+git archive --format=tar --prefix=project/ HEAD | gzip > project.tar.gz
+```
+
+**Specific Branch:**
+```bash
+git archive --format=zip --output=archive.zip branch-name
+```
+
+**Use Cases:**
+- Create releases
+- Export code
+- Backup snapshots
+
+### 38. Explain Git Blame.
+
+**Answer:**
+Blame shows who last modified each line.
+
+**Basic:**
+```bash
+git blame file.txt
+```
+
+**Ignore Whitespace:**
+```bash
+git blame -w file.txt
+```
+
+**Show Email:**
+```bash
+git blame -e file.txt
+```
+
+**Range:**
+```bash
+git blame -L 10,20 file.txt
+```
+
+**Use Cases:**
+- Find author of code
+- Debug issues
+- Code review
+
+### 39. Explain Git Describe.
+
+**Answer:**
+Describe finds most recent tag.
+
+**Basic:**
+```bash
+git describe
+# v1.0.0-5-gabc1234
+```
+
+**Always Show Tag:**
+```bash
+git describe --always
+```
+
+**Tags Only:**
+```bash
+git describe --tags
+```
+
+**Use Cases:**
+- Version identification
+- Build numbers
+- Release tracking
+
+### 40. Explain Git Clean.
+
+**Answer:**
+Clean removes untracked files.
+
+**Dry Run:**
+```bash
+git clean -n
+```
+
+**Remove Files:**
+```bash
+git clean -f
+```
+
+**Remove Directories:**
+```bash
+git clean -fd
+```
+
+**Interactive:**
+```bash
+git clean -i
+```
+
+**Exclude Patterns:**
+```bash
+git clean -f -e "*.log"
+```
+
+### 41. Explain Git Stash Advanced Usage.
+
+**Answer:**
+**Stash with Message:**
+```bash
+git stash save "WIP: feature implementation"
+```
+
+**Stash Untracked Files:**
+```bash
+git stash -u
+```
+
+**Stash All (Including Ignored):**
+```bash
+git stash -a
+```
+
+**Stash Specific Files:**
+```bash
+git stash push -m "message" file1.txt file2.txt
+```
+
+**List Stashes:**
+```bash
+git stash list
+```
+
+**Show Stash:**
+```bash
+git stash show stash@{0}
+git stash show -p stash@{0}  # With diff
+```
+
+**Apply Stash:**
+```bash
+git stash apply stash@{0}
+git stash pop  # Apply and remove
+```
+
+**Drop Stash:**
+```bash
+git stash drop stash@{0}
+git stash clear  # Remove all
+```
+
+### 42. Explain Git Subtree.
+
+**Answer:**
+Subtree allows including repository as subdirectory.
+
+**Add Subtree:**
+```bash
+git subtree add --prefix=lib/foo https://github.com/user/foo.git main --squash
+```
+
+**Pull Updates:**
+```bash
+git subtree pull --prefix=lib/foo https://github.com/user/foo.git main --squash
+```
+
+**Push Changes:**
+```bash
+git subtree push --prefix=lib/foo https://github.com/user/foo.git main
+```
+
+**Differences from Submodules:**
+- Subtree: Code included in main repo
+- Submodule: Reference to external repo
+
+### 43. Explain Git LFS (Large File Storage).
+
+**Answer:**
+LFS handles large files efficiently.
+
+**Install:**
+```bash
+git lfs install
+```
+
+**Track Files:**
+```bash
+git lfs track "*.psd"
+git lfs track "*.zip"
+```
+
+**List Tracked:**
+```bash
+git lfs ls-files
+```
+
+**Migrate Existing Files:**
+```bash
+git lfs migrate import --include="*.psd" --everything
+```
+
+**Use Cases:**
+- Large binary files
+- Media files
+- Design assets
+
+### 44. Explain Git Hooks with Husky.
+
+**Answer:**
+Husky makes Git hooks easy.
+
+**Install:**
+```bash
+npm install --save-dev husky
+npx husky install
+```
+
+**Add Hook:**
+```bash
+npx husky add .husky/pre-commit "npm test"
+```
+
+**Pre-commit Hook:**
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npm run lint
+npm run test
+```
+
+**Commit-msg Hook:**
+```bash
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx commitlint --edit $1
+```
+
+### 45. Explain Git Flow Workflow.
+
+**Answer:**
+Git Flow is branching model for releases.
+
+**Branches:**
+- `main`: Production code
+- `develop`: Development branch
+- `feature/*`: Feature branches
+- `release/*`: Release preparation
+- `hotfix/*`: Production fixes
+
+**Commands:**
+```bash
+git flow init
+git flow feature start new-feature
+git flow feature finish new-feature
+git flow release start 1.0.0
+git flow release finish 1.0.0
+git flow hotfix start 1.0.1
+```
+
+**Benefits:**
+- Clear branching strategy
+- Release management
+- Hotfix handling
+
 ---
 
 This covers Git and GitHub interview questions from beginner to advanced level with detailed explanations and examples.

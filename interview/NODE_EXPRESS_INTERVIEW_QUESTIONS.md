@@ -1208,6 +1208,385 @@ app.post('/upload', (req, res) => {
 });
 ```
 
+### 39. Explain Node.js Buffer operations in detail.
+
+**Answer:**
+**Buffer Creation:**
+```javascript
+const buf1 = Buffer.from('Hello', 'utf8');
+const buf2 = Buffer.alloc(10); // Zero-filled
+const buf3 = Buffer.allocUnsafe(10); // May contain old data
+const buf4 = Buffer.from([1, 2, 3]);
+```
+
+**Buffer Operations:**
+```javascript
+const buf = Buffer.from('Hello World');
+
+buf.toString('utf8'); // 'Hello World'
+buf.toString('base64'); // 'SGVsbG8gV29ybGQ='
+buf.slice(0, 5); // Buffer containing 'Hello'
+buf.copy(targetBuffer);
+buf.fill(0); // Fill with zeros
+```
+
+**Buffer Comparison:**
+```javascript
+const buf1 = Buffer.from('ABC');
+const buf2 = Buffer.from('ABC');
+buf1.equals(buf2); // true
+buf1.compare(buf2); // 0 (equal)
+```
+
+### 40. Explain Node.js Streams error handling.
+
+**Answer:**
+**Error Handling:**
+```javascript
+const readable = fs.createReadStream('file.txt');
+
+readable.on('error', (err) => {
+    console.error('Stream error:', err);
+});
+
+readable.on('data', (chunk) => {
+    // Handle data
+}).on('error', (err) => {
+    // Handle error
+}).on('end', () => {
+    // Handle end
+});
+```
+
+**Pipeline with Error Handling:**
+```javascript
+const { pipeline } = require('stream');
+
+pipeline(
+    fs.createReadStream('input.txt'),
+    transformStream,
+    fs.createWriteStream('output.txt'),
+    (err) => {
+        if (err) {
+            console.error('Pipeline failed:', err);
+        } else {
+            console.log('Pipeline succeeded');
+        }
+    }
+);
+```
+
+### 41. Explain Node.js EventEmitter best practices.
+
+**Answer:**
+**Memory Leaks:**
+```javascript
+// Bad - listener not removed
+emitter.on('event', handler);
+
+// Good - remove listener
+emitter.on('event', handler);
+emitter.removeListener('event', handler);
+
+// Or use once
+emitter.once('event', handler);
+```
+
+**Error Handling:**
+```javascript
+emitter.on('error', (err) => {
+    console.error('Error:', err);
+});
+
+// Always handle error events
+```
+
+**Max Listeners:**
+```javascript
+emitter.setMaxListeners(20); // Increase limit
+```
+
+### 42. Explain Node.js child process communication.
+
+**Answer:**
+**spawn with Communication:**
+```javascript
+const { spawn } = require('child_process');
+const child = spawn('node', ['child.js']);
+
+child.stdout.on('data', (data) => {
+    console.log('stdout:', data.toString());
+});
+
+child.stderr.on('data', (data) => {
+    console.error('stderr:', data.toString());
+});
+
+child.on('close', (code) => {
+    console.log('Child process exited with code', code);
+});
+```
+
+**fork with IPC:**
+```javascript
+// parent.js
+const { fork } = require('child_process');
+const child = fork('child.js');
+
+child.send({ message: 'Hello' });
+child.on('message', (msg) => {
+    console.log('From child:', msg);
+});
+
+// child.js
+process.on('message', (msg) => {
+    process.send({ reply: 'Hi' });
+});
+```
+
+### 43. Explain Node.js cluster module load balancing.
+
+**Answer:**
+**Round-Robin (Default):**
+```javascript
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
+if (cluster.isMaster) {
+    for (let i = 0; i < numCPUs; i++) {
+        cluster.fork();
+    }
+} else {
+    require('./app.js');
+}
+```
+
+**Custom Load Balancing:**
+```javascript
+// Use sticky sessions with nginx or custom logic
+```
+
+### 44. Explain Node.js performance monitoring.
+
+**Answer:**
+**Performance Hooks:**
+```javascript
+const { performance, PerformanceObserver } = require('perf_hooks');
+
+const obs = new PerformanceObserver((list) => {
+    const entries = list.getEntries();
+    entries.forEach((entry) => {
+        console.log(entry.name, entry.duration);
+    });
+});
+
+obs.observe({ entryTypes: ['measure', 'function'] });
+
+performance.mark('start');
+// Do work
+performance.mark('end');
+performance.measure('work', 'start', 'end');
+```
+
+**Memory Usage:**
+```javascript
+const used = process.memoryUsage();
+console.log(used);
+// {
+//   rss: number,
+//   heapTotal: number,
+//   heapUsed: number,
+//   external: number
+// }
+```
+
+### 45. Explain Express.js route parameters and validation.
+
+**Answer:**
+**Route Parameters:**
+```javascript
+app.get('/users/:id', (req, res) => {
+    const userId = req.params.id;
+    res.json({ userId });
+});
+
+// Multiple parameters
+app.get('/users/:userId/posts/:postId', (req, res) => {
+    const { userId, postId } = req.params;
+    res.json({ userId, postId });
+});
+```
+
+**Parameter Validation:**
+```javascript
+app.param('id', (req, res, next, id) => {
+    if (!/^\d+$/.test(id)) {
+        return res.status(400).json({ error: 'Invalid ID' });
+    }
+    req.id = parseInt(id);
+    next();
+});
+
+app.get('/users/:id', (req, res) => {
+    res.json({ id: req.id });
+});
+```
+
+### 46. Explain Express.js middleware execution order.
+
+**Answer:**
+**Order Matters:**
+```javascript
+app.use((req, res, next) => {
+    console.log('1');
+    next();
+});
+
+app.use('/api', (req, res, next) => {
+    console.log('2');
+    next();
+});
+
+app.get('/api/users', (req, res, next) => {
+    console.log('3');
+    next();
+}, (req, res) => {
+    console.log('4');
+    res.send('Done');
+});
+
+// Output: 1, 2, 3, 4
+```
+
+**Error Handler Position:**
+```javascript
+// Error handler must be last
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+```
+
+### 47. Explain Express.js body parsing middleware.
+
+**Answer:**
+**JSON:**
+```javascript
+app.use(express.json()); // Parse JSON bodies
+app.use(express.json({ limit: '10mb' })); // Size limit
+```
+
+**URL Encoded:**
+```javascript
+app.use(express.urlencoded({ extended: true })); // Parse form data
+// extended: true uses qs library
+// extended: false uses querystring library
+```
+
+**Raw:**
+```javascript
+app.use(express.raw({ type: 'application/octet-stream' }));
+```
+
+**Text:**
+```javascript
+app.use(express.text({ type: 'text/plain' }));
+```
+
+### 48. Explain Express.js static file serving.
+
+**Answer:**
+**Basic:**
+```javascript
+app.use(express.static('public'));
+// Serves files from public directory
+```
+
+**Multiple Directories:**
+```javascript
+app.use(express.static('public'));
+app.use(express.static('uploads'));
+```
+
+**Virtual Path:**
+```javascript
+app.use('/static', express.static('public'));
+// Files accessible at /static/file.html
+```
+
+**Options:**
+```javascript
+app.use(express.static('public', {
+    maxAge: '1d', // Cache control
+    etag: true,
+    lastModified: true
+}));
+```
+
+### 49. Explain Express.js cookie handling.
+
+**Answer:**
+**cookie-parser:**
+```javascript
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+app.get('/', (req, res) => {
+    console.log(req.cookies); // Parsed cookies
+});
+
+app.get('/set', (req, res) => {
+    res.cookie('name', 'value', {
+        maxAge: 900000,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict'
+    });
+    res.send('Cookie set');
+});
+```
+
+**Signed Cookies:**
+```javascript
+app.use(cookieParser('secret-key'));
+
+res.cookie('name', 'value', { signed: true });
+const value = req.signedCookies.name;
+```
+
+### 50. Explain Express.js CORS configuration.
+
+**Answer:**
+**Basic CORS:**
+```javascript
+const cors = require('cors');
+app.use(cors());
+```
+
+**Custom CORS:**
+```javascript
+app.use(cors({
+    origin: 'https://example.com',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+```
+
+**Dynamic Origin:**
+```javascript
+app.use(cors({
+    origin: (origin, callback) => {
+        const allowed = ['https://example.com', 'https://app.example.com'];
+        if (allowed.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
+}));
+```
+
 ---
 
 This covers Node.js and Express.js interview questions from beginner to advanced level with detailed explanations and code examples.

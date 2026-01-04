@@ -1199,6 +1199,728 @@ interface Flyable {
 - **Abstract Class**: Share code, common state
 - **Interface**: Define contract, multiple inheritance
 
+### 36. Explain Java's Collections Framework hierarchy.
+
+**Answer:**
+**Collection Interface Hierarchy:**
+```
+Collection
+├── List
+│   ├── ArrayList
+│   ├── LinkedList
+│   └── Vector
+├── Set
+│   ├── HashSet
+│   ├── LinkedHashSet
+│   └── TreeSet
+└── Queue
+    ├── PriorityQueue
+    └── Deque
+        └── ArrayDeque
+```
+
+**Map Interface:**
+```
+Map
+├── HashMap
+├── LinkedHashMap
+├── TreeMap
+└── Hashtable
+```
+
+**Key Differences:**
+- **List**: Ordered, allows duplicates
+- **Set**: No duplicates
+- **Queue**: FIFO order
+- **Map**: Key-value pairs
+
+### 37. Explain the difference between `ArrayList` and `Vector`.
+
+**Answer:**
+- **ArrayList**: Not synchronized, faster, not thread-safe
+- **Vector**: Synchronized, slower, thread-safe
+
+```java
+// ArrayList - not thread-safe
+ArrayList<String> list = new ArrayList<>();
+list.add("item");
+
+// Vector - thread-safe (synchronized)
+Vector<String> vector = new Vector<>();
+vector.add("item");
+
+// For thread-safe ArrayList, use Collections.synchronizedList()
+List<String> syncList = Collections.synchronizedList(new ArrayList<>());
+```
+
+**Note**: `Vector` is legacy, prefer `ArrayList` with `Collections.synchronizedList()` if needed.
+
+### 38. Explain the difference between `HashSet`, `LinkedHashSet`, and `TreeSet`.
+
+**Answer:**
+**HashSet:**
+```java
+HashSet<String> set = new HashSet<>();
+set.add("c");
+set.add("a");
+set.add("b");
+// Order: Not guaranteed (may be: a, b, c or c, a, b)
+```
+
+**LinkedHashSet:**
+```java
+LinkedHashSet<String> set = new LinkedHashSet<>();
+set.add("c");
+set.add("a");
+set.add("b");
+// Order: Insertion order (c, a, b)
+```
+
+**TreeSet:**
+```java
+TreeSet<String> set = new TreeSet<>();
+set.add("c");
+set.add("a");
+set.add("b");
+// Order: Sorted order (a, b, c)
+```
+
+**Performance:**
+- **HashSet**: O(1) average, O(n) worst
+- **LinkedHashSet**: O(1) average, maintains order
+- **TreeSet**: O(log n), sorted order
+
+### 39. Explain the difference between `HashMap`, `LinkedHashMap`, and `TreeMap`.
+
+**Answer:**
+**HashMap:**
+```java
+HashMap<String, Integer> map = new HashMap<>();
+map.put("c", 3);
+map.put("a", 1);
+map.put("b", 2);
+// Order: Not guaranteed
+```
+
+**LinkedHashMap:**
+```java
+LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
+map.put("c", 3);
+map.put("a", 1);
+map.put("b", 2);
+// Order: Insertion order (c, a, b)
+```
+
+**TreeMap:**
+```java
+TreeMap<String, Integer> map = new TreeMap<>();
+map.put("c", 3);
+map.put("a", 1);
+map.put("b", 2);
+// Order: Sorted by key (a, b, c)
+```
+
+**Performance:**
+- **HashMap**: O(1) average
+- **LinkedHashMap**: O(1) average, maintains order
+- **TreeMap**: O(log n), sorted by key
+
+### 40. Explain Java's `Optional` class in detail.
+
+**Answer:**
+Optional represents value that may or may not be present.
+
+```java
+// Create Optional
+Optional<String> empty = Optional.empty();
+Optional<String> of = Optional.of("value"); // Non-null
+Optional<String> nullable = Optional.ofNullable(null); // Can be null
+
+// Check and get
+if (optional.isPresent()) {
+    String value = optional.get();
+}
+
+// Or else
+String value = optional.orElse("default");
+String value2 = optional.orElseGet(() -> "default"); // Lazy
+String value3 = optional.orElseThrow(() -> new RuntimeException()); // Throw if empty
+
+// Map and filter
+Optional<String> upper = optional.map(String::toUpperCase);
+Optional<String> filtered = optional.filter(s -> s.length() > 5);
+
+// FlatMap
+Optional<String> flatMapped = optional.flatMap(s -> Optional.of(s.toUpperCase()));
+```
+
+**Best Practices:**
+- Don't use for method parameters
+- Don't use for class fields
+- Use for return types
+- Avoid `Optional.get()` without checking
+
+### 41. Explain Java's `Stream` API terminal operations.
+
+**Answer:**
+**Collect:**
+```java
+List<String> list = stream.collect(Collectors.toList());
+Set<String> set = stream.collect(Collectors.toSet());
+Map<String, Integer> map = stream.collect(
+    Collectors.toMap(s -> s, String::length)
+);
+```
+
+**Reduce:**
+```java
+Optional<Integer> sum = stream.reduce(Integer::sum);
+Integer sum2 = stream.reduce(0, Integer::sum);
+```
+
+**ForEach:**
+```java
+stream.forEach(System.out::println);
+```
+
+**Match:**
+```java
+boolean anyMatch = stream.anyMatch(s -> s.length() > 5);
+boolean allMatch = stream.allMatch(s -> s.length() > 5);
+boolean noneMatch = stream.noneMatch(s -> s.length() > 5);
+```
+
+**Find:**
+```java
+Optional<String> first = stream.findFirst();
+Optional<String> any = stream.findAny();
+```
+
+**Count:**
+```java
+long count = stream.count();
+```
+
+### 42. Explain Java's `Stream` API intermediate operations.
+
+**Answer:**
+**Filter:**
+```java
+Stream<String> filtered = stream.filter(s -> s.length() > 5);
+```
+
+**Map:**
+```java
+Stream<Integer> lengths = stream.map(String::length);
+```
+
+**FlatMap:**
+```java
+Stream<String> flatMapped = stream.flatMap(s -> 
+    Stream.of(s.split(" "))
+);
+```
+
+**Distinct:**
+```java
+Stream<String> distinct = stream.distinct();
+```
+
+**Sorted:**
+```java
+Stream<String> sorted = stream.sorted();
+Stream<String> sorted2 = stream.sorted(Comparator.reverseOrder());
+```
+
+**Limit and Skip:**
+```java
+Stream<String> limited = stream.limit(10);
+Stream<String> skipped = stream.skip(5);
+```
+
+**Peek:**
+```java
+Stream<String> peeked = stream.peek(System.out::println);
+```
+
+### 43. Explain Java's `Collectors` utility class.
+
+**Answer:**
+**Basic Collectors:**
+```java
+// To list
+List<String> list = stream.collect(Collectors.toList());
+
+// To set
+Set<String> set = stream.collect(Collectors.toSet());
+
+// To map
+Map<String, Integer> map = stream.collect(
+    Collectors.toMap(s -> s, String::length)
+);
+
+// Joining
+String joined = stream.collect(Collectors.joining(", "));
+```
+
+**Grouping:**
+```java
+Map<String, List<Person>> byCity = people.stream()
+    .collect(Collectors.groupingBy(Person::getCity));
+
+Map<String, Long> countByCity = people.stream()
+    .collect(Collectors.groupingBy(Person::getCity, Collectors.counting()));
+```
+
+**Partitioning:**
+```java
+Map<Boolean, List<Person>> partitioned = people.stream()
+    .collect(Collectors.partitioningBy(p -> p.getAge() > 18));
+```
+
+**Summarizing:**
+```java
+IntSummaryStatistics stats = numbers.stream()
+    .collect(Collectors.summarizingInt(Integer::intValue));
+```
+
+### 44. Explain Java's `CompletableFuture` in detail.
+
+**Answer:**
+CompletableFuture provides asynchronous programming.
+
+```java
+// Create
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+    return "Result";
+});
+
+// Chain operations
+CompletableFuture<String> future = CompletableFuture
+    .supplyAsync(() -> "Hello")
+    .thenApply(s -> s + " World")
+    .thenApply(String::toUpperCase);
+
+// Combine futures
+CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> "Hello");
+CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> "World");
+
+CompletableFuture<String> combined = future1.thenCombine(
+    future2, (a, b) -> a + " " + b
+);
+
+// Handle errors
+CompletableFuture<String> future = CompletableFuture
+    .supplyAsync(() -> {
+        if (true) throw new RuntimeException("Error");
+        return "Success";
+    })
+    .exceptionally(ex -> "Error: " + ex.getMessage());
+
+// All of
+CompletableFuture<Void> all = CompletableFuture.allOf(future1, future2);
+```
+
+### 45. Explain Java's `ExecutorService` and thread pools.
+
+**Answer:**
+**ExecutorService:**
+```java
+ExecutorService executor = Executors.newFixedThreadPool(10);
+Future<String> future = executor.submit(() -> "Result");
+String result = future.get();
+executor.shutdown();
+```
+
+**Thread Pool Types:**
+```java
+// Fixed thread pool
+ExecutorService fixed = Executors.newFixedThreadPool(10);
+
+// Cached thread pool
+ExecutorService cached = Executors.newCachedThreadPool();
+
+// Single thread executor
+ExecutorService single = Executors.newSingleThreadExecutor();
+
+// Scheduled executor
+ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(5);
+scheduled.schedule(() -> System.out.println("Task"), 5, TimeUnit.SECONDS);
+```
+
+**Custom Thread Pool:**
+```java
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+    5,  // core pool size
+    10, // maximum pool size
+    60L, TimeUnit.SECONDS, // keep-alive time
+    new LinkedBlockingQueue<>() // work queue
+);
+```
+
+### 46. Explain Java's `Atomic` classes.
+
+**Answer:**
+Atomic classes provide thread-safe operations without synchronization.
+
+```java
+// AtomicInteger
+AtomicInteger count = new AtomicInteger(0);
+count.incrementAndGet(); // Atomic increment
+count.getAndIncrement(); // Get then increment
+count.addAndGet(5); // Add and get
+
+// AtomicLong
+AtomicLong longValue = new AtomicLong(0L);
+
+// AtomicReference
+AtomicReference<String> ref = new AtomicReference<>("initial");
+ref.compareAndSet("initial", "updated"); // CAS operation
+
+// AtomicBoolean
+AtomicBoolean flag = new AtomicBoolean(false);
+flag.compareAndSet(false, true);
+```
+
+**Benefits:**
+- No synchronization needed
+- Better performance than synchronized
+- Lock-free operations
+
+### 47. Explain Java's `CountDownLatch` and `CyclicBarrier`.
+
+**Answer:**
+**CountDownLatch:**
+```java
+CountDownLatch latch = new CountDownLatch(3);
+
+// Thread 1
+new Thread(() -> {
+    // Do work
+    latch.countDown();
+}).start();
+
+// Thread 2
+new Thread(() -> {
+    // Do work
+    latch.countDown();
+}).start();
+
+// Thread 3
+new Thread(() -> {
+    // Do work
+    latch.countDown();
+}).start();
+
+// Main thread waits
+latch.await(); // Waits until count reaches 0
+```
+
+**CyclicBarrier:**
+```java
+CyclicBarrier barrier = new CyclicBarrier(3, () -> {
+    System.out.println("All threads reached barrier");
+});
+
+// Threads
+for (int i = 0; i < 3; i++) {
+    new Thread(() -> {
+        // Do work
+        try {
+            barrier.await(); // Wait for all threads
+        } catch (Exception e) {}
+    }).start();
+}
+```
+
+**Differences:**
+- **CountDownLatch**: One-time use, countdown
+- **CyclicBarrier**: Reusable, all threads wait
+
+### 48. Explain Java's `Semaphore`.
+
+**Answer:**
+Semaphore controls access to resource pool.
+
+```java
+Semaphore semaphore = new Semaphore(3); // 3 permits
+
+// Acquire permit
+semaphore.acquire();
+try {
+    // Access resource
+} finally {
+    semaphore.release(); // Release permit
+}
+
+// Try acquire (non-blocking)
+if (semaphore.tryAcquire()) {
+    try {
+        // Access resource
+    } finally {
+        semaphore.release();
+    }
+}
+```
+
+**Use Cases:**
+- Connection pooling
+- Rate limiting
+- Resource access control
+
+### 49. Explain Java's `BlockingQueue` implementations.
+
+**Answer:**
+**ArrayBlockingQueue:**
+```java
+BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
+queue.put("item"); // Blocks if full
+String item = queue.take(); // Blocks if empty
+```
+
+**LinkedBlockingQueue:**
+```java
+BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+queue.put("item");
+String item = queue.take();
+```
+
+**PriorityBlockingQueue:**
+```java
+BlockingQueue<String> queue = new PriorityBlockingQueue<>();
+queue.put("c");
+queue.put("a");
+queue.put("b");
+String item = queue.take(); // "a" (sorted)
+```
+
+**SynchronousQueue:**
+```java
+BlockingQueue<String> queue = new SynchronousQueue<>();
+// Each put must wait for take, and vice versa
+```
+
+### 50. Explain Java's `CopyOnWriteArrayList` and `CopyOnWriteArraySet`.
+
+**Answer:**
+**CopyOnWriteArrayList:**
+```java
+CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
+list.add("item");
+
+// Thread-safe for reads
+for (String item : list) {
+    // Safe iteration (snapshot)
+}
+
+// Writes create new copy
+list.add("new item"); // Creates new array
+```
+
+**CopyOnWriteArraySet:**
+```java
+CopyOnWriteArraySet<String> set = new CopyOnWriteArraySet<>();
+set.add("item");
+```
+
+**Characteristics:**
+- Thread-safe
+- Expensive writes (copy entire array)
+- Fast reads
+- No locking for reads
+- Best for read-heavy workloads
+
+### 51. Explain Java's `ReentrantLock` vs `synchronized`.
+
+**Answer:**
+**synchronized:**
+```java
+public synchronized void method() {
+    // Synchronized block
+}
+
+synchronized (obj) {
+    // Synchronized block
+}
+```
+
+**ReentrantLock:**
+```java
+ReentrantLock lock = new ReentrantLock();
+
+public void method() {
+    lock.lock();
+    try {
+        // Critical section
+    } finally {
+        lock.unlock();
+    }
+}
+```
+
+**Differences:**
+- **ReentrantLock**: More flexible, tryLock, fair locking
+- **synchronized**: Simpler, automatic unlock
+
+**ReentrantLock Features:**
+```java
+ReentrantLock lock = new ReentrantLock(true); // Fair lock
+
+// Try lock
+if (lock.tryLock()) {
+    try {
+        // Critical section
+    } finally {
+        lock.unlock();
+    }
+}
+
+// Try lock with timeout
+if (lock.tryLock(5, TimeUnit.SECONDS)) {
+    try {
+        // Critical section
+    } finally {
+        lock.unlock();
+    }
+}
+```
+
+### 52. Explain Java's `ReadWriteLock`.
+
+**Answer:**
+ReadWriteLock allows multiple readers or single writer.
+
+```java
+ReadWriteLock lock = new ReentrantReadWriteLock();
+Lock readLock = lock.readLock();
+Lock writeLock = lock.writeLock();
+
+// Read operation
+readLock.lock();
+try {
+    // Read data
+} finally {
+    readLock.unlock();
+}
+
+// Write operation
+writeLock.lock();
+try {
+    // Write data
+} finally {
+    writeLock.unlock();
+}
+```
+
+**Benefits:**
+- Multiple concurrent readers
+- Exclusive writer
+- Better performance for read-heavy workloads
+
+### 53. Explain Java's `StampedLock`.
+
+**Answer:**
+StampedLock provides optimistic and pessimistic locking.
+
+```java
+StampedLock lock = new StampedLock();
+
+// Optimistic read
+long stamp = lock.tryOptimisticRead();
+// Read data
+if (!lock.validate(stamp)) {
+    // Fallback to pessimistic read
+    stamp = lock.readLock();
+    try {
+        // Read data
+    } finally {
+        lock.unlockRead(stamp);
+    }
+}
+
+// Pessimistic read
+long stamp = lock.readLock();
+try {
+    // Read data
+} finally {
+    lock.unlockRead(stamp);
+}
+
+// Write lock
+long stamp = lock.writeLock();
+try {
+    // Write data
+} finally {
+    lock.unlockWrite(stamp);
+}
+```
+
+**Benefits:**
+- Optimistic reads (no locking)
+- Better performance than ReadWriteLock
+- More complex API
+
+### 54. Explain Java's `Phaser`.
+
+**Answer:**
+Phaser is reusable synchronization barrier.
+
+```java
+Phaser phaser = new Phaser(3); // 3 parties
+
+// Thread 1
+new Thread(() -> {
+    phaser.arriveAndAwaitAdvance(); // Wait for all
+    // Continue
+}).start();
+
+// Thread 2
+new Thread(() -> {
+    phaser.arriveAndAwaitAdvance();
+    // Continue
+}).start();
+
+// Thread 3
+new Thread(() -> {
+    phaser.arriveAndAwaitAdvance();
+    // Continue
+}).start();
+```
+
+**Features:**
+- Dynamic party registration
+- Multiple phases
+- More flexible than CyclicBarrier
+
+### 55. Explain Java's `Exchanger`.
+
+**Answer:**
+Exchanger allows two threads to exchange data.
+
+```java
+Exchanger<String> exchanger = new Exchanger<>();
+
+// Thread 1
+new Thread(() -> {
+    try {
+        String data = exchanger.exchange("Data from thread 1");
+        System.out.println("Received: " + data);
+    } catch (InterruptedException e) {}
+}).start();
+
+// Thread 2
+new Thread(() -> {
+    try {
+        String data = exchanger.exchange("Data from thread 2");
+        System.out.println("Received: " + data);
+    } catch (InterruptedException e) {}
+}).start();
+```
+
+**Use Cases:**
+- Producer-consumer with data exchange
+- Pipeline processing
+
 ---
 
 This covers Java interview questions from beginner to advanced level. Each answer includes code examples and explanations.

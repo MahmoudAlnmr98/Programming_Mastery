@@ -1250,6 +1250,590 @@ class UserService {
 }
 ```
 
+### 27. Explain the Object Pool Pattern.
+
+**Answer:**
+Reuses expensive-to-create objects to improve performance.
+
+**Java:**
+```java
+class ConnectionPool {
+    private Queue<Connection> pool = new LinkedList<>();
+    private int maxSize;
+    
+    public ConnectionPool(int maxSize) {
+        this.maxSize = maxSize;
+        initializePool();
+    }
+    
+    private void initializePool() {
+        for (int i = 0; i < maxSize; i++) {
+            pool.offer(new Connection());
+        }
+    }
+    
+    public Connection acquire() {
+        Connection conn = pool.poll();
+        if (conn == null) {
+            conn = new Connection(); // Create new if pool empty
+        }
+        return conn;
+    }
+    
+    public void release(Connection conn) {
+        conn.reset();
+        if (pool.size() < maxSize) {
+            pool.offer(conn);
+        }
+    }
+}
+```
+
+**Use Cases:**
+- Database connections
+- Thread pools
+- Network connections
+
+### 28. Explain the Specification Pattern.
+
+**Answer:**
+Encapsulates business rules as reusable specifications.
+
+**Java:**
+```java
+interface Specification<T> {
+    boolean isSatisfiedBy(T item);
+    Specification<T> and(Specification<T> other);
+    Specification<T> or(Specification<T> other);
+    Specification<T> not();
+}
+
+class PriceSpecification implements Specification<Product> {
+    private double minPrice;
+    
+    public PriceSpecification(double minPrice) {
+        this.minPrice = minPrice;
+    }
+    
+    @Override
+    public boolean isSatisfiedBy(Product product) {
+        return product.getPrice() >= minPrice;
+    }
+    
+    @Override
+    public Specification<Product> and(Specification<Product> other) {
+        return new AndSpecification<>(this, other);
+    }
+}
+
+// Usage
+Specification<Product> spec = new PriceSpecification(100)
+    .and(new CategorySpecification("Electronics"));
+List<Product> filtered = products.stream()
+    .filter(spec::isSatisfiedBy)
+    .collect(Collectors.toList());
+```
+
+### 29. Explain the Chain of Responsibility Pattern.
+
+**Answer:**
+Passes request along chain of handlers until one handles it.
+
+**Java:**
+```java
+abstract class Handler {
+    protected Handler next;
+    
+    public Handler setNext(Handler next) {
+        this.next = next;
+        return next;
+    }
+    
+    public abstract void handle(Request request);
+}
+
+class AuthenticationHandler extends Handler {
+    @Override
+    public void handle(Request request) {
+        if (request.isAuthenticated()) {
+            if (next != null) {
+                next.handle(request);
+            }
+        } else {
+            throw new RuntimeException("Not authenticated");
+        }
+    }
+}
+
+class AuthorizationHandler extends Handler {
+    @Override
+    public void handle(Request request) {
+        if (request.hasPermission()) {
+            if (next != null) {
+                next.handle(request);
+            }
+        } else {
+            throw new RuntimeException("Not authorized");
+        }
+    }
+}
+
+// Usage
+Handler chain = new AuthenticationHandler();
+chain.setNext(new AuthorizationHandler());
+chain.handle(request);
+```
+
+**Use Cases:**
+- Middleware chains
+- Event handling
+- Request processing
+
+### 30. Explain the Template Method Pattern.
+
+**Answer:**
+Defines algorithm skeleton, subclasses override steps.
+
+**Java:**
+```java
+abstract class DataProcessor {
+    // Template method
+    public final void process() {
+        readData();
+        processData();
+        saveData();
+    }
+    
+    protected abstract void readData();
+    protected abstract void processData();
+    protected abstract void saveData();
+}
+
+class CSVProcessor extends DataProcessor {
+    @Override
+    protected void readData() {
+        System.out.println("Reading CSV");
+    }
+    
+    @Override
+    protected void processData() {
+        System.out.println("Processing CSV");
+    }
+    
+    @Override
+    protected void saveData() {
+        System.out.println("Saving CSV");
+    }
+}
+```
+
+**Use Cases:**
+- Framework design
+- Algorithm variations
+- Code reuse
+
+### 31. Explain the Strategy Pattern vs State Pattern.
+
+**Answer:**
+**Strategy Pattern:** Different algorithms, same interface
+```java
+interface PaymentStrategy {
+    void pay(double amount);
+}
+
+class CreditCardPayment implements PaymentStrategy {
+    public void pay(double amount) {
+        System.out.println("Paid with credit card");
+    }
+}
+
+class PayPalPayment implements PaymentStrategy {
+    public void pay(double amount) {
+        System.out.println("Paid with PayPal");
+    }
+}
+```
+
+**State Pattern:** Behavior changes with internal state
+```java
+interface State {
+    void handle(Context context);
+}
+
+class StateA implements State {
+    public void handle(Context context) {
+        System.out.println("State A");
+        context.setState(new StateB());
+    }
+}
+
+class StateB implements State {
+    public void handle(Context context) {
+        System.out.println("State B");
+        context.setState(new StateA());
+    }
+}
+```
+
+**Differences:**
+- Strategy: Algorithm selection (external)
+- State: State-dependent behavior (internal)
+
+### 32. Explain the Visitor Pattern.
+
+**Answer:**
+Separates algorithm from object structure.
+
+**Java:**
+```java
+interface Visitor {
+    void visit(ElementA element);
+    void visit(ElementB element);
+}
+
+interface Element {
+    void accept(Visitor visitor);
+}
+
+class ElementA implements Element {
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+}
+
+class ConcreteVisitor implements Visitor {
+    public void visit(ElementA element) {
+        System.out.println("Visiting ElementA");
+    }
+    
+    public void visit(ElementB element) {
+        System.out.println("Visiting ElementB");
+    }
+}
+```
+
+**Use Cases:**
+- Compiler design
+- AST traversal
+- Report generation
+
+### 33. Explain the Memento Pattern.
+
+**Answer:**
+Captures and restores object state without violating encapsulation.
+
+**Java:**
+```java
+class Memento {
+    private String state;
+    
+    public Memento(String state) {
+        this.state = state;
+    }
+    
+    public String getState() {
+        return state;
+    }
+}
+
+class Originator {
+    private String state;
+    
+    public void setState(String state) {
+        this.state = state;
+    }
+    
+    public Memento save() {
+        return new Memento(state);
+    }
+    
+    public void restore(Memento memento) {
+        state = memento.getState();
+    }
+}
+
+class Caretaker {
+    private List<Memento> history = new ArrayList<>();
+    
+    public void save(Memento memento) {
+        history.add(memento);
+    }
+    
+    public Memento undo() {
+        if (history.size() > 1) {
+            history.remove(history.size() - 1);
+            return history.get(history.size() - 1);
+        }
+        return null;
+    }
+}
+```
+
+**Use Cases:**
+- Undo/redo functionality
+- State snapshots
+- Checkpoint systems
+
+### 34. Explain the Interpreter Pattern.
+
+**Answer:**
+Defines grammar representation and interpreter.
+
+**Java:**
+```java
+interface Expression {
+    int interpret();
+}
+
+class Number implements Expression {
+    private int value;
+    
+    public Number(int value) {
+        this.value = value;
+    }
+    
+    public int interpret() {
+        return value;
+    }
+}
+
+class Add implements Expression {
+    private Expression left;
+    private Expression right;
+    
+    public Add(Expression left, Expression right) {
+        this.left = left;
+        this.right = right;
+    }
+    
+    public int interpret() {
+        return left.interpret() + right.interpret();
+    }
+}
+
+// Usage: 1 + 2
+Expression expr = new Add(new Number(1), new Number(2));
+int result = expr.interpret(); // 3
+```
+
+**Use Cases:**
+- Language parsers
+- Rule engines
+- Query languages
+
+### 35. Explain the Flyweight Pattern.
+
+**Answer:**
+Shares common state to reduce memory usage.
+
+**Java:**
+```java
+class Flyweight {
+    private String intrinsicState;
+    
+    public Flyweight(String intrinsicState) {
+        this.intrinsicState = intrinsicState;
+    }
+    
+    public void operation(String extrinsicState) {
+        System.out.println("Intrinsic: " + intrinsicState);
+        System.out.println("Extrinsic: " + extrinsicState);
+    }
+}
+
+class FlyweightFactory {
+    private Map<String, Flyweight> flyweights = new HashMap<>();
+    
+    public Flyweight getFlyweight(String key) {
+        if (!flyweights.containsKey(key)) {
+            flyweights.put(key, new Flyweight(key));
+        }
+        return flyweights.get(key);
+    }
+}
+```
+
+**Use Cases:**
+- Text editors (character formatting)
+- Game development (tree/grass rendering)
+- GUI libraries
+
+### 36. Explain the Bridge Pattern.
+
+**Answer:**
+Separates abstraction from implementation.
+
+**Java:**
+```java
+interface Implementor {
+    void operation();
+}
+
+class ConcreteImplementorA implements Implementor {
+    public void operation() {
+        System.out.println("Implementation A");
+    }
+}
+
+abstract class Abstraction {
+    protected Implementor implementor;
+    
+    public Abstraction(Implementor implementor) {
+        this.implementor = implementor;
+    }
+    
+    public abstract void operation();
+}
+
+class RefinedAbstraction extends Abstraction {
+    public RefinedAbstraction(Implementor implementor) {
+        super(implementor);
+    }
+    
+    public void operation() {
+        implementor.operation();
+    }
+}
+```
+
+**Use Cases:**
+- Platform independence
+- Database drivers
+- GUI frameworks
+
+### 37. Explain the Decorator Pattern vs Adapter Pattern.
+
+**Answer:**
+**Decorator:** Adds behavior dynamically
+```java
+interface Component {
+    void operation();
+}
+
+class ConcreteComponent implements Component {
+    public void operation() {
+        System.out.println("Base operation");
+    }
+}
+
+class Decorator implements Component {
+    protected Component component;
+    
+    public Decorator(Component component) {
+        this.component = component;
+    }
+    
+    public void operation() {
+        component.operation();
+    }
+}
+
+class ConcreteDecorator extends Decorator {
+    public ConcreteDecorator(Component component) {
+        super(component);
+    }
+    
+    public void operation() {
+        super.operation();
+        System.out.println("Added behavior");
+    }
+}
+```
+
+**Adapter:** Makes incompatible interfaces work together
+```java
+class Adaptee {
+    public void specificRequest() {
+        System.out.println("Specific request");
+    }
+}
+
+class Adapter implements Target {
+    private Adaptee adaptee;
+    
+    public Adapter(Adaptee adaptee) {
+        this.adaptee = adaptee;
+    }
+    
+    public void request() {
+        adaptee.specificRequest();
+    }
+}
+```
+
+**Differences:**
+- Decorator: Extends functionality
+- Adapter: Makes incompatible interfaces compatible
+
+### 38. Explain the Proxy Pattern Types.
+
+**Answer:**
+**Virtual Proxy:** Lazy loading
+```java
+interface Image {
+    void display();
+}
+
+class RealImage implements Image {
+    private String filename;
+    
+    public RealImage(String filename) {
+        this.filename = filename;
+        loadFromDisk();
+    }
+    
+    private void loadFromDisk() {
+        System.out.println("Loading " + filename);
+    }
+    
+    public void display() {
+        System.out.println("Displaying " + filename);
+    }
+}
+
+class ProxyImage implements Image {
+    private RealImage realImage;
+    private String filename;
+    
+    public ProxyImage(String filename) {
+        this.filename = filename;
+    }
+    
+    public void display() {
+        if (realImage == null) {
+            realImage = new RealImage(filename);
+        }
+        realImage.display();
+    }
+}
+```
+
+**Protection Proxy:** Access control
+```java
+class ProtectionProxy implements Subject {
+    private RealSubject realSubject;
+    private String userRole;
+    
+    public ProtectionProxy(String userRole) {
+        this.userRole = userRole;
+    }
+    
+    public void request() {
+        if (userRole.equals("admin")) {
+            if (realSubject == null) {
+                realSubject = new RealSubject();
+            }
+            realSubject.request();
+        } else {
+            throw new RuntimeException("Access denied");
+        }
+    }
+}
+```
+
+**Remote Proxy:** Network communication
+**Smart Proxy:** Additional functionality (logging, caching)
+
 ---
 
 This covers design patterns interview questions from beginner to advanced level with implementations in Java and JavaScript.

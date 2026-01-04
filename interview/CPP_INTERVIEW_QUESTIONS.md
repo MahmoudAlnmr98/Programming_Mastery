@@ -557,6 +557,325 @@ public:
 };
 ```
 
+### 26. Explain C++ Smart Pointers in Detail.
+
+**Answer:**
+**unique_ptr:**
+```cpp
+#include <memory>
+
+std::unique_ptr<int> ptr = std::make_unique<int>(42);
+// Automatically deleted when out of scope
+// Cannot be copied, only moved
+std::unique_ptr<int> ptr2 = std::move(ptr);
+```
+
+**shared_ptr:**
+```cpp
+std::shared_ptr<int> ptr1 = std::make_shared<int>(42);
+std::shared_ptr<int> ptr2 = ptr1; // Reference count: 2
+// Deleted when last shared_ptr is destroyed
+```
+
+**weak_ptr:**
+```cpp
+std::shared_ptr<int> shared = std::make_shared<int>(42);
+std::weak_ptr<int> weak = shared;
+
+if (auto locked = weak.lock()) {
+    // Use locked shared_ptr
+}
+```
+
+### 27. Explain C++ Move Semantics.
+
+**Answer:**
+Move semantics transfer ownership without copying.
+
+**Move Constructor:**
+```cpp
+class MyClass {
+public:
+    MyClass(MyClass&& other) noexcept
+        : data(std::move(other.data)) {
+        other.data = nullptr;
+    }
+    
+    MyClass& operator=(MyClass&& other) noexcept {
+        if (this != &other) {
+            delete data;
+            data = std::move(other.data);
+            other.data = nullptr;
+        }
+        return *this;
+    }
+};
+```
+
+**std::move:**
+```cpp
+std::vector<int> vec1 = {1, 2, 3};
+std::vector<int> vec2 = std::move(vec1);
+// vec1 is now empty, vec2 has the data
+```
+
+### 28. Explain C++ Lambda Expressions.
+
+**Answer:**
+Lambdas create anonymous functions.
+
+**Basic:**
+```cpp
+auto lambda = [](int x, int y) { return x + y; };
+int result = lambda(3, 4); // 7
+```
+
+**Capture:**
+```cpp
+int a = 10;
+auto lambda = [a](int x) { return a + x; }; // Capture by value
+auto lambda2 = [&a](int x) { return a + x; }; // Capture by reference
+auto lambda3 = [=](int x) { return a + x; }; // Capture all by value
+auto lambda4 = [&](int x) { return a + x; }; // Capture all by reference
+```
+
+**Mutable:**
+```cpp
+int count = 0;
+auto lambda = [count]() mutable { count++; };
+```
+
+### 29. Explain C++ Templates Advanced.
+
+**Answer:**
+**Variadic Templates:**
+```cpp
+template<typename... Args>
+void print(Args... args) {
+    ((std::cout << args << " "), ...);
+}
+
+print(1, 2.5, "hello"); // 1 2.5 hello
+```
+
+**Template Specialization:**
+```cpp
+template<typename T>
+class MyClass {
+    // Generic implementation
+};
+
+template<>
+class MyClass<int> {
+    // Specialized for int
+};
+```
+
+**SFINAE:**
+```cpp
+template<typename T>
+typename std::enable_if<std::is_integral<T>::value, T>::type
+foo(T t) {
+    return t * 2;
+}
+```
+
+### 30. Explain C++ Concurrency.
+
+**Answer:**
+**Threads:**
+```cpp
+#include <thread>
+
+void function() {
+    std::cout << "Thread running\n";
+}
+
+std::thread t(function);
+t.join();
+```
+
+**Mutex:**
+```cpp
+#include <mutex>
+
+std::mutex mtx;
+
+void safeFunction() {
+    std::lock_guard<std::mutex> lock(mtx);
+    // Critical section
+}
+```
+
+**Condition Variable:**
+```cpp
+#include <condition_variable>
+
+std::condition_variable cv;
+std::mutex mtx;
+bool ready = false;
+
+// Waiter
+std::unique_lock<std::mutex> lock(mtx);
+cv.wait(lock, []{ return ready; });
+
+// Notifier
+{
+    std::lock_guard<std::mutex> lock(mtx);
+    ready = true;
+}
+cv.notify_one();
+```
+
+### 31. Explain C++ RAII (Resource Acquisition Is Initialization).
+
+**Answer:**
+RAII manages resources through object lifetime.
+
+**Example:**
+```cpp
+class File {
+    FILE* file;
+public:
+    File(const char* filename) : file(fopen(filename, "r")) {
+        if (!file) throw std::runtime_error("Cannot open file");
+    }
+    
+    ~File() {
+        if (file) fclose(file);
+    }
+    
+    // Delete copy constructor and assignment
+    File(const File&) = delete;
+    File& operator=(const File&) = delete;
+    
+    // Allow move
+    File(File&& other) : file(other.file) {
+        other.file = nullptr;
+    }
+};
+```
+
+**Benefits:**
+- Automatic resource management
+- Exception safety
+- No memory leaks
+
+### 32. Explain C++ Exception Handling.
+
+**Answer:**
+**Try-Catch:**
+```cpp
+try {
+    riskyFunction();
+} catch (const std::exception& e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+} catch (...) {
+    std::cerr << "Unknown error" << std::endl;
+}
+```
+
+**Custom Exception:**
+```cpp
+class MyException : public std::exception {
+    const char* message;
+public:
+    MyException(const char* msg) : message(msg) {}
+    const char* what() const noexcept override {
+        return message;
+    }
+};
+```
+
+**Exception Safety:**
+- Basic guarantee: No leaks
+- Strong guarantee: All-or-nothing
+- No-throw guarantee: Never throws
+
+### 33. Explain C++ STL Algorithms.
+
+**Answer:**
+**Common Algorithms:**
+```cpp
+#include <algorithm>
+#include <vector>
+
+std::vector<int> vec = {3, 1, 4, 1, 5};
+
+// Sort
+std::sort(vec.begin(), vec.end());
+
+// Find
+auto it = std::find(vec.begin(), vec.end(), 4);
+
+// Count
+int count = std::count(vec.begin(), vec.end(), 1);
+
+// Transform
+std::transform(vec.begin(), vec.end(), vec.begin(),
+    [](int x) { return x * 2; });
+
+// Accumulate
+#include <numeric>
+int sum = std::accumulate(vec.begin(), vec.end(), 0);
+```
+
+### 34. Explain C++ Type Traits.
+
+**Answer:**
+Type traits provide type information.
+
+**Common Traits:**
+```cpp
+#include <type_traits>
+
+std::is_integral<int>::value; // true
+std::is_pointer<int*>::value; // true
+std::is_reference<int&>::value; // true
+
+// Remove qualifiers
+std::remove_const<const int>::type; // int
+std::remove_reference<int&>::type; // int
+std::remove_pointer<int*>::type; // int
+```
+
+**Enable If:**
+```cpp
+template<typename T>
+typename std::enable_if<std::is_integral<T>::value, T>::type
+foo(T t) {
+    return t * 2;
+}
+```
+
+### 35. Explain C++ Perfect Forwarding.
+
+**Answer:**
+Perfect forwarding preserves value category.
+
+**Example:**
+```cpp
+template<typename T>
+void wrapper(T&& arg) {
+    func(std::forward<T>(arg));
+}
+
+void func(int& x) { /* lvalue */ }
+void func(int&& x) { /* rvalue */ }
+
+int x = 42;
+wrapper(x); // Calls func(int&)
+wrapper(42); // Calls func(int&&)
+```
+
+**std::forward:**
+```cpp
+template<typename T>
+T&& forward(typename std::remove_reference<T>::type& arg) {
+    return static_cast<T&&>(arg);
+}
+```
+
 ---
 
 This covers C++ interview questions from beginner to advanced level with detailed explanations and code examples.

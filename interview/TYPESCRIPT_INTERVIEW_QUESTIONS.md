@@ -1008,6 +1008,371 @@ app.use((req, res) => {
 }
 ```
 
+### 36. Explain TypeScript's const assertions.
+
+**Answer:**
+const assertions create readonly literal types.
+
+```typescript
+// Without const assertion
+const arr = [1, 2, 3]; // number[]
+
+// With const assertion
+const arr = [1, 2, 3] as const; // readonly [1, 2, 3]
+
+// Object
+const obj = { name: 'John', age: 30 } as const;
+// { readonly name: "John"; readonly age: 30; }
+```
+
+**Use Cases:**
+- Immutable data structures
+- Literal types
+- Tuple types
+
+### 37. Explain TypeScript's satisfies operator.
+
+**Answer:**
+satisfies ensures type matches without widening.
+
+```typescript
+// Without satisfies
+const config = {
+    apiUrl: 'https://api.example.com',
+    timeout: 5000
+}; // Type is inferred
+
+// With satisfies
+const config = {
+    apiUrl: 'https://api.example.com',
+    timeout: 5000
+} satisfies Config; // Type checked but not widened
+```
+
+**Benefits:**
+- Type checking without type widening
+- Preserves literal types
+- Better autocomplete
+
+### 38. Explain TypeScript's satisfies vs as const.
+
+**Answer:**
+**as const:**
+```typescript
+const config = { apiUrl: 'https://api.example.com' } as const;
+// Makes everything readonly and literal
+```
+
+**satisfies:**
+```typescript
+const config = { apiUrl: 'https://api.example.com' } satisfies Config;
+// Type checks but preserves types
+```
+
+**Differences:**
+- `as const`: Makes readonly, literal types
+- `satisfies`: Type checks, preserves original types
+
+### 39. Explain TypeScript's module augmentation for third-party libraries.
+
+**Answer:**
+Extend types from third-party libraries.
+
+```typescript
+// node_modules/@types/express/index.d.ts
+declare module 'express' {
+    interface Request {
+        user?: User;
+    }
+}
+
+// Now Request has user property
+app.get('/', (req, res) => {
+    req.user; // TypeScript knows about this
+});
+```
+
+**Global Augmentation:**
+```typescript
+declare global {
+    interface Window {
+        myCustomProperty: string;
+    }
+}
+```
+
+### 40. Explain TypeScript's type predicates in detail.
+
+**Answer:**
+Type predicates narrow types in conditional blocks.
+
+```typescript
+function isString(value: unknown): value is string {
+    return typeof value === 'string';
+}
+
+function process(value: unknown) {
+    if (isString(value)) {
+        // value is string here
+        value.toUpperCase();
+    }
+}
+```
+
+**Complex Example:**
+```typescript
+interface Cat {
+    type: 'cat';
+    meow: () => void;
+}
+
+interface Dog {
+    type: 'dog';
+    bark: () => void;
+}
+
+function isCat(animal: Cat | Dog): animal is Cat {
+    return animal.type === 'cat';
+}
+
+function handle(animal: Cat | Dog) {
+    if (isCat(animal)) {
+        animal.meow(); // TypeScript knows it's Cat
+    } else {
+        animal.bark(); // TypeScript knows it's Dog
+    }
+}
+```
+
+### 41. Explain TypeScript's assertion functions.
+
+**Answer:**
+Functions that assert types at runtime.
+
+```typescript
+function assertIsString(value: unknown): asserts value is string {
+    if (typeof value !== 'string') {
+        throw new Error('Not a string');
+    }
+}
+
+function process(value: unknown) {
+    assertIsString(value);
+    // value is string here
+    value.toUpperCase();
+}
+```
+
+**Assertion with Condition:**
+```typescript
+function assert(condition: unknown): asserts condition {
+    if (!condition) {
+        throw new Error('Assertion failed');
+    }
+}
+
+function process(value: unknown) {
+    assert(typeof value === 'string');
+    // value is string here
+}
+```
+
+### 42. Explain TypeScript's readonly modifier.
+
+**Answer:**
+readonly prevents mutation.
+
+```typescript
+interface User {
+    readonly id: number;
+    readonly name: string;
+    age: number; // Mutable
+}
+
+const user: User = { id: 1, name: 'John', age: 30 };
+user.id = 2; // Error
+user.age = 31; // OK
+
+// Readonly array
+const arr: readonly number[] = [1, 2, 3];
+arr.push(4); // Error
+arr[0] = 0; // Error
+```
+
+**Deep Readonly:**
+```typescript
+type DeepReadonly<T> = {
+    readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
+};
+```
+
+### 43. Explain TypeScript's keyof operator.
+
+**Answer:**
+keyof creates union of object keys.
+
+```typescript
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+type UserKeys = keyof User; // 'id' | 'name' | 'email'
+
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+    return obj[key];
+}
+
+const user: User = { id: 1, name: 'John', email: 'john@example.com' };
+const name = getProperty(user, 'name'); // string
+```
+
+### 44. Explain TypeScript's typeof operator.
+
+**Answer:**
+typeof gets type of value.
+
+```typescript
+const user = {
+    id: 1,
+    name: 'John',
+    email: 'john@example.com'
+};
+
+type UserType = typeof user;
+// { id: number; name: string; email: string; }
+
+// With functions
+function createUser() {
+    return { id: 1, name: 'John' };
+}
+
+type User = ReturnType<typeof createUser>;
+// { id: number; name: string; }
+```
+
+### 45. Explain TypeScript's indexed access types.
+
+**Answer:**
+Access property types using bracket notation.
+
+```typescript
+interface User {
+    id: number;
+    name: string;
+    address: {
+        street: string;
+        city: string;
+    };
+}
+
+type UserName = User['name']; // string
+type UserAddress = User['address']; // { street: string; city: string; }
+type Street = User['address']['street']; // string
+
+// Union of all property types
+type UserValues = User[keyof User]; // number | string | { street: string; city: string; }
+```
+
+### 46. Explain TypeScript's template literal types with unions.
+
+**Answer:**
+Template literal types with unions create all combinations.
+
+```typescript
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+type ApiEndpoint = 'users' | 'posts' | 'comments';
+
+type ApiRoute = `${HttpMethod} /api/${ApiEndpoint}`;
+// "GET /api/users" | "GET /api/posts" | "GET /api/comments" | ...
+
+// Complex example
+type EventName<T extends string> = `on${Capitalize<T>}`;
+type MouseEvent = EventName<'click' | 'hover'>;
+// "onClick" | "onHover"
+```
+
+### 47. Explain TypeScript's distributive conditional types.
+
+**Answer:**
+Conditional types distribute over union types.
+
+```typescript
+type ToArray<T> = T extends any ? T[] : never;
+
+type StrArrOrNumArr = ToArray<string | number>;
+// string[] | number[] (distributed)
+
+// Non-distributive
+type ToArrayNonDist<T> = [T] extends [any] ? T[] : never;
+type StrOrNumArr = ToArrayNonDist<string | number>;
+// (string | number)[] (not distributed)
+```
+
+### 48. Explain TypeScript's mapped types with modifiers.
+
+**Answer:**
+Mapped types can add/remove modifiers.
+
+```typescript
+// Remove readonly
+type Writable<T> = {
+    -readonly [P in keyof T]: T[P];
+};
+
+// Remove optional
+type Required<T> = {
+    [P in keyof T]-?: T[P];
+};
+
+// Make optional
+type Partial<T> = {
+    [P in keyof T]?: T[P];
+};
+```
+
+### 49. Explain TypeScript's string manipulation types.
+
+**Answer:**
+Built-in string manipulation types.
+
+```typescript
+type Uppercase<S extends string> = // Built-in
+type Lowercase<S extends string> = // Built-in
+type Capitalize<S extends string> = // Built-in
+type Uncapitalize<S extends string> = // Built-in
+
+type T1 = Uppercase<'hello'>; // "HELLO"
+type T2 = Lowercase<'HELLO'>; // "hello"
+type T3 = Capitalize<'hello'>; // "Hello"
+type T4 = Uncapitalize<'Hello'>; // "hello"
+```
+
+### 50. Explain TypeScript's brand types for nominal typing.
+
+**Answer:**
+Brand types create distinct types from same underlying type.
+
+```typescript
+// Brand type
+type UserId = string & { readonly brand: unique symbol };
+type ProductId = string & { readonly brand: unique symbol };
+
+function createUserId(id: string): UserId {
+    return id as UserId;
+}
+
+function createProductId(id: string): ProductId {
+    return id as ProductId;
+}
+
+let userId = createUserId('123');
+let productId = createProductId('123');
+
+// userId === productId; // Type error (different brands)
+```
+
 ---
 
 This covers TypeScript interview questions from beginner to advanced level with detailed explanations and code examples.
