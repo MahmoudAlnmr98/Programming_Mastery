@@ -2419,6 +2419,300 @@ const UserProfileWithLoading = withLoading(UserProfile);
 
 **Modern Alternative:** Use hooks instead of HOCs.
 
+### 71. Explain React's ref forwarding with useImperativeHandle.
+
+**Answer:**
+```jsx
+const FancyInput = forwardRef((props, ref) => {
+    const inputRef = useRef();
+    
+    useImperativeHandle(ref, () => ({
+        focus: () => inputRef.current.focus(),
+        blur: () => inputRef.current.blur(),
+        getValue: () => inputRef.current.value,
+        setValue: (value) => { inputRef.current.value = value; }
+    }));
+    
+    return <input ref={inputRef} {...props} />;
+});
+
+// Usage
+function Parent() {
+    const inputRef = useRef();
+    
+    const handleFocus = () => {
+        inputRef.current.focus();
+    };
+    
+    return (
+        <>
+            <FancyInput ref={inputRef} />
+            <button onClick={handleFocus}>Focus Input</button>
+        </>
+    );
+}
+```
+
+### 72. Explain React's useCallback vs useMemo.
+
+**Answer:**
+**useCallback - Memoize functions:**
+```jsx
+const handleClick = useCallback(() => {
+    doSomething(id);
+}, [id]); // Function recreated only if id changes
+```
+
+**useMemo - Memoize values:**
+```jsx
+const expensiveValue = useMemo(() => {
+    return computeExpensiveValue(a, b);
+}, [a, b]); // Value recomputed only if a or b changes
+```
+
+**When to use:**
+- `useCallback`: Memoize functions passed as props
+- `useMemo`: Memoize expensive computations
+
+### 73. Explain React's Context API performance considerations.
+
+**Answer:**
+**Problem:**
+```jsx
+// All consumers re-render when context value changes
+const ThemeContext = createContext();
+
+function App() {
+    const [theme, setTheme] = useState('light');
+    return (
+        <ThemeContext.Provider value={{ theme, setTheme }}>
+            <Component />
+        </ThemeContext.Provider>
+    );
+}
+```
+
+**Solution - Split contexts:**
+```jsx
+const ThemeContext = createContext();
+const ThemeUpdateContext = createContext();
+
+function App() {
+    const [theme, setTheme] = useState('light');
+    return (
+        <ThemeContext.Provider value={theme}>
+            <ThemeUpdateContext.Provider value={setTheme}>
+                <Component />
+            </ThemeUpdateContext.Provider>
+        </ThemeContext.Provider>
+    );
+}
+```
+
+### 74. Explain React's error boundaries with hooks.
+
+**Answer:**
+Error boundaries must be class components, but you can use hooks inside:
+
+```jsx
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+    
+    static getDerivedStateFromError(error) {
+        return { hasError: true };
+    }
+    
+    componentDidCatch(error, errorInfo) {
+        console.error('Error:', error, errorInfo);
+    }
+    
+    render() {
+        if (this.state.hasError) {
+            return <ErrorFallback />;
+        }
+        return this.props.children;
+    }
+}
+
+// Use with hooks components
+<ErrorBoundary>
+    <ComponentWithHooks />
+</ErrorBoundary>
+```
+
+### 75. Explain React's Portal usage.
+
+**Answer:**
+Render children into DOM node outside parent hierarchy.
+
+```jsx
+import { createPortal } from 'react-dom';
+
+function Modal({ children, isOpen }) {
+    if (!isOpen) return null;
+    
+    return createPortal(
+        <div className="modal">
+            {children}
+        </div>,
+        document.body
+    );
+}
+
+// Usage
+function App() {
+    return (
+        <div>
+            <Modal isOpen={true}>
+                <h1>Modal Content</h1>
+            </Modal>
+        </div>
+    );
+}
+```
+
+**Benefits:**
+- Render outside parent DOM
+- Useful for modals, tooltips
+- Event bubbling still works
+
+### 76. Explain React's Profiler API.
+
+**Answer:**
+Measure component render performance.
+
+```jsx
+import { Profiler } from 'react';
+
+function onRenderCallback(id, phase, actualDuration) {
+    console.log('Component:', id);
+    console.log('Phase:', phase); // mount or update
+    console.log('Duration:', actualDuration);
+}
+
+function App() {
+    return (
+        <Profiler id="App" onRender={onRenderCallback}>
+            <Component />
+        </Profiler>
+    );
+}
+```
+
+### 77. Explain React's Concurrent Mode features.
+
+**Answer:**
+**useTransition:**
+```jsx
+const [isPending, startTransition] = useTransition();
+
+const handleClick = () => {
+    startTransition(() => {
+        setCount(count + 1); // Non-urgent update
+    });
+};
+```
+
+**useDeferredValue:**
+```jsx
+const deferredQuery = useDeferredValue(query);
+```
+
+**Benefits:**
+- Keep UI responsive
+- Prioritize urgent updates
+- Better user experience
+
+### 78. Explain React's Server Components vs Client Components.
+
+**Answer:**
+**Server Component (Default):**
+```jsx
+// app/users/page.js
+async function UsersPage() {
+    const users = await fetchUsers(); // Runs on server
+    
+    return (
+        <div>
+            {users.map(user => <UserCard key={user.id} user={user} />)}
+        </div>
+    );
+}
+```
+
+**Client Component:**
+```jsx
+'use client';
+
+import { useState } from 'react';
+
+function Counter() {
+    const [count, setCount] = useState(0);
+    return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+```
+
+### 79. Explain React's Suspense boundaries.
+
+**Answer:**
+**Basic:**
+```jsx
+<Suspense fallback={<Loading />}>
+    <LazyComponent />
+</Suspense>
+```
+
+**Multiple boundaries:**
+```jsx
+<Suspense fallback={<HeaderSkeleton />}>
+    <Header />
+    <Suspense fallback={<ContentSkeleton />}>
+        <Content />
+    </Suspense>
+</Suspense>
+```
+
+**Error boundaries with Suspense:**
+```jsx
+<ErrorBoundary>
+    <Suspense fallback={<Loading />}>
+        <Component />
+    </Suspense>
+</ErrorBoundary>
+```
+
+### 80. Explain React's testing with React Testing Library.
+
+**Answer:**
+**Basic test:**
+```jsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import Button from './Button';
+
+test('renders button and handles click', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+    
+    const button = screen.getByRole('button', { name: /click me/i });
+    fireEvent.click(button);
+    
+    expect(handleClick).toHaveBeenCalledTimes(1);
+});
+```
+
+**Async testing:**
+```jsx
+test('loads data', async () => {
+    render(<DataComponent />);
+    
+    const data = await screen.findByText('Data loaded');
+    expect(data).toBeInTheDocument();
+});
+```
+
 ---
 
 This covers React interview questions from beginner to advanced level with detailed explanations and code examples.

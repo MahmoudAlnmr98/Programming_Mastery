@@ -2774,6 +2774,458 @@ function isPowerOfThree(n) {
 }
 ```
 
+### 101. Valid Anagram (LeetCode Easy)
+
+**Problem:** Check if two strings are anagrams of each other.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1) - max 26 characters
+function isAnagram(s, t) {
+    if (s.length !== t.length) return false;
+    
+    const count = new Array(26).fill(0);
+    
+    for (let i = 0; i < s.length; i++) {
+        count[s.charCodeAt(i) - 97]++;
+        count[t.charCodeAt(i) - 97]--;
+    }
+    
+    return count.every(c => c === 0);
+}
+```
+
+### 102. First Bad Version (LeetCode Easy)
+
+**Problem:** Find first bad version using binary search.
+
+**Solution:**
+```javascript
+// Time: O(log n), Space: O(1)
+function firstBadVersion(n) {
+    let left = 1, right = n;
+    
+    while (left < right) {
+        const mid = Math.floor((left + right) / 2);
+        if (isBadVersion(mid)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    
+    return left;
+}
+```
+
+### 103. Climbing Stairs (LeetCode Easy)
+
+**Problem:** Count ways to climb n stairs (1 or 2 steps at a time).
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function climbStairs(n) {
+    if (n <= 2) return n;
+    
+    let first = 1, second = 2;
+    
+    for (let i = 3; i <= n; i++) {
+        const third = first + second;
+        first = second;
+        second = third;
+    }
+    
+    return second;
+}
+```
+
+### 104. Best Time to Buy and Sell Stock (LeetCode Easy)
+
+**Problem:** Find maximum profit from one transaction.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function maxProfit(prices) {
+    let minPrice = Infinity;
+    let maxProfit = 0;
+    
+    for (let price of prices) {
+        minPrice = Math.min(minPrice, price);
+        maxProfit = Math.max(maxProfit, price - minPrice);
+    }
+    
+    return maxProfit;
+}
+```
+
+### 105. Maximum Depth of Binary Tree (LeetCode Easy)
+
+**Problem:** Find maximum depth of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function maxDepth(root) {
+    if (!root) return 0;
+    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}
+```
+
+### 106. Same Tree (LeetCode Easy)
+
+**Problem:** Check if two binary trees are identical.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function isSameTree(p, q) {
+    if (!p && !q) return true;
+    if (!p || !q) return false;
+    if (p.val !== q.val) return false;
+    
+    return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);
+}
+```
+
+### 107. Invert Binary Tree (LeetCode Easy)
+
+**Problem:** Invert a binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function invertTree(root) {
+    if (!root) return null;
+    
+    [root.left, root.right] = [root.right, root.left];
+    
+    invertTree(root.left);
+    invertTree(root.right);
+    
+    return root;
+}
+```
+
+### 108. Valid Parentheses (LeetCode Easy)
+
+**Problem:** Check if parentheses string is valid.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(n)
+function isValid(s) {
+    const stack = [];
+    const map = { ')': '(', '}': '{', ']': '[' };
+    
+    for (let char of s) {
+        if (char in map) {
+            if (stack.length === 0 || stack.pop() !== map[char]) {
+                return false;
+            }
+        } else {
+            stack.push(char);
+        }
+    }
+    
+    return stack.length === 0;
+}
+```
+
+### 109. Merge Two Sorted Lists (LeetCode Easy)
+
+**Problem:** Merge two sorted linked lists.
+
+**Solution:**
+```javascript
+// Time: O(n + m), Space: O(1)
+function mergeTwoLists(list1, list2) {
+    const dummy = new ListNode(0);
+    let current = dummy;
+    
+    while (list1 && list2) {
+        if (list1.val < list2.val) {
+            current.next = list1;
+            list1 = list1.next;
+        } else {
+            current.next = list2;
+            list2 = list2.next;
+        }
+        current = current.next;
+    }
+    
+    current.next = list1 || list2;
+    return dummy.next;
+}
+```
+
+### 110. Symmetric Tree (LeetCode Easy)
+
+**Problem:** Check if binary tree is symmetric.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function isSymmetric(root) {
+    if (!root) return true;
+    return isMirror(root.left, root.right);
+}
+
+function isMirror(left, right) {
+    if (!left && !right) return true;
+    if (!left || !right) return false;
+    if (left.val !== right.val) return false;
+    
+    return isMirror(left.left, right.right) && 
+           isMirror(left.right, right.left);
+}
+```
+
+### 111. Path Sum (LeetCode Easy)
+
+**Problem:** Check if tree has root-to-leaf path with given sum.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function hasPathSum(root, targetSum) {
+    if (!root) return false;
+    if (!root.left && !root.right) return root.val === targetSum;
+    
+    return hasPathSum(root.left, targetSum - root.val) ||
+           hasPathSum(root.right, targetSum - root.val);
+}
+```
+
+### 112. Minimum Depth of Binary Tree (LeetCode Easy)
+
+**Problem:** Find minimum depth of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function minDepth(root) {
+    if (!root) return 0;
+    if (!root.left && !root.right) return 1;
+    if (!root.left) return 1 + minDepth(root.right);
+    if (!root.right) return 1 + minDepth(root.left);
+    
+    return 1 + Math.min(minDepth(root.left), minDepth(root.right));
+}
+```
+
+### 113. Balanced Binary Tree (LeetCode Easy)
+
+**Problem:** Check if binary tree is height-balanced.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function isBalanced(root) {
+    return getHeight(root) !== -1;
+}
+
+function getHeight(root) {
+    if (!root) return 0;
+    
+    const left = getHeight(root.left);
+    if (left === -1) return -1;
+    
+    const right = getHeight(root.right);
+    if (right === -1) return -1;
+    
+    if (Math.abs(left - right) > 1) return -1;
+    
+    return 1 + Math.max(left, right);
+}
+```
+
+### 114. Convert Sorted Array to BST (LeetCode Easy)
+
+**Problem:** Convert sorted array to height-balanced BST.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(log n)
+function sortedArrayToBST(nums) {
+    return buildBST(nums, 0, nums.length - 1);
+}
+
+function buildBST(nums, left, right) {
+    if (left > right) return null;
+    
+    const mid = Math.floor((left + right) / 2);
+    const root = new TreeNode(nums[mid]);
+    
+    root.left = buildBST(nums, left, mid - 1);
+    root.right = buildBST(nums, mid + 1, right);
+    
+    return root;
+}
+```
+
+### 115. Binary Tree Level Order Traversal (LeetCode Medium)
+
+**Problem:** Return level order traversal of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(n)
+function levelOrder(root) {
+    if (!root) return [];
+    
+    const result = [];
+    const queue = [root];
+    
+    while (queue.length > 0) {
+        const level = [];
+        const size = queue.length;
+        
+        for (let i = 0; i < size; i++) {
+            const node = queue.shift();
+            level.push(node.val);
+            
+            if (node.left) queue.push(node.left);
+            if (node.right) queue.push(node.right);
+        }
+        
+        result.push(level);
+    }
+    
+    return result;
+}
+```
+
+### 116. Binary Tree Inorder Traversal (LeetCode Easy)
+
+**Problem:** Return inorder traversal of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function inorderTraversal(root) {
+    const result = [];
+    
+    function traverse(node) {
+        if (!node) return;
+        traverse(node.left);
+        result.push(node.val);
+        traverse(node.right);
+    }
+    
+    traverse(root);
+    return result;
+}
+
+// Iterative
+function inorderTraversal(root) {
+    const result = [];
+    const stack = [];
+    let current = root;
+    
+    while (current || stack.length > 0) {
+        while (current) {
+            stack.push(current);
+            current = current.left;
+        }
+        current = stack.pop();
+        result.push(current.val);
+        current = current.right;
+    }
+    
+    return result;
+}
+```
+
+### 117. Binary Tree Preorder Traversal (LeetCode Easy)
+
+**Problem:** Return preorder traversal of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function preorderTraversal(root) {
+    const result = [];
+    
+    function traverse(node) {
+        if (!node) return;
+        result.push(node.val);
+        traverse(node.left);
+        traverse(node.right);
+    }
+    
+    traverse(root);
+    return result;
+}
+```
+
+### 118. Binary Tree Postorder Traversal (LeetCode Easy)
+
+**Problem:** Return postorder traversal of binary tree.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(h)
+function postorderTraversal(root) {
+    const result = [];
+    
+    function traverse(node) {
+        if (!node) return;
+        traverse(node.left);
+        traverse(node.right);
+        result.push(node.val);
+    }
+    
+    traverse(root);
+    return result;
+}
+```
+
+### 119. Maximum Subarray (Kadane's Algorithm) (LeetCode Easy)
+
+**Problem:** Find maximum sum of contiguous subarray.
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function maxSubArray(nums) {
+    let maxSum = nums[0];
+    let currentSum = nums[0];
+    
+    for (let i = 1; i < nums.length; i++) {
+        currentSum = Math.max(nums[i], currentSum + nums[i]);
+        maxSum = Math.max(maxSum, currentSum);
+    }
+    
+    return maxSum;
+}
+```
+
+### 120. House Robber (LeetCode Medium)
+
+**Problem:** Maximum money that can be robbed from houses (can't rob adjacent).
+
+**Solution:**
+```javascript
+// Time: O(n), Space: O(1)
+function rob(nums) {
+    if (nums.length === 0) return 0;
+    if (nums.length === 1) return nums[0];
+    
+    let prev2 = nums[0];
+    let prev1 = Math.max(nums[0], nums[1]);
+    
+    for (let i = 2; i < nums.length; i++) {
+        const current = Math.max(prev1, prev2 + nums[i]);
+        prev2 = prev1;
+        prev1 = current;
+    }
+    
+    return prev1;
+}
+```
+
 ---
 
 This covers problem-solving and algorithm questions from beginner to advanced level with solutions and explanations.

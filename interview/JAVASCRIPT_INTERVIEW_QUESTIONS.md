@@ -2501,6 +2501,215 @@ const set = new Set([1, 2, 3]);
 - `Array.from()`: Works with array-like objects
 - Spread: Only works with iterables
 
+### 81. Explain JavaScript's `Array.isArray()` and type checking.
+
+**Answer:**
+**Array.isArray():**
+```javascript
+Array.isArray([1, 2, 3]);     // true
+Array.isArray({});            // false
+Array.isArray('string');      // false
+Array.isArray(null);          // false
+```
+
+**Type Checking:**
+```javascript
+// typeof limitations
+typeof [];           // "object" (not helpful)
+typeof null;         // "object" (bug)
+
+// Better methods
+Array.isArray([]);   // true
+Object.prototype.toString.call([]); // "[object Array]"
+```
+
+### 82. Explain JavaScript's `Array.splice()` vs `Array.slice()`.
+
+**Answer:**
+**splice() - Mutates array:**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+arr.splice(1, 2, 'a', 'b'); // [1, 'a', 'b', 4, 5]
+// Removes 2 elements from index 1, inserts 'a', 'b'
+```
+
+**slice() - Returns new array:**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+arr.slice(1, 3); // [2, 3] (original unchanged)
+arr.slice(1);    // [2, 3, 4, 5]
+arr.slice(-2);   // [4, 5] (last 2)
+```
+
+**Differences:**
+- `splice()`: Mutates, can insert/delete
+- `slice()`: Immutable, only extracts
+
+### 83. Explain JavaScript's `Array.some()` and `Array.every()`.
+
+**Answer:**
+**some() - At least one:**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+arr.some(n => n > 3);  // true (4, 5 exist)
+arr.some(n => n > 10); // false
+```
+
+**every() - All:**
+```javascript
+const arr = [1, 2, 3, 4, 5];
+arr.every(n => n > 0);  // true (all positive)
+arr.every(n => n > 3);  // false (1, 2, 3 not > 3)
+```
+
+### 84. Explain JavaScript's `String.split()` and `Array.join()`.
+
+**Answer:**
+**split():**
+```javascript
+'hello world'.split(' ');     // ['hello', 'world']
+'1,2,3'.split(',');           // ['1', '2', '3']
+'abc'.split('');              // ['a', 'b', 'c']
+'hello'.split('', 3);         // ['h', 'e', 'l'] (limit)
+```
+
+**join():**
+```javascript
+['a', 'b', 'c'].join();       // 'a,b,c'
+['a', 'b', 'c'].join('');     // 'abc'
+['a', 'b', 'c'].join('-');    // 'a-b-c'
+```
+
+### 85. Explain JavaScript's `String.substring()` vs `String.substr()` vs `String.slice()`.
+
+**Answer:**
+**substring() - Start to end:**
+```javascript
+'hello'.substring(1, 3);  // 'el' (start, end)
+'hello'.substring(1);     // 'ello' (start to end)
+'hello'.substring(3, 1);  // 'el' (swaps if start > end)
+```
+
+**substr() - Start and length (deprecated):**
+```javascript
+'hello'.substr(1, 3);  // 'ell' (start, length)
+'hello'.substr(1);     // 'ello' (start to end)
+```
+
+**slice() - Start to end:**
+```javascript
+'hello'.slice(1, 3);   // 'el' (start, end)
+'hello'.slice(1);       // 'ello' (start to end)
+'hello'.slice(-3);      // 'llo' (negative index)
+'hello'.slice(3, 1);    // '' (doesn't swap)
+```
+
+**Best Practice:** Use `slice()` (most flexible, works with arrays too).
+
+### 86. Explain JavaScript's `String.replace()` and `String.replaceAll()`.
+
+**Answer:**
+**replace() - First match:**
+```javascript
+'hello world'.replace('l', 'L');  // 'heLlo world'
+'hello world'.replace(/l/g, 'L'); // 'heLLo worLd' (regex)
+```
+
+**replaceAll() - All matches:**
+```javascript
+'hello world'.replaceAll('l', 'L'); // 'heLLo worLd'
+'hello world'.replaceAll(/l/g, 'L'); // 'heLLo worLd'
+```
+
+### 87. Explain JavaScript's `String.includes()`, `String.startsWith()`, `String.endsWith()`.
+
+**Answer:**
+**includes():**
+```javascript
+'hello'.includes('ell');  // true
+'hello'.includes('xyz');  // false
+'hello'.includes('ell', 1); // true (start from index 1)
+```
+
+**startsWith():**
+```javascript
+'hello'.startsWith('he');  // true
+'hello'.startsWith('lo');   // false
+'hello'.startsWith('ll', 2); // true (start from index 2)
+```
+
+**endsWith():**
+```javascript
+'hello'.endsWith('lo');     // true
+'hello'.endsWith('he');     // false
+'hello'.endsWith('he', 2);  // true (check first 2 chars)
+```
+
+### 88. Explain JavaScript's `String.trim()`, `String.trimStart()`, `String.trimEnd()`.
+
+**Answer:**
+**trim():**
+```javascript
+'  hello  '.trim();        // 'hello' (both sides)
+```
+
+**trimStart() / trimLeft():**
+```javascript
+'  hello  '.trimStart();  // 'hello  ' (left only)
+```
+
+**trimEnd() / trimRight():**
+```javascript
+'  hello  '.trimEnd();     // '  hello' (right only)
+```
+
+### 89. Explain JavaScript's `String.padStart()` and `String.padEnd()`.
+
+**Answer:**
+**padStart():**
+```javascript
+'5'.padStart(3, '0');      // '005' (pad to length 3)
+'5'.padStart(3);           // '  5' (default: space)
+```
+
+**padEnd():**
+```javascript
+'5'.padEnd(3, '0');        // '500'
+'5'.padEnd(3);             // '5  '
+```
+
+**Use Cases:**
+- Formatting numbers
+- Aligning text
+- Padding IDs
+
+### 90. Explain JavaScript's `Number.parseInt()` and `Number.parseFloat()`.
+
+**Answer:**
+**parseInt():**
+```javascript
+parseInt('123');        // 123
+parseInt('123.45');     // 123 (stops at decimal)
+parseInt('123abc');     // 123 (stops at non-digit)
+parseInt('abc123');     // NaN
+parseInt('1010', 2);    // 10 (binary)
+parseInt('FF', 16);     // 255 (hexadecimal)
+```
+
+**parseFloat():**
+```javascript
+parseFloat('123.45');   // 123.45
+parseFloat('123.45abc'); // 123.45 (stops at non-digit)
+parseFloat('abc123');    // NaN
+```
+
+**vs Number():**
+```javascript
+Number('123');          // 123
+Number('123.45');       // 123.45
+Number('123abc');       // NaN (strict)
+```
+
 ---
 
 This covers JavaScript interview questions from beginner to advanced level with detailed explanations and code examples.

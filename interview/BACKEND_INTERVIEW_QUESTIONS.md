@@ -1564,6 +1564,333 @@ queue.add({ to: 'user@example.com', subject: 'Hello' });
 - Report generation
 - Data synchronization
 
+### 66. Explain Backend API Versioning Strategies.
+
+**Answer:**
+**URL Versioning:**
+```
+/api/v1/users
+/api/v2/users
+```
+
+**Header Versioning:**
+```
+Accept: application/vnd.api+json;version=1
+```
+
+**Query Parameter:**
+```
+/api/users?version=1
+```
+
+**Best Practice:** URL versioning is most common and explicit.
+
+### 67. Explain Backend Request Validation.
+
+**Answer:**
+**Input Validation:**
+```javascript
+const schema = {
+    email: {
+        type: 'string',
+        required: true,
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    },
+    age: {
+        type: 'number',
+        min: 18,
+        max: 100
+    }
+};
+
+function validate(data, schema) {
+    // Validation logic
+    for (const [key, rules] of Object.entries(schema)) {
+        if (rules.required && !data[key]) {
+            throw new Error(`${key} is required`);
+        }
+        // More validation...
+    }
+}
+```
+
+**Libraries:**
+- Joi
+- express-validator
+- yup
+
+### 68. Explain Backend API Response Caching.
+
+**Answer:**
+**HTTP Caching:**
+```javascript
+app.get('/api/users', (req, res) => {
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.json(users);
+});
+```
+
+**Redis Caching:**
+```javascript
+async function getUsers() {
+    const cached = await redis.get('users');
+    if (cached) return JSON.parse(cached);
+    
+    const users = await db.query('SELECT * FROM users');
+    await redis.setex('users', 3600, JSON.stringify(users));
+    return users;
+}
+```
+
+### 69. Explain Backend Database Migrations.
+
+**Answer:**
+**Migration Example:**
+```javascript
+// migrations/001_create_users.js
+exports.up = function(knex) {
+    return knex.schema.createTable('users', table => {
+        table.increments('id');
+        table.string('email').unique();
+        table.string('name');
+        table.timestamps();
+    });
+};
+
+exports.down = function(knex) {
+    return knex.schema.dropTable('users');
+};
+```
+
+**Tools:**
+- Knex.js
+- Sequelize migrations
+- TypeORM migrations
+
+### 70. Explain Backend API Documentation.
+
+**Answer:**
+**Swagger/OpenAPI:**
+```javascript
+const swaggerJsdoc = require('swagger-jsdoc');
+
+const swaggerSpec = swaggerJsdoc({
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API',
+            version: '1.0.0',
+        },
+    },
+    apis: ['./routes/*.js'],
+});
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+```
+
+**JSDoc Comments:**
+```javascript
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     responses:
+ *       200:
+ *         description: List of users
+ */
+app.get('/api/users', getUsers);
+```
+
+### 71. Explain Backend Request/Response Interceptors.
+
+**Answer:**
+**Request Interceptor:**
+```javascript
+app.use((req, res, next) => {
+    // Log request
+    console.log(`${req.method} ${req.path}`);
+    
+    // Add request ID
+    req.id = generateId();
+    
+    // Modify request
+    req.timestamp = Date.now();
+    
+    next();
+});
+```
+
+**Response Interceptor:**
+```javascript
+app.use((req, res, next) => {
+    const originalSend = res.send;
+    
+    res.send = function(data) {
+        // Modify response
+        const response = {
+            data: JSON.parse(data),
+            timestamp: Date.now(),
+            requestId: req.id
+        };
+        
+        return originalSend.call(this, JSON.stringify(response));
+    };
+    
+    next();
+});
+```
+
+### 72. Explain Backend API Throttling.
+
+**Answer:**
+**Rate Limiting:**
+```javascript
+const rateLimit = require('express-rate-limit');
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests
+    message: 'Too many requests'
+});
+
+app.use('/api/', limiter);
+```
+
+**Per-User Throttling:**
+```javascript
+const userLimits = new Map();
+
+function throttleUser(userId, limit) {
+    const userLimit = userLimits.get(userId) || { count: 0, reset: Date.now() };
+    
+    if (Date.now() > userLimit.reset) {
+        userLimit.count = 0;
+        userLimit.reset = Date.now() + 60000;
+    }
+    
+    if (userLimit.count >= limit) {
+        throw new Error('Rate limit exceeded');
+    }
+    
+    userLimit.count++;
+    userLimits.set(userId, userLimit);
+}
+```
+
+### 73. Explain Backend API Pagination Best Practices.
+
+**Answer:**
+**Offset-Based:**
+```javascript
+app.get('/api/users', (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    
+    const users = db.query('SELECT * FROM users LIMIT ? OFFSET ?', [limit, offset]);
+    const total = db.query('SELECT COUNT(*) as count FROM users');
+    
+    res.json({
+        data: users,
+        pagination: {
+            page,
+            limit,
+            total: total.count,
+            totalPages: Math.ceil(total.count / limit)
+        }
+    });
+});
+```
+
+**Cursor-Based:**
+```javascript
+app.get('/api/users', (req, res) => {
+    const cursor = req.query.cursor;
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const users = db.query(
+        'SELECT * FROM users WHERE id > ? ORDER BY id LIMIT ?',
+        [cursor || 0, limit + 1]
+    );
+    
+    const hasMore = users.length > limit;
+    if (hasMore) users.pop();
+    
+    res.json({
+        data: users,
+        nextCursor: hasMore ? users[users.length - 1].id : null
+    });
+});
+```
+
+### 74. Explain Backend API Error Handling Best Practices.
+
+**Answer:**
+**Error Classes:**
+```javascript
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+    }
+}
+
+class ValidationError extends AppError {
+    constructor(message) {
+        super(message, 400);
+    }
+}
+
+class NotFoundError extends AppError {
+    constructor(resource) {
+        super(`${resource} not found`, 404);
+    }
+}
+```
+
+**Error Handler:**
+```javascript
+app.use((err, req, res, next) => {
+    if (err.isOperational) {
+        return res.status(err.statusCode).json({
+            status: 'error',
+            message: err.message
+        });
+    }
+    
+    // Log unexpected errors
+    logger.error(err);
+    
+    res.status(500).json({
+        status: 'error',
+        message: 'Internal server error'
+    });
+});
+```
+
+### 75. Explain Backend API Security Headers.
+
+**Answer:**
+**Security Headers:**
+```javascript
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+    res.setHeader('Content-Security-Policy', "default-src 'self'");
+    next();
+});
+```
+
+**Helmet.js:**
+```javascript
+const helmet = require('helmet');
+app.use(helmet());
+```
+
 ---
 
 This covers backend interview questions from beginner to advanced level with comprehensive coverage of essential topics.

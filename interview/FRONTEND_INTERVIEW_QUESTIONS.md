@@ -1472,6 +1472,288 @@ $font-size: 16px;
 - Use transform/opacity for animations
 - Avoid layout thrashing
 
+### 51. Explain CSS Transform and Transition.
+
+**Answer:**
+**Transform:**
+```css
+.element {
+    transform: translateX(50px);
+    transform: rotate(45deg);
+    transform: scale(1.5);
+    transform: translate(50px, 50px) rotate(45deg);
+}
+```
+
+**Transition:**
+```css
+.element {
+    transition: property duration timing-function delay;
+    transition: transform 0.3s ease-in-out;
+    transition: all 0.3s ease;
+}
+```
+
+**Combined:**
+```css
+.button {
+    transform: scale(1);
+    transition: transform 0.3s ease;
+}
+
+.button:hover {
+    transform: scale(1.1);
+}
+```
+
+### 52. Explain CSS Flexbox Properties.
+
+**Answer:**
+**Container (Parent):**
+```css
+.container {
+    display: flex;
+    flex-direction: row | column | row-reverse | column-reverse;
+    flex-wrap: nowrap | wrap | wrap-reverse;
+    justify-content: flex-start | center | flex-end | space-between | space-around;
+    align-items: flex-start | center | flex-end | stretch | baseline;
+    align-content: flex-start | center | flex-end | stretch | space-between;
+    gap: 10px;
+}
+```
+
+**Items (Children):**
+```css
+.item {
+    flex-grow: 0;
+    flex-shrink: 1;
+    flex-basis: auto;
+    flex: 1; /* shorthand: grow shrink basis */
+    align-self: auto | flex-start | center | flex-end;
+    order: 0;
+}
+```
+
+### 53. Explain CSS Grid Properties.
+
+**Answer:**
+**Container:**
+```css
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
+    gap: 20px;
+    grid-template-areas:
+        "header header header"
+        "sidebar main main"
+        "footer footer footer";
+}
+```
+
+**Items:**
+```css
+.item {
+    grid-column: 1 / 3;
+    grid-row: 1 / 2;
+    grid-area: header;
+}
+```
+
+### 54. Explain CSS Pseudo-classes and Pseudo-elements.
+
+**Answer:**
+**Pseudo-classes (state):**
+```css
+a:hover { }
+a:active { }
+a:visited { }
+input:focus { }
+input:disabled { }
+li:first-child { }
+li:last-child { }
+li:nth-child(2n) { }
+li:nth-of-type(2) { }
+```
+
+**Pseudo-elements (content):**
+```css
+p::before {
+    content: "Before ";
+}
+
+p::after {
+    content: " After";
+}
+
+p::first-line { }
+p::first-letter { }
+```
+
+### 55. Explain CSS Variables (Custom Properties).
+
+**Answer:**
+**Definition:**
+```css
+:root {
+    --primary-color: #007bff;
+    --font-size: 16px;
+    --spacing: 1rem;
+}
+```
+
+**Usage:**
+```css
+.element {
+    color: var(--primary-color);
+    font-size: var(--font-size);
+    margin: var(--spacing);
+}
+```
+
+**With Fallback:**
+```css
+.element {
+    color: var(--primary-color, #000);
+}
+```
+
+**JavaScript:**
+```javascript
+document.documentElement.style.setProperty('--primary-color', '#ff0000');
+```
+
+### 56. Explain CSS Specificity Calculation.
+
+**Answer:**
+**Specificity Values:**
+- Inline styles: 1000
+- IDs: 100
+- Classes, attributes, pseudo-classes: 10
+- Elements, pseudo-elements: 1
+
+**Examples:**
+```css
+div { }                    /* 1 */
+.container { }             /* 10 */
+#header { }                /* 100 */
+div.container { }          /* 11 */
+#header .container { }     /* 110 */
+div#header.container { }   /* 111 */
+```
+
+**!important:**
+```css
+.element {
+    color: red !important; /* Overrides everything */
+}
+```
+
+### 57. Explain CSS Box Model.
+
+**Answer:**
+**Box Model Components:**
+- Content: Actual content
+- Padding: Space inside border
+- Border: Border around padding
+- Margin: Space outside border
+
+**Box-Sizing:**
+```css
+/* content-box (default) */
+.element {
+    box-sizing: content-box;
+    width: 200px;
+    padding: 20px;
+    border: 5px;
+    /* Total width: 200 + 20*2 + 5*2 = 250px */
+}
+
+/* border-box */
+.element {
+    box-sizing: border-box;
+    width: 200px;
+    padding: 20px;
+    border: 5px;
+    /* Total width: 200px (includes padding and border) */
+}
+```
+
+### 58. Explain CSS Media Queries for Responsive Design.
+
+**Answer:**
+**Breakpoints:**
+```css
+/* Mobile first */
+.container {
+    width: 100%;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .container {
+        width: 750px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .container {
+        width: 1000px;
+    }
+}
+```
+
+**Common Breakpoints:**
+- Mobile: < 768px
+- Tablet: 768px - 1023px
+- Desktop: >= 1024px
+
+### 59. Explain CSS Selectors Advanced.
+
+**Answer:**
+**Attribute Selectors:**
+```css
+[type="text"] { }
+[href^="https"] { }  /* Starts with */
+[href$=".pdf"] { }   /* Ends with */
+[href*="example"] { } /* Contains */
+```
+
+**Combinators:**
+```css
+div p { }        /* Descendant */
+div > p { }      /* Child */
+div + p { }      /* Adjacent sibling */
+div ~ p { }      /* General sibling */
+```
+
+**Pseudo-selectors:**
+```css
+:not(.class) { }
+:has(.child) { }
+```
+
+### 60. Explain CSS Performance Optimization.
+
+**Answer:**
+**Techniques:**
+1. **Minimize CSS**: Remove unused styles
+2. **Critical CSS**: Inline above-the-fold CSS
+3. **Avoid Deep Selectors**: Keep selectors shallow
+4. **Use Efficient Selectors**: Avoid universal selector
+5. **Reduce Reflows**: Use transform/opacity
+6. **CSS Containment**: `contain: layout style paint`
+
+**Example:**
+```css
+/* Bad */
+div div div div .class { }
+
+/* Good */
+.class { }
+```
+
 ---
 
 This covers frontend interview questions from beginner to advanced level with comprehensive coverage.

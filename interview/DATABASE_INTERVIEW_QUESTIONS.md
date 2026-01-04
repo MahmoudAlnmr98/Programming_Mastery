@@ -1824,6 +1824,160 @@ GROUP BY EXTRACT(YEAR FROM hire_date), EXTRACT(MONTH FROM hire_date)
 HAVING COUNT(*) > 1;
 ```
 
+### 76. Find All Duplicate Emails (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT email, COUNT(*) as count
+FROM users
+GROUP BY email
+HAVING COUNT(*) > 1;
+```
+
+### 77. Find Customers Who Never Order (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT c.name as Customers
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customerId
+WHERE o.id IS NULL;
+```
+
+### 78. Rising Temperature (LeetCode Easy).
+
+**Problem:** Find dates with temperature higher than previous day.
+
+**Answer:**
+```sql
+SELECT w1.id
+FROM weather w1
+JOIN weather w2 ON DATEDIFF(w1.recordDate, w2.recordDate) = 1
+WHERE w1.temperature > w2.temperature;
+```
+
+### 79. Delete Duplicate Emails (LeetCode Easy).
+
+**Answer:**
+```sql
+DELETE p1 FROM person p1
+INNER JOIN person p2
+WHERE p1.email = p2.email AND p1.id > p2.id;
+```
+
+### 80. Combine Two Tables (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT p.firstName, p.lastName, a.city, a.state
+FROM person p
+LEFT JOIN address a ON p.personId = a.personId;
+```
+
+### 81. Second Highest Salary (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT MAX(salary) as SecondHighestSalary
+FROM employee
+WHERE salary < (SELECT MAX(salary) FROM employee);
+```
+
+### 82. Employees Earning More Than Their Managers (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT e.name as Employee
+FROM employee e
+JOIN employee m ON e.managerId = m.id
+WHERE e.salary > m.salary;
+```
+
+### 83. Duplicate Emails (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT email
+FROM person
+GROUP BY email
+HAVING COUNT(*) > 1;
+```
+
+### 84. Customers Who Never Order (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT name as Customers
+FROM customers
+WHERE id NOT IN (
+    SELECT customerId FROM orders WHERE customerId IS NOT NULL
+);
+```
+
+### 85. Big Countries (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT name, population, area
+FROM world
+WHERE area >= 3000000 OR population >= 25000000;
+```
+
+### 86. Classes More Than 5 Students (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT class
+FROM courses
+GROUP BY class
+HAVING COUNT(DISTINCT student) >= 5;
+```
+
+### 87. Not Boring Movies (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT *
+FROM cinema
+WHERE id % 2 = 1 AND description != 'boring'
+ORDER BY rating DESC;
+```
+
+### 88. Swap Salary (LeetCode Easy).
+
+**Answer:**
+```sql
+UPDATE salary
+SET sex = CASE
+    WHEN sex = 'm' THEN 'f'
+    WHEN sex = 'f' THEN 'm'
+END;
+```
+
+### 89. Friend Requests I (LeetCode Easy).
+
+**Answer:**
+```sql
+SELECT 
+    ROUND(
+        COUNT(DISTINCT requester_id, accepter_id) / 
+        COUNT(DISTINCT sender_id, send_to_id) * 100, 
+        2
+    ) as accept_rate
+FROM friend_request, request_accepted;
+```
+
+### 90. Consecutive Numbers (LeetCode Medium).
+
+**Answer:**
+```sql
+SELECT DISTINCT l1.num as ConsecutiveNums
+FROM logs l1
+JOIN logs l2 ON l1.id = l2.id - 1
+JOIN logs l3 ON l1.id = l3.id - 2
+WHERE l1.num = l2.num AND l2.num = l3.num;
+```
+
 ---
 
 This covers database interview questions from beginner to advanced level with detailed explanations.
