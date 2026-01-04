@@ -957,6 +957,224 @@ function coinChange(coins, amount) {
 }
 ```
 
+### 36. Implement Stack using Array.
+
+**Problem:** Implement stack data structure.
+
+**Solution:**
+```javascript
+class Stack {
+    constructor() {
+        this.items = [];
+    }
+    
+    push(element) {
+        this.items.push(element);
+    }
+    
+    pop() {
+        if (this.isEmpty()) return null;
+        return this.items.pop();
+    }
+    
+    peek() {
+        return this.items[this.items.length - 1];
+    }
+    
+    isEmpty() {
+        return this.items.length === 0;
+    }
+    
+    size() {
+        return this.items.length;
+    }
+}
+```
+
+### 37. Implement Queue using Array.
+
+**Problem:** Implement queue data structure.
+
+**Solution:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+    
+    enqueue(element) {
+        this.items.push(element);
+    }
+    
+    dequeue() {
+        if (this.isEmpty()) return null;
+        return this.items.shift();
+    }
+    
+    front() {
+        return this.items[0];
+    }
+    
+    isEmpty() {
+        return this.items.length === 0;
+    }
+    
+    size() {
+        return this.items.length;
+    }
+}
+```
+
+### 38. Implement Binary Search Tree.
+
+**Problem:** Implement BST with insert, search, delete.
+
+**Solution:**
+```javascript
+class TreeNode {
+    constructor(val) {
+        this.val = val;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+class BST {
+    constructor() {
+        this.root = null;
+    }
+    
+    insert(val) {
+        this.root = this._insert(this.root, val);
+    }
+    
+    _insert(node, val) {
+        if (!node) return new TreeNode(val);
+        if (val < node.val) {
+            node.left = this._insert(node.left, val);
+        } else {
+            node.right = this._insert(node.right, val);
+        }
+        return node;
+    }
+    
+    search(val) {
+        return this._search(this.root, val);
+    }
+    
+    _search(node, val) {
+        if (!node || node.val === val) return node;
+        if (val < node.val) return this._search(node.left, val);
+        return this._search(node.right, val);
+    }
+}
+```
+
+### 39. Implement Linked List.
+
+**Problem:** Implement singly linked list.
+
+**Solution:**
+```javascript
+class ListNode {
+    constructor(val) {
+        this.val = val;
+        this.next = null;
+    }
+}
+
+class LinkedList {
+    constructor() {
+        this.head = null;
+        this.size = 0;
+    }
+    
+    add(val) {
+        const node = new ListNode(val);
+        if (!this.head) {
+            this.head = node;
+        } else {
+            let current = this.head;
+            while (current.next) {
+                current = current.next;
+            }
+            current.next = node;
+        }
+        this.size++;
+    }
+    
+    remove(val) {
+        if (!this.head) return false;
+        if (this.head.val === val) {
+            this.head = this.head.next;
+            this.size--;
+            return true;
+        }
+        let current = this.head;
+        while (current.next) {
+            if (current.next.val === val) {
+                current.next = current.next.next;
+                this.size--;
+                return true;
+            }
+            current = current.next;
+        }
+        return false;
+    }
+}
+```
+
+### 40. Implement Hash Table.
+
+**Problem:** Implement hash table with collision handling.
+
+**Solution:**
+```javascript
+class HashTable {
+    constructor(size = 10) {
+        this.buckets = new Array(size).fill(null).map(() => []);
+        this.size = size;
+    }
+    
+    hash(key) {
+        let hash = 0;
+        for (let i = 0; i < key.length; i++) {
+            hash = (hash + key.charCodeAt(i)) % this.size;
+        }
+        return hash;
+    }
+    
+    set(key, value) {
+        const index = this.hash(key);
+        const bucket = this.buckets[index];
+        const existing = bucket.find(item => item[0] === key);
+        if (existing) {
+            existing[1] = value;
+        } else {
+            bucket.push([key, value]);
+        }
+    }
+    
+    get(key) {
+        const index = this.hash(key);
+        const bucket = this.buckets[index];
+        const item = bucket.find(item => item[0] === key);
+        return item ? item[1] : undefined;
+    }
+    
+    delete(key) {
+        const index = this.hash(key);
+        const bucket = this.buckets[index];
+        const itemIndex = bucket.findIndex(item => item[0] === key);
+        if (itemIndex !== -1) {
+            bucket.splice(itemIndex, 1);
+            return true;
+        }
+        return false;
+    }
+}
+```
+
 ---
 
 ## Common Patterns

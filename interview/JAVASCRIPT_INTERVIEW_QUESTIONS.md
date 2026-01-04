@@ -998,6 +998,113 @@ const map = new Map([['a', 1], ['b', 2]]);
 Object.fromEntries(map); // { a: 1, b: 2 }
 ```
 
+### 31. Explain WeakMap and WeakSet.
+
+**Answer:**
+**WeakMap:**
+- Keys must be objects
+- Weak references (garbage collectable)
+- No iteration methods
+- No size property
+
+```javascript
+const weakMap = new WeakMap();
+const obj = {};
+
+weakMap.set(obj, 'value');
+console.log(weakMap.get(obj)); // 'value'
+
+// When obj is garbage collected, entry is removed
+```
+
+**WeakSet:**
+- Values must be objects
+- Weak references
+- No iteration methods
+
+```javascript
+const weakSet = new WeakSet();
+const obj = {};
+
+weakSet.add(obj);
+console.log(weakSet.has(obj)); // true
+```
+
+**Use Cases:**
+- Storing metadata about objects
+- Private data storage
+- DOM element tracking
+
+### 32. Explain Reflect API.
+
+**Answer:**
+Reflect provides methods for interceptable operations.
+
+```javascript
+const obj = { name: 'John', age: 30 };
+
+// Reflect.get
+Reflect.get(obj, 'name'); // 'John'
+
+// Reflect.set
+Reflect.set(obj, 'name', 'Jane');
+
+// Reflect.has
+Reflect.has(obj, 'name'); // true
+
+// Reflect.ownKeys
+Reflect.ownKeys(obj); // ['name', 'age']
+
+// Reflect.construct
+class Person {
+    constructor(name) {
+        this.name = name;
+    }
+}
+const person = Reflect.construct(Person, ['John']);
+
+// Reflect.apply
+Reflect.apply(Math.max, null, [1, 2, 3]); // 3
+```
+
+**Benefits:**
+- Works with Proxy
+- Returns boolean for success/failure
+- More functional style
+
+### 33. Explain Promise.allSettled, Promise.any, and Promise.race in detail.
+
+**Answer:**
+**Promise.allSettled:**
+```javascript
+// Waits for all promises, doesn't reject
+Promise.allSettled([promise1, promise2, promise3])
+    .then(results => {
+        results.forEach(result => {
+            if (result.status === 'fulfilled') {
+                console.log('Success:', result.value);
+            } else {
+                console.log('Failed:', result.reason);
+            }
+        });
+    });
+```
+
+**Promise.any:**
+```javascript
+// Resolves with first fulfilled promise
+Promise.any([promise1, promise2, promise3])
+    .then(first => console.log('First success:', first))
+    .catch(errors => console.log('All failed:', errors));
+```
+
+**Promise.race:**
+```javascript
+// Resolves/rejects with first settled promise
+Promise.race([promise1, promise2])
+    .then(result => console.log('First:', result));
+```
+
 ---
 
 This covers JavaScript interview questions from beginner to advanced level with detailed explanations and code examples.

@@ -7,12 +7,12 @@ This directory contains interview questions organized by technology and topic, w
 ### ✅ Completed Files
 
 1. **JAVA_INTERVIEW_QUESTIONS.md** - Java programming questions (30 questions)
-2. **JAVASCRIPT_INTERVIEW_QUESTIONS.md** - JavaScript/ES6+ questions (30 questions)
-3. **REACT_INTERVIEW_QUESTIONS.md** - React.js questions (30 questions)
+2. **JAVASCRIPT_INTERVIEW_QUESTIONS.md** - JavaScript/ES6+ questions (33 questions)
+3. **REACT_INTERVIEW_QUESTIONS.md** - React.js questions (33 questions)
 4. **NODE_EXPRESS_INTERVIEW_QUESTIONS.md** - Node.js and Express.js questions (30 questions)
 5. **TYPESCRIPT_INTERVIEW_QUESTIONS.md** - TypeScript questions (30 questions)
-6. **PROBLEM_SOLVING_ALGORITHMS.md** - Algorithm and problem-solving questions (35 problems)
-7. **DESIGN_PATTERNS_INTERVIEW_QUESTIONS.md** - Design patterns questions (25 patterns)
+6. **PROBLEM_SOLVING_ALGORITHMS.md** - Algorithm and problem-solving questions (40 problems)
+7. **DESIGN_PATTERNS_INTERVIEW_QUESTIONS.md** - Design patterns questions (26 patterns)
 8. **GOLANG_INTERVIEW_QUESTIONS.md** - Go programming questions (25 questions)
 9. **CPP_INTERVIEW_QUESTIONS.md** - C++ programming questions (25 questions)
 10. **NEXTJS_INTERVIEW_QUESTIONS.md** - Next.js framework questions (25 questions)
@@ -40,12 +40,12 @@ All questions include:
 
 ### Completed Files Summary:
 - **Java**: 30 questions (8 Beginner, 9 Intermediate, 13 Advanced)
-- **JavaScript**: 30 questions (8 Beginner, 9 Intermediate, 13 Advanced)
-- **React**: 30 questions (8 Beginner, 9 Intermediate, 13 Advanced)
+- **JavaScript**: 33 questions (8 Beginner, 9 Intermediate, 16 Advanced)
+- **React**: 33 questions (8 Beginner, 9 Intermediate, 16 Advanced)
 - **Node/Express**: 30 questions (7 Beginner, 9 Intermediate, 14 Advanced)
 - **TypeScript**: 30 questions (8 Beginner, 9 Intermediate, 13 Advanced)
-- **Problem Solving**: 35 problems (8 Beginner, 12 Intermediate, 15 Advanced)
-- **Design Patterns**: 25 patterns (5 Beginner, 5 Intermediate, 15 Advanced)
+- **Problem Solving**: 40 problems (8 Beginner, 12 Intermediate, 20 Advanced)
+- **Design Patterns**: 26 patterns (5 Beginner, 5 Intermediate, 16 Advanced)
 - **Golang**: 25 questions (8 Beginner, 9 Intermediate, 8 Advanced)
 - **C++**: 25 questions (8 Beginner, 6 Intermediate, 11 Advanced)
 - **Next.js**: 25 questions (8 Beginner, 7 Intermediate, 10 Advanced)
@@ -56,7 +56,7 @@ All questions include:
 - **Frontend**: 25 questions (8 Beginner, 6 Intermediate, 11 Advanced)
 - **Backend**: 27 questions (8 Beginner, 6 Intermediate, 13 Advanced)
 
-**Total Completed: 450+ questions with detailed answers and code examples**
+**Total Completed: 460+ questions with detailed answers and code examples**
 
 ## Study Tips
 

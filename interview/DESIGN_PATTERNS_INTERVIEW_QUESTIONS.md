@@ -1135,6 +1135,121 @@ class Subject {
 }
 ```
 
+### 26. Explain SOLID Principles.
+
+**Answer:**
+SOLID principles guide object-oriented design.
+
+**S - Single Responsibility Principle:**
+- Class should have one reason to change
+- One responsibility per class
+
+```java
+// Bad
+class User {
+    void save() { }
+    void sendEmail() { }
+    void generateReport() { }
+}
+
+// Good
+class User {
+    void save() { }
+}
+class EmailService {
+    void sendEmail() { }
+}
+class ReportGenerator {
+    void generateReport() { }
+}
+```
+
+**O - Open/Closed Principle:**
+- Open for extension, closed for modification
+- Use inheritance/abstraction
+
+```java
+interface PaymentMethod {
+    void pay(double amount);
+}
+
+class CreditCardPayment implements PaymentMethod {
+    public void pay(double amount) { }
+}
+
+class PayPalPayment implements PaymentMethod {
+    public void pay(double amount) { }
+}
+```
+
+**L - Liskov Substitution Principle:**
+- Subtypes must be substitutable for base types
+- Derived classes shouldn't break base class behavior
+
+```java
+class Bird {
+    void fly() { }
+}
+
+// Violates LSP
+class Penguin extends Bird {
+    void fly() {
+        throw new UnsupportedOperationException();
+    }
+}
+
+// Better
+interface Flyable {
+    void fly();
+}
+class Bird implements Flyable {
+    public void fly() { }
+}
+class Penguin extends Bird {
+    // Doesn't implement Flyable
+}
+```
+
+**I - Interface Segregation Principle:**
+- Clients shouldn't depend on interfaces they don't use
+- Prefer specific interfaces over general ones
+
+```java
+// Bad
+interface Worker {
+    void work();
+    void eat();
+    void sleep();
+}
+
+// Good
+interface Workable {
+    void work();
+}
+interface Eatable {
+    void eat();
+}
+```
+
+**D - Dependency Inversion Principle:**
+- Depend on abstractions, not concretions
+- High-level modules shouldn't depend on low-level modules
+
+```java
+// Bad
+class UserService {
+    private MySQLDatabase db = new MySQLDatabase();
+}
+
+// Good
+class UserService {
+    private Database db;
+    public UserService(Database db) {
+        this.db = db;
+    }
+}
+```
+
 ---
 
 This covers design patterns interview questions from beginner to advanced level with implementations in Java and JavaScript.

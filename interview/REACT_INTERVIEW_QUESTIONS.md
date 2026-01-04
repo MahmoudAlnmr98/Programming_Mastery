@@ -880,6 +880,93 @@ function useCounter(initialValue) {
 }
 ```
 
+### 31. Explain useDeferredValue hook in detail.
+
+**Answer:**
+useDeferredValue defers updating value until more urgent updates complete.
+
+```jsx
+import { useDeferredValue, useState } from 'react';
+
+function SearchResults({ query }) {
+    const deferredQuery = useDeferredValue(query);
+    
+    // Use deferredQuery for expensive operations
+    const results = useMemo(() => {
+        return expensiveSearch(deferredQuery);
+    }, [deferredQuery]);
+    
+    return (
+        <div>
+            {query !== deferredQuery && <div>Searching...</div>}
+            <ResultsList results={results} />
+        </div>
+    );
+}
+```
+
+**Use Cases:**
+- Deferring expensive computations
+- Keeping UI responsive
+- Prioritizing urgent updates
+
+### 32. Explain React's useId hook.
+
+**Answer:**
+useId generates unique IDs for accessibility.
+
+```jsx
+import { useId } from 'react';
+
+function Form() {
+    const id = useId();
+    
+    return (
+        <>
+            <label htmlFor={id}>Name</label>
+            <input id={id} type="text" />
+        </>
+    );
+}
+
+// Multiple IDs
+function Form() {
+    const nameId = useId();
+    const emailId = useId();
+    
+    return (
+        <>
+            <label htmlFor={nameId}>Name</label>
+            <input id={nameId} type="text" />
+            <label htmlFor={emailId}>Email</label>
+            <input id={emailId} type="email" />
+        </>
+    );
+}
+```
+
+### 33. Explain React's useSyncExternalStore hook.
+
+**Answer:**
+useSyncExternalStore subscribes to external store.
+
+```jsx
+import { useSyncExternalStore } from 'react';
+
+function useStore(store) {
+    return useSyncExternalStore(
+        store.subscribe,
+        store.getSnapshot
+    );
+}
+
+// Usage
+function Component() {
+    const value = useStore(myStore);
+    return <div>{value}</div>;
+}
+```
+
 ---
 
 This covers React interview questions from beginner to advanced level with detailed explanations and code examples.
