@@ -500,6 +500,173 @@ CREATE TABLE users (
 </changeSet>
 ```
 
+### 21. Explain Spring Boot Actuator endpoints in detail.
+
+**Answer:**
+Actuator provides production-ready monitoring endpoints.
+
+**Health Endpoints:**
+```java
+// Custom health indicator
+@Component
+public class CustomHealthIndicator implements HealthIndicator {
+    @Override
+    public Health health() {
+        if (checkService()) {
+            return Health.up().withDetail("service", "available").build();
+        }
+        return Health.down().withDetail("service", "unavailable").build();
+    }
+}
+```
+
+**Metrics:**
+```java
+@RestController
+public class UserController {
+    private final Counter userCounter;
+    
+    public UserController(MeterRegistry registry) {
+        this.userCounter = Counter.builder("users.created")
+            .register(registry);
+    }
+}
+```
+
+### 22. Explain Spring Boot's @Conditional annotations.
+
+**Answer:**
+Conditional annotations enable beans based on conditions.
+
+```java
+@ConditionalOnProperty(name = "feature.enabled", havingValue = "true")
+@Configuration
+public class FeatureConfig {
+    // Configuration only if property is true
+}
+
+@ConditionalOnClass(name = "com.example.Class")
+@Bean
+public MyBean myBean() {
+    return new MyBean();
+}
+
+@ConditionalOnMissingBean(DataSource.class)
+@Bean
+public DataSource dataSource() {
+    // Only if DataSource bean doesn't exist
+}
+```
+
+### 23. Explain Spring Boot's application properties and YAML.
+
+**Answer:**
+**Properties:**
+```properties
+app.name=MyApp
+app.version=1.0
+app.database.url=jdbc:mysql://localhost:3306/mydb
+app.database.username=root
+app.database.password=password
+```
+
+**YAML:**
+```yaml
+app:
+  name: MyApp
+  version: 1.0
+  database:
+    url: jdbc:mysql://localhost:3306/mydb
+    username: root
+    password: password
+```
+
+**Profile-specific:**
+```yaml
+# application-dev.yml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/devdb
+
+# application-prod.yml
+spring:
+  datasource:
+    url: jdbc:mysql://prod-server:3306/proddb
+```
+
+### 24. Explain Spring Boot's @Scheduled annotation.
+
+**Answer:**
+@Scheduled enables task scheduling.
+
+```java
+@Component
+public class ScheduledTasks {
+    @Scheduled(fixedRate = 5000)
+    public void task1() {
+        // Runs every 5 seconds
+    }
+    
+    @Scheduled(fixedDelay = 5000)
+    public void task2() {
+        // Runs 5 seconds after previous completion
+    }
+    
+    @Scheduled(cron = "0 0 * * * ?")
+    public void task3() {
+        // Runs every hour
+    }
+}
+
+// Enable scheduling
+@SpringBootApplication
+@EnableScheduling
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+```
+
+### 25. Explain Spring Boot's validation and error handling.
+
+**Answer:**
+**Validation:**
+```java
+public class User {
+    @NotNull
+    @Size(min = 2, max = 50)
+    private String name;
+    
+    @Email
+    @NotBlank
+    private String email;
+}
+
+@PostMapping("/users")
+public ResponseEntity<?> createUser(@Valid @RequestBody User user) {
+    // Validation happens automatically
+    return ResponseEntity.ok(userService.save(user));
+}
+```
+
+**Global Exception Handler:**
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(
+            MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+            errors.put(error.getField(), error.getDefaultMessage())
+        );
+        return ResponseEntity.badRequest()
+            .body(new ErrorResponse("Validation failed", errors));
+    }
+}
+```
+
 ---
 
 This covers Spring Boot interview questions from beginner to advanced level with detailed explanations and code examples.

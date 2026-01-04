@@ -669,6 +669,136 @@ type Readonly<T> = {
 };
 ```
 
+### 26. Explain TypeScript's module resolution.
+
+**Answer:**
+TypeScript resolves modules using module resolution strategies.
+
+**Resolution Strategies:**
+- **Classic**: For TypeScript < 1.6
+- **Node**: Mimics Node.js resolution
+
+**Node Resolution:**
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "components/*": ["src/components/*"]
+    }
+  }
+}
+```
+
+### 27. Explain TypeScript's strict mode.
+
+**Answer:**
+Strict mode enables all strict type checking options.
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    // Or individually:
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true
+  }
+}
+```
+
+**Benefits:**
+- Catches more errors at compile time
+- Better type safety
+- Prevents common bugs
+
+### 28. Explain TypeScript's declaration files (.d.ts).
+
+**Answer:**
+Declaration files provide type information for JavaScript libraries.
+
+```typescript
+// types.d.ts
+declare module 'my-library' {
+    export function doSomething(): void;
+    export const value: number;
+}
+
+// Global declarations
+declare global {
+    interface Window {
+        myCustomProperty: string;
+    }
+}
+```
+
+### 29. Explain TypeScript's tsconfig.json options.
+
+**Answer:**
+**Common Options:**
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "sourceMap": true,
+    "declaration": true,
+    "removeComments": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+### 30. Explain TypeScript's type narrowing techniques.
+
+**Answer:**
+Type narrowing reduces type to more specific type.
+
+**Techniques:**
+```typescript
+// typeof guards
+function process(value: string | number) {
+    if (typeof value === 'string') {
+        return value.toUpperCase(); // string
+    }
+    return value.toFixed(2); // number
+}
+
+// instanceof guards
+function process(value: Date | string) {
+    if (value instanceof Date) {
+        return value.toISOString(); // Date
+    }
+    return value.toUpperCase(); // string
+}
+
+// Discriminated unions
+type Success = { status: 'success'; data: string };
+type Error = { status: 'error'; message: string };
+type Result = Success | Error;
+
+function handle(result: Result) {
+    if (result.status === 'success') {
+        console.log(result.data); // Success
+    } else {
+        console.log(result.message); // Error
+    }
+}
+```
+
 ---
 
 This covers TypeScript interview questions from beginner to advanced level with detailed explanations and code examples.

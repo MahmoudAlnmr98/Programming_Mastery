@@ -543,6 +543,136 @@ test('homepage loads', async ({ page }) => {
 });
 ```
 
+### 21. Explain Next.js Image component optimization.
+
+**Answer:**
+Next.js Image component provides automatic optimization.
+
+```javascript
+import Image from 'next/image';
+
+<Image
+    src="/image.jpg"
+    alt="Description"
+    width={500}
+    height={300}
+    quality={90}
+    priority={false}
+    placeholder="blur"
+    blurDataURL="data:image/jpeg;base64,..."
+    sizes="(max-width: 768px) 100vw, 50vw"
+/>
+```
+
+**Features:**
+- Automatic format optimization (WebP, AVIF)
+- Responsive images
+- Lazy loading
+- Prevents layout shift
+
+### 22. Explain Next.js middleware advanced usage.
+
+**Answer:**
+Middleware can handle complex routing and authentication.
+
+```javascript
+// middleware.js
+import { NextResponse } from 'next/server';
+
+export function middleware(request) {
+    // A/B testing
+    const variant = request.cookies.get('variant') || 'A';
+    
+    // Feature flags
+    if (request.nextUrl.pathname.startsWith('/beta')) {
+        const hasAccess = checkBetaAccess(request);
+        if (!hasAccess) {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+    }
+    
+    // Request modification
+    const response = NextResponse.next();
+    response.headers.set('x-custom-header', 'value');
+    return response;
+}
+```
+
+### 23. Explain Next.js static export and deployment.
+
+**Answer:**
+**Static Export:**
+```javascript
+// next.config.js
+module.exports = {
+    output: 'export',
+    images: {
+        unoptimized: true
+    }
+};
+```
+
+**Deployment Options:**
+- **Vercel**: Optimized for Next.js
+- **Netlify**: Static site hosting
+- **AWS Amplify**: Full-stack deployment
+- **Docker**: Containerized deployment
+
+### 24. Explain Next.js internationalization (i18n) routing.
+
+**Answer:**
+```javascript
+// next.config.js
+module.exports = {
+    i18n: {
+        locales: ['en', 'fr', 'es'],
+        defaultLocale: 'en',
+        localeDetection: false
+    }
+};
+
+// Usage
+import { useRouter } from 'next/router';
+
+const router = useRouter();
+const { locale, locales, defaultLocale } = router;
+
+// Change locale
+router.push('/', '/', { locale: 'fr' });
+```
+
+### 25. Explain Next.js error boundaries and error handling.
+
+**Answer:**
+**Error Boundary (Pages Router):**
+```javascript
+// _error.js
+function Error({ statusCode }) {
+    return (
+        <p>
+            {statusCode
+                ? `An error ${statusCode} occurred on server`
+                : 'An error occurred on client'}
+        </p>
+    );
+}
+```
+
+**Error Handling (App Router):**
+```javascript
+// app/error.js
+'use client';
+
+export default function Error({ error, reset }) {
+    return (
+        <div>
+            <h2>Something went wrong!</h2>
+            <button onClick={() => reset()}>Try again</button>
+        </div>
+    );
+}
+```
+
 ---
 
 This covers Next.js interview questions from beginner to advanced level with detailed explanations and code examples.

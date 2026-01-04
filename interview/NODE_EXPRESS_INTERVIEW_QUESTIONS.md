@@ -719,6 +719,179 @@ CMD ["node", "app.js"]
 - Enable HTTPS
 - Set up monitoring
 
+### 26. Explain Node.js Buffer and Streams in detail.
+
+**Answer:**
+**Buffer:**
+```javascript
+// Create buffer
+const buf = Buffer.from('Hello', 'utf8');
+const buf2 = Buffer.alloc(10);
+const buf3 = Buffer.allocUnsafe(10);
+
+// Buffer operations
+buf.toString('utf8');
+buf.write('World', 0);
+buf.slice(0, 5);
+```
+
+**Streams:**
+```javascript
+const { Readable, Writable, Transform, Duplex } = require('stream');
+
+// Custom readable stream
+class MyReadable extends Readable {
+    constructor(options) {
+        super(options);
+        this.index = 0;
+    }
+    
+    _read() {
+        if (this.index < 10) {
+            this.push(String(this.index++));
+        } else {
+            this.push(null);
+        }
+    }
+}
+
+// Piping streams
+readableStream
+    .pipe(transformStream)
+    .pipe(writableStream);
+```
+
+### 27. Explain Node.js child processes.
+
+**Answer:**
+**spawn:**
+```javascript
+const { spawn } = require('child_process');
+
+const child = spawn('ls', ['-la']);
+child.stdout.on('data', (data) => {
+    console.log(data.toString());
+});
+```
+
+**exec:**
+```javascript
+const { exec } = require('child_process');
+
+exec('ls -la', (error, stdout, stderr) => {
+    if (error) {
+        console.error(error);
+        return;
+    }
+    console.log(stdout);
+});
+```
+
+**fork:**
+```javascript
+const { fork } = require('child_process');
+const child = fork('child.js');
+child.send({ message: 'Hello' });
+child.on('message', (msg) => {
+    console.log('From child:', msg);
+});
+```
+
+### 28. Explain Node.js EventEmitter in detail.
+
+**Answer:**
+```javascript
+const EventEmitter = require('events');
+
+class MyEmitter extends EventEmitter {}
+
+const emitter = new MyEmitter();
+
+// Listen to event
+emitter.on('event', (data) => {
+    console.log('Event received:', data);
+});
+
+// Emit event
+emitter.emit('event', 'Hello');
+
+// Once (fires only once)
+emitter.once('event', () => {
+    console.log('Fired once');
+});
+
+// Remove listener
+emitter.removeListener('event', handler);
+
+// Remove all listeners
+emitter.removeAllListeners('event');
+```
+
+### 29. Explain Node.js cluster module in detail.
+
+**Answer:**
+```javascript
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
+if (cluster.isMaster) {
+    console.log(`Master ${process.pid} is running`);
+    
+    // Fork workers
+    for (let i = 0; i < numCPUs; i++) {
+        const worker = cluster.fork();
+        worker.on('message', (msg) => {
+            console.log('Message from worker:', msg);
+        });
+    }
+    
+    cluster.on('exit', (worker, code, signal) => {
+        console.log(`Worker ${worker.process.pid} died`);
+        cluster.fork(); // Restart
+    });
+} else {
+    // Worker process
+    require('./app.js');
+    process.send({ type: 'ready' });
+}
+```
+
+### 30. Explain Express.js middleware types and best practices.
+
+**Answer:**
+**Middleware Types:**
+```javascript
+// Application-level
+app.use((req, res, next) => {
+    console.log('Application middleware');
+    next();
+});
+
+// Router-level
+router.use((req, res, next) => {
+    console.log('Router middleware');
+    next();
+});
+
+// Error-handling (4 parameters)
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
+// Built-in middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+```
+
+**Best Practices:**
+- Order matters (execute in sequence)
+- Always call next() or send response
+- Handle errors properly
+- Use middleware for cross-cutting concerns
+- Keep middleware focused and reusable
+
 ---
 
 This covers Node.js and Express.js interview questions from beginner to advanced level with detailed explanations and code examples.
