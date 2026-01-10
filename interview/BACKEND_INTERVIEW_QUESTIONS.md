@@ -807,81 +807,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 - Istio, Linkerd
 - Handles service-to-service communication
 
-### 35. Explain API Gateway Pattern.
-
-**Answer:**
-Single entry point for all client requests.
-
-**Functions:**
-- Routing
-- Authentication
-- Rate limiting
-- Load balancing
-- Request/response transformation
-
-**Example:**
-```
-Client → API Gateway → [Service 1] [Service 2] [Service 3]
-```
-
-**Benefits:**
-- Centralized cross-cutting concerns
-- Simplified client
-- Service abstraction
-
-### 36. Explain Circuit Breaker Pattern.
-
-**Answer:**
-Prevents cascading failures.
-
-**States:**
-- Closed: Normal operation
-- Open: Failing, reject requests
-- Half-Open: Testing if service recovered
-
-**Implementation:**
-```javascript
-class CircuitBreaker {
-    constructor(threshold = 5, timeout = 60000) {
-        this.failureCount = 0;
-        this.threshold = threshold;
-        this.timeout = timeout;
-        this.state = 'CLOSED';
-    }
-    
-    async execute(fn) {
-        if (this.state === 'OPEN') {
-            throw new Error('Circuit breaker is OPEN');
-        }
-        
-        try {
-            const result = await fn();
-            this.onSuccess();
-            return result;
-        } catch (error) {
-            this.onFailure();
-            throw error;
-        }
-    }
-    
-    onSuccess() {
-        this.failureCount = 0;
-        this.state = 'CLOSED';
-    }
-    
-    onFailure() {
-        this.failureCount++;
-        if (this.failureCount >= this.threshold) {
-            this.state = 'OPEN';
-            setTimeout(() => {
-                this.state = 'HALF_OPEN';
-            }, this.timeout);
-        }
-    }
-}
-```
-
-### 37. Explain Saga Pattern.
+### 35. Explain Saga Pattern.
 
 **Answer:**
 Manages distributed transactions.
@@ -1128,33 +1054,7 @@ async function getData(key) {
 - X-Frame-Options
 - X-XSS-Protection
 
-### 49. Explain GraphQL vs REST.
-
-**Answer:**
-**REST:**
-- Multiple endpoints
-- Fixed data structure
-- Over-fetching/under-fetching
-
-**GraphQL:**
-- Single endpoint
-- Flexible queries
-- Client specifies fields
-
-**Example:**
-```graphql
-query {
-    user(id: "123") {
-        name
-        email
-        posts {
-            title
-        }
-    }
-}
-```
-
-### 50. Explain WebSocket vs HTTP.
+### 49. Explain WebSocket vs HTTP.
 
 **Answer:**
 **HTTP:**
