@@ -1,4 +1,4 @@
-﻿# Problem Solving & Algorithms Interview Questions
+﻿﻿# Problem Solving & Algorithms Interview Questions
 
 ## Table of Contents
 - [Beginner Level](#beginner-level)
@@ -9,7 +9,7 @@
 
 ## Beginner Level
 
-### 1. Two Sum Problem
+### 1. Two Sum
 
 **Problem:** Given an array of integers and a target sum, find two numbers that add up to target.
 
@@ -938,6 +938,7 @@ function majorityElement(nums) {
 ```
 
 ### 39. Best Time to Buy and Sell Stock II (LeetCode Easy)
+### 31. Best Time to Buy and Sell Stock II
 
 **Problem:** Find maximum profit (can buy and sell multiple times).
 
@@ -1041,6 +1042,7 @@ function mergeTwoLists(list1, list2) {
 ```
 
 ### 44. Linked List Cycle (LeetCode Easy)
+### 35. Linked List Cycle
 
 **Problem:** Detect if linked list has cycle.
 
@@ -1765,6 +1767,7 @@ function preorderTraversal(root) {
 ```
 
 ### 78. Binary Tree Postorder Traversal (LeetCode Easy)
+### 55. Binary Tree Postorder Traversal
 
 **Problem:** Return postorder traversal of binary tree.
 

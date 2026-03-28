@@ -2713,4 +2713,3 @@ Number('123abc');       // NaN (strict)
 ---
 
 This covers JavaScript interview questions from beginner to advanced level with detailed explanations and code examples.
-
